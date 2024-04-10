@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+button {
+	@apply p-3 text-xs
+}
+
+select {
+	@apply pl-2 pr-2 text-xs text-center
+}
+
+.smart-gantt-task-element-container {
+	@apply flex-nowrap
+}
+
+.smart-gantt-task-checkbox {
+
+}
+.smart-gantt-task-element {
+	@apply m-4 text-[color:var(--text-normal)] hover:text-[color:var(--text-accent)]
+}
+.smart-gantt-task-board {
+	@apply p-4 h-1/2 overflow-y-auto
+}
+.smart-gantt-second-container {
+	@apply  overflow-y-auto
+}
+.smart-gantt-button-container {
+	@apply flex justify-center p-4 m-4
+}
+.smart-gantt-refresh-button {
+	@apply  rounded text-[color:var(--text-normal)]
+	hover:text-[color:var(--text-accent)]
+	bg-[color:var(--background-primary)] hover:bg-[color:var(--background-modifier-hover)]
+}

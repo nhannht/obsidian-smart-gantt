@@ -63,6 +63,7 @@ export default class SmartGanttReactView extends ItemView {
 
 	}
 
+
 	override async onOpen() {
 		const allMarkdownFiles = this.app.vault.getMarkdownFiles();
 		const markdownProcesser = new MarkdownProcesser(allMarkdownFiles, this.thisPlugin)
@@ -84,13 +85,19 @@ export default class SmartGanttReactView extends ItemView {
 			cls: "smart-gantt-task-board"
 		})
 
-		parsedResult.forEach(parsedResult => {
-				parsedResult.parsedResults.forEach(_result => {
+		parsedResult.forEach((parsedResult, parsedResultIndex) => {
+				parsedResult.parsedResults.forEach((_result, resultIndex) => {
+					const smartGanttTaskElementContainer = smartGanttTaskBoard.createEl("div", {
+						cls: "smart-gantt-task-element-container"
+					})
 					if ("text" in parsedResult.token) {
 						if ("checked" in parsedResult.token) {
-							let checkbox = smartGanttTaskBoard.createEl("input", {
+							let checkbox = smartGanttTaskElementContainer.createEl("input", {
 								type: "checkbox",
-								cls: "smart-gank-task-checkbox",
+								cls: "smart-gantt-task-checkbox",
+								attr: {
+									id: `smart-gantt-task-checkbox-${parsedResultIndex}-${resultIndex}`
+								}
 
 							})
 							if (parsedResult.token.checked) {
@@ -124,9 +131,12 @@ export default class SmartGanttReactView extends ItemView {
 							})
 						}
 
-						const smartGanttTask = smartGanttTaskBoard.createEl("div", {
-							cls: "smart-gank-task-element",
-							text: parsedResult.token.text.split("\n")[0].trim()
+						const smartGanttTask = smartGanttTaskElementContainer.createEl("label", {
+							cls: "smart-gantt-task-element",
+							text: parsedResult.token.text.split("\n")[0].trim(),
+							attr: {
+								for: `smart-gantt-task-checkbox-${parsedResultIndex}-${resultIndex}`
+							}
 						})
 
 						smartGanttTask.addEventListener('click', async () => {
@@ -162,6 +172,7 @@ export default class SmartGanttReactView extends ItemView {
 							}
 
 						})
+
 					}
 
 
