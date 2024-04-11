@@ -1,0 +1,60 @@
+name: "Release"
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+
+      - name: set up npm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+#      - name: "📔 Generate a changelog"
+#        uses: orhun/git-cliff-action@v3
+#        with:
+#          config: cliff.toml
+#          args: --verbose --latest
+#        env:
+#          OUTPUT: CHANGELOG_temp.md
+
+
+
+
+
+      - name: Build plugin
+        run: |
+          yarn
+          
+          yarn run build
+
+      - name: "Get the tag"
+        id: get_tag
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag=${{ steps.get_tag.outputs.tag }}
+
+          gh release create "$tag" \
+          --title="$tag" \
+          --draft \
+          --notes-file=CHANGELOG_temp.md \
+          main.js manifest.json styles.css LICENSE README.md
+
+      
+
+
+
