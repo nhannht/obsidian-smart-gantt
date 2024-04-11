@@ -1,13 +1,13 @@
 {
 	"name": "obsidian-smart-gantt",
-	"version": "0.0.2",
+	"version": "0.0.4",
 	"description": "Intelligently generate Gantt chart from your tasks",
 	"main": "main.js",
 	"scripts": {
 		"css": "tailwindcss -i src/style/src.css -o styles.css --watch",
 		"esbuild": "node esbuild.config.mjs",
 		"dev": "concurrently \"yarn run css\" \"yarn run esbuild\" ",
-		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production &&  tailwindcss -i src/style/src.css -o styles.css --minify",
+		"build": "tailwindcss -i src/style/src.css -o styles.css --minify && tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
 	"keywords": [
