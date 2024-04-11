@@ -15,7 +15,11 @@
 
 </ul>
 
+---
+
 ##### Simplest use cases
+
+---
 
 ###### Using the right sidebar.
 
@@ -25,6 +29,7 @@
 
 ###### Gantt code block.
 
+---
 
 <div><sub>Simply create a Gantt code block somewhere in your file </sub> </div>
 
@@ -36,6 +41,7 @@
 
 ![](./assets/README-1712821625314.png)
 
+---
 
 ##### Limitation
 
@@ -43,9 +49,11 @@
 
 > [!tip]
 > 
-> Only track a task (line with checkbox) with part of string that can interpret as a time
+> Only track a valid task (line with checkbox) which have part of string that can interpret as time/time range
 > 
 > Smart Gantt is not perfect for natural language processing:
-> - Cannot parse text with only year like "2024"
-> - Time (hours, minutes) of day must stay after date. Example Sat Aug 17 2024 9 AM or Sat Aug 17 2013 18:40:39 GMT+0900 or 2014-11-30T08:15:30-05:30
-> - Relative time like today, tomorrow, yesterday, last friday, 5 hours from now work, but it is not useful at all. At least in the early version
+> - Cannot parse text with only year like "2024", so please write your sentence a bit clearly
+> 
+> - Time (hours, minutes) of day must stay after date. Example Sat Aug 17 2024 9 AM or Sat Aug 17 2013 18:40:39 GMT+0900 or 2014-11-30T08:15:30-05:30. But 9 AM April/11/2024 will be parsed as 2 different points of time.
+> 
+> - Relative time like - today, tomorrow, yesterday, last friday, 5 hours from now - will work in theory, but it is not useful at all. Because every time you refresh the plot will parse from your current point of time
