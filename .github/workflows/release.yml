@@ -51,8 +51,7 @@ jobs:
           gh release create "$tag" \
           --title="$tag" \
           --draft \
-          --notes-file=CHANGELOG_temp.md \
-          main.js manifest.json styles.css LICENSE README.md
+            main.js manifest.json styles.css LICENSE README.md
 
       
 
