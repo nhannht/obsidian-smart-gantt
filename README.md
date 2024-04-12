@@ -2,10 +2,14 @@
     align="center"
 >Obsidian Smart Gantt</h1>
 
+---
+
 <div align="center">
 <sub>Intelligently generate Gantt Chart for your task across your vault</sub>
 
 </div>
+
+---
 
 <ul>
 
