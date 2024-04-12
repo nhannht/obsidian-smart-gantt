@@ -82,7 +82,7 @@ export default class SmartGanttPlugin extends Plugin {
 	}
 
 	override onunload() {
-		this.app.workspace.detachLeavesOfType("gantt-chart")
+		// this.app.workspace.detachLeavesOfType("gantt-chart")
 
 	}
 

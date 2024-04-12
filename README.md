@@ -52,7 +52,7 @@
 > Only track a valid task (line with checkbox) which have part of string that can interpret as time/time range
 > 
 > Smart Gantt is not perfect for natural language processing:
-> - Cannot parse text with only year like "2024", so please write your sentence a bit clearly
+> - Cannot parse text with only a year like "2024", so please write your sentence a bit clearly
 > 
 > - Time (hours, minutes) of day must stay after date. Example Sat Aug 17 2024 9 AM or Sat Aug 17 2013 18:40:39 GMT+0900 or 2014-11-30T08:15:30-05:30. But 9 AM April/11/2024 will be parsed as 2 different points of time.
 > 

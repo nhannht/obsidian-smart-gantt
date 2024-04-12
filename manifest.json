@@ -1,8 +1,8 @@
 {
 	"id": "smart-gantt",
 	"name": "Smart Gantt",
-	"version": "0.0.7",
-	"minAppVersion": "0.0.7",
+	"version": "0.0.8",
+	"minAppVersion": "0.0.8",
 	"description": "Intelligently generate Gantt chart from your tasks",
 	"author": "Obsidian",
 	"authorUrl": "https://github.com/nhannht",
