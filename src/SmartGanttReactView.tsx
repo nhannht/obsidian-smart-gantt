@@ -10,6 +10,7 @@ import SmartGanttPlugin from "../main";
 import "styles.css"
 import {escapeRegExp} from "lodash";
 
+
 /**
  * The api of obsidian about custom view is a bit complicated to use.
  * View and leaf is two different term. View must be regist via a "ViewCreator" function that return a view and everyview must be assicate with a type.
@@ -17,26 +18,17 @@ import {escapeRegExp} from "lodash";
  */
 export default class SmartGanttReactView extends ItemView {
 
-	get thisPlugin(): SmartGanttPlugin {
-		return this._thisPlugin;
-	}
 
-	get isJustResize(): boolean {
-		return this._isJustResize;
-	}
 
-	set isJustResize(value: boolean) {
-		this._isJustResize = value;
-	}
 
 	root: Root | null = null;
-	private _isJustResize: boolean = false;
-	private _thisPlugin: SmartGanttPlugin;
 
 
-	constructor(leaf: WorkspaceLeaf, thisPlugin: SmartGanttPlugin) {
+	constructor(leaf: WorkspaceLeaf,
+				private thisPlugin: SmartGanttPlugin
+
+				) {
 		super(leaf);
-		this._thisPlugin = thisPlugin;
 
 	}
 
@@ -45,23 +37,9 @@ export default class SmartGanttReactView extends ItemView {
 	}
 
 	getDisplayText() {
-		return "Smart Gantt View";
+		return "Smart Gantt";
 	}
 
-	async reloadView() {
-		this.thisPlugin.app.workspace.detachLeavesOfType("smart-gantt")
-		let leaf = this.thisPlugin.app.workspace.getRightLeaf(false);
-
-		leaf?.setViewState({
-			type: "smart-gantt",
-			active: true,
-		})
-		if (leaf instanceof WorkspaceLeaf) {
-			this.thisPlugin.app.workspace.revealLeaf(leaf);
-		}
-
-
-	}
 
 
 	override async onOpen() {
@@ -81,6 +59,19 @@ export default class SmartGanttReactView extends ItemView {
 		const secondContainer = this.containerEl.createEl("div", {
 			cls: "smart-gantt-second-container"
 		})
+		const buttonContainer = secondContainer.createEl("div", {
+			cls: "smart-gantt-button-container"
+		})
+
+		const refreshButton = buttonContainer.createEl("button", {
+			text: "Refresh",
+			cls: "smart-gantt-refresh-button"
+		})
+
+		refreshButton.addEventListener("click", async () => {
+			await this.thisPlugin.helper.reloadView()
+		})
+
 		const smartGanttTaskBoard = secondContainer.createEl("div", {
 			cls: "smart-gantt-task-board"
 		})
@@ -111,7 +102,7 @@ export default class SmartGanttReactView extends ItemView {
 
 									let fileContent = await this.thisPlugin.app.vault.read(parsedResult.file)
 									await this.thisPlugin.app.vault.modify(parsedResult.file, fileContent.replace(taskRawText.trim(), taskRawTextSwitch.trim()))
-									await this.reloadView()
+									await this.thisPlugin.helper.reloadView()
 
 
 								} else if (!checkbox.checked) {
@@ -123,7 +114,7 @@ export default class SmartGanttReactView extends ItemView {
 									let fileContent = await this.thisPlugin.app.vault.read(parsedResult.file)
 									// console.log(fileContent)
 									await this.thisPlugin.app.vault.modify(parsedResult.file, fileContent.replace(taskRawText.trim(), taskRawTextSwitch.trim()))
-									await this.reloadView()
+									await this.thisPlugin.helper.reloadView()
 
 
 								}
@@ -181,20 +172,6 @@ export default class SmartGanttReactView extends ItemView {
 		)
 
 
-		const buttonContainer = secondContainer.createEl("div", {
-			cls: "smart-gantt-button-container"
-		})
-
-		const refreshButton = buttonContainer.createEl("button", {
-			text: "Refresh",
-			cls: "smart-gantt-refresh-button"
-		})
-
-		refreshButton.addEventListener("click", async () => {
-			await this.reloadView()
-
-		})
-
 		this.root.render(
 			<AppContext.Provider value={{
 				app: this.app,
@@ -214,4 +191,6 @@ export default class SmartGanttReactView extends ItemView {
 	override getIcon(): IconName {
 		return 'gantt-chart'
 	}
+
+
 }

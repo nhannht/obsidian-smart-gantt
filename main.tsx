@@ -7,6 +7,7 @@ import MarkdownProcesser from "./src/MarkdownProcesser";
 import {Chrono} from "chrono-node";
 import TimelineExtractor from "./src/TimelineExtractor";
 import MermaidCrafter from "./src/MermaidCrafter";
+import {Helper} from "./src/Helper";
 
 // const DEFAULT_SETTINGS: SmartGanttSettings = {
 // 	mySetting: 'default'
@@ -14,13 +15,21 @@ import MermaidCrafter from "./src/MermaidCrafter";
 
 export default class SmartGanttPlugin extends Plugin {
 	// settingManager = new SettingManager(this,DEFAULT_SETTINGS);
+	private helper = new Helper(this)
+
 
 
 	override async onload() {
 		// await this.settingManager.loadSettings()
-		this.registerObsidianProtocolHandler("hello", async (_e) => {
-			console.log("ollama")
+		this.addCommand({
+			id: 'smart-gantt-reload',
+			name: 'Reload',
+			callback: ()=>{
+				this.helper.reloadView()
+			}
 		})
+
+
 		this.registerView("smart-gantt", (leaf) => {
 			return new SmartGanttReactView(leaf,this);
 		})
@@ -29,7 +38,13 @@ export default class SmartGanttPlugin extends Plugin {
 
 			let leafs = this.app.workspace.getLeavesOfType("smart-gantt");
 			if (leafs.length > 0) {
-				this.app.workspace.detachLeavesOfType("smart-gantt")
+				// this.app.workspace.detachLeavesOfType("smart-gantt")
+				let leaf = leafs[0];
+				if (this.app.workspace.rightSplit.collapsed){
+					this.app.workspace.revealLeaf(leaf)
+				} else {
+					this.app.workspace.rightSplit.collapse()
+				}
 			} else {
 				let leaf = this.app.workspace.getRightLeaf(false);
 

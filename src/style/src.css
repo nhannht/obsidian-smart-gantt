@@ -24,7 +24,7 @@ select {
 	@apply p-4 h-1/2 overflow-y-auto
 }
 .smart-gantt-second-container {
-	@apply  overflow-y-auto
+	@apply  overflow-y-auto h-screen
 }
 .smart-gantt-button-container {
 	@apply flex justify-center p-4 m-4
