@@ -15,7 +15,7 @@ import {Helper} from "./src/Helper";
 
 export default class SmartGanttPlugin extends Plugin {
 	// settingManager = new SettingManager(this,DEFAULT_SETTINGS);
-	private helper = new Helper(this)
+	public helper = new Helper(this)
 
 
 
