@@ -25,7 +25,8 @@ export default class MermaidCrafter {
 
 		results.forEach(result => {
 			craft += `\tsection ${result.file.basename}\n`
-			result.parsedResults.forEach(parseResult => {
+			if (result.parsedResults){
+							result.parsedResults.forEach(parseResult => {
 				const startDateString = parseResult.start.date().toDateString()
 				const taskId = AES.encrypt(parseResult.start.date().toDateString(), "secret")
 				taskIdMap.set(taskId, {
@@ -48,6 +49,8 @@ export default class MermaidCrafter {
 					craft += `\t\t${text}:\t ${checked? "done ," : "active ,"}  ${taskId},${startDateString}, ${diff}d\n`
 				}
 			})
+
+			}
 
 		})
 

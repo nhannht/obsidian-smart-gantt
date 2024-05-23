@@ -3,7 +3,7 @@ import {createRoot, Root} from "react-dom/client";
 import {SmartGanttMainReactComponent} from "./SmartGanttMainReactComponent";
 import {AppContext} from "./AppContext";
 import MarkdownProcesser from "./MarkdownProcesser";
-import TimelineExtractor from "./TimelineExtractor";
+import TimelineExtractor, {SmartGanttParsesResult} from "./TimelineExtractor";
 import {Chrono} from "chrono-node";
 import MermaidCrafter from "./MermaidCrafter";
 import SmartGanttPlugin from "../main";
@@ -19,15 +19,12 @@ import {escapeRegExp} from "lodash";
 export default class SmartGanttReactView extends ItemView {
 
 
-
-
 	root: Root | null = null;
 
 
 	constructor(leaf: WorkspaceLeaf,
 				private thisPlugin: SmartGanttPlugin
-
-				) {
+	) {
 		super(leaf);
 
 	}
@@ -40,6 +37,73 @@ export default class SmartGanttReactView extends ItemView {
 		return "Smart Gantt";
 	}
 
+	renderCheckBox(parsedResult: SmartGanttParsesResult, checkbox: HTMLInputElement) {
+		if ("checked" in parsedResult.token && parsedResult.token.checked) {
+			checkbox.setAttr("checked", "checked")
+		}
+		checkbox.addEventListener("change", async () => {
+			if (checkbox.checked) {
+				const taskRawText = parsedResult.token.raw
+				// console.log(taskRawText)
+				const taskRawTextSwitch = taskRawText.replace("[ ]", "[x]")
+
+				let fileContent = await this.thisPlugin.app.vault.read(parsedResult.file)
+				await this.thisPlugin.app.vault.modify(parsedResult.file, fileContent.replace(taskRawText.trim(), taskRawTextSwitch.trim()))
+				await this.thisPlugin.helper.reloadView()
+
+
+			} else if (!checkbox.checked) {
+				const taskRawText = parsedResult.token.raw
+				// console.log(taskRawText)
+				const taskRawTextSwitch = taskRawText.replace("[x]", "[ ]")
+				// console.log(taskRawTextSwitch)
+
+				let fileContent = await this.thisPlugin.app.vault.read(parsedResult.file)
+				// console.log(fileContent)
+				await this.thisPlugin.app.vault.modify(parsedResult.file, fileContent.replace(taskRawText.trim(), taskRawTextSwitch.trim()))
+				await this.thisPlugin.helper.reloadView()
+
+
+			}
+
+		})
+	}
+
+	createCheckboxTaskHandle(smartGanttTask: HTMLLabelElement, parsedResult: SmartGanttParsesResult) {
+		smartGanttTask.addEventListener('click', async () => {
+			const leaf = this.thisPlugin.app.workspace.getLeaf(false);
+			await leaf.openFile(parsedResult.file)
+			const view = leaf.view as MarkdownView
+			const fileContent = await this.thisPlugin.app.vault.read(parsedResult.file)
+			const regex = new RegExp(escapeRegExp(smartGanttTask.getText()))
+			const lines = fileContent.split("\n")
+			// console.log(smartGanttTask.getText())
+			// console.log(lines)
+			for (let i = 0; i < lines.length; i++) {
+				const match = lines[i].trim().search(regex)
+				// console.log(match)
+				if (match !== -1) {
+					// console.log(lines[i])
+					view.editor.setCursor({
+						line: i,
+						ch: 0
+					})
+					view.editor.setSelection({
+							line: i,
+							ch: match
+						},
+						{
+							line: i,
+							ch: match + smartGanttTask.getText().length
+						})
+					view.editor.scrollTo(i)
+					break
+				}
+
+			}
+
+		})
+	}
 
 
 	override async onOpen() {
@@ -77,7 +141,44 @@ export default class SmartGanttReactView extends ItemView {
 		})
 
 		parsedResult.forEach((parsedResult, parsedResultIndex) => {
-				parsedResult.parsedResults.forEach((_result, resultIndex) => {
+				if (parsedResult.parsedResults) {
+					// console.log(parsedResult)
+					parsedResult.parsedResults.forEach((_result, resultIndex) => {
+						const smartGanttTaskElementContainer = smartGanttTaskBoard.createEl("div", {
+							cls: "smart-gantt-task-element-container"
+						})
+						if ("text" in parsedResult.token) {
+							if ("checked" in parsedResult.token) {
+								let checkbox = smartGanttTaskElementContainer.createEl("input", {
+									type: "checkbox",
+									cls: "smart-gantt-task-checkbox",
+									attr: {
+										id: `smart-gantt-task-checkbox-${parsedResultIndex}-${resultIndex}`
+									}
+
+								})
+								if (parsedResult.token.checked) {
+									checkbox.setAttr("checked", "checked")
+								}
+								this.renderCheckBox(parsedResult, checkbox)
+							}
+
+							const smartGanttTask = smartGanttTaskElementContainer.createEl("label", {
+								cls: "smart-gantt-task-element",
+								text: parsedResult.token.text.split("\n")[0].trim(),
+								attr: {
+									for: `smart-gantt-task-checkbox-${parsedResultIndex}-${resultIndex}`
+								}
+							})
+
+							this.createCheckboxTaskHandle(smartGanttTask,parsedResult)
+
+						}
+
+
+					})
+
+				} else {
 					const smartGanttTaskElementContainer = smartGanttTaskBoard.createEl("div", {
 						cls: "smart-gantt-task-element-container"
 					})
@@ -87,87 +188,30 @@ export default class SmartGanttReactView extends ItemView {
 								type: "checkbox",
 								cls: "smart-gantt-task-checkbox",
 								attr: {
-									id: `smart-gantt-task-checkbox-${parsedResultIndex}-${resultIndex}`
+									id: `smart-gantt-task-checkbox-${parsedResultIndex}-non-chrono}`
 								}
 
 							})
 							if (parsedResult.token.checked) {
 								checkbox.setAttr("checked", "checked")
 							}
-							checkbox.addEventListener("change", async () => {
-								if (checkbox.checked) {
-									const taskRawText = parsedResult.token.raw
-									// console.log(taskRawText)
-									const taskRawTextSwitch = taskRawText.replace("[ ]", "[x]")
-
-									let fileContent = await this.thisPlugin.app.vault.read(parsedResult.file)
-									await this.thisPlugin.app.vault.modify(parsedResult.file, fileContent.replace(taskRawText.trim(), taskRawTextSwitch.trim()))
-									await this.thisPlugin.helper.reloadView()
-
-
-								} else if (!checkbox.checked) {
-									const taskRawText = parsedResult.token.raw
-									// console.log(taskRawText)
-									const taskRawTextSwitch = taskRawText.replace("[x]", "[ ]")
-									// console.log(taskRawTextSwitch)
-
-									let fileContent = await this.thisPlugin.app.vault.read(parsedResult.file)
-									// console.log(fileContent)
-									await this.thisPlugin.app.vault.modify(parsedResult.file, fileContent.replace(taskRawText.trim(), taskRawTextSwitch.trim()))
-									await this.thisPlugin.helper.reloadView()
-
-
-								}
-
-							})
+							this.renderCheckBox(parsedResult, checkbox)
 						}
 
 						const smartGanttTask = smartGanttTaskElementContainer.createEl("label", {
 							cls: "smart-gantt-task-element",
 							text: parsedResult.token.text.split("\n")[0].trim(),
 							attr: {
-								for: `smart-gantt-task-checkbox-${parsedResultIndex}-${resultIndex}`
+								for: `smart-gantt-task-checkbox-${parsedResultIndex}-non-chrono}`
 							}
 						})
 
-						smartGanttTask.addEventListener('click', async () => {
-							const leaf = this.thisPlugin.app.workspace.getLeaf(false);
-							await leaf.openFile(parsedResult.file)
-							const view = leaf.view as MarkdownView
-							const fileContent = await this.thisPlugin.app.vault.read(parsedResult.file)
-							const regex = new RegExp(escapeRegExp(smartGanttTask.getText()))
-							const lines = fileContent.split("\n")
-							// console.log(smartGanttTask.getText())
-							// console.log(lines)
-							for (let i = 0; i < lines.length; i++) {
-								const match = lines[i].trim().search(regex)
-								// console.log(match)
-								if (match !== -1) {
-									// console.log(lines[i])
-									view.editor.setCursor({
-										line: i,
-										ch: 0
-									})
-									view.editor.setSelection({
-											line: i,
-											ch: match
-										},
-										{
-											line: i,
-											ch: match + smartGanttTask.getText().length
-										})
-									view.editor.scrollTo(i)
-									break
-								}
-
-							}
-
-						})
+						this.createCheckboxTaskHandle(smartGanttTask,parsedResult)
 
 					}
 
 
-				})
+				}
 			}
 		)
 

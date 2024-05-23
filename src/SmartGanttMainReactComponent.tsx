@@ -10,13 +10,14 @@ export const SmartGanttMainReactComponent = (props: {
 
 
 	useEffect(() => {
-		loadMermaid().then(mermaid => {
-			mermaid.initialize({
-				startOnLoad: true,
-				theme: 'default',
-				securityLevel: 'loose',
-				fontFamily: 'monospace',
-			});
+		loadMermaid()
+			.then(mermaid => {
+				mermaid.initialize({
+					startOnLoad: true,
+					// theme: 'default',
+					// securityLevel: 'loose',
+					// fontFamily: 'monospace',
+				});
 
 			mermaid.contentLoaded();
 
@@ -28,9 +29,9 @@ export const SmartGanttMainReactComponent = (props: {
 	return <>
 		<main>
 
-			<div className={"mermaid"}>
+			<pre className={"mermaid"}>
 				{props.mermaidCraft}
-			</div>
+			</pre>
 		</main>
 
 

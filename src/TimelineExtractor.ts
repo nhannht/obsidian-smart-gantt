@@ -16,7 +16,7 @@ import {TokenWithFile} from "./MarkdownProcesser";
 
 
 export interface SmartGanttParsesResult extends TokenWithFile {
-	parsedResults: ParsedResult[],
+	parsedResults: ParsedResult[]|null,
 
 }
 
@@ -54,6 +54,7 @@ export default class TimelineExtractor {
 		// let timelineData: TimelineEntryChrono[] = []
 		let smartGanttParsedResults: SmartGanttParsesResult[] = []
 		// let documents: Document[] = []
+		// console.log(tokens)
 		tokens?.forEach((token) => {
 			let parsedResult:ParsedResult[] = []
 			if ("text" in token.token) {
@@ -63,6 +64,11 @@ export default class TimelineExtractor {
 				smartGanttParsedResults.push({
 					...token,
 					parsedResults: parsedResult
+				})
+			} else if (parsedResult.length === 0){
+				smartGanttParsedResults.push({
+					...token,
+					parsedResults: null,
 				})
 			}
 		})
