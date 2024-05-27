@@ -1,3 +1,6 @@
+>[!tip]
+> Check https://obsidian-smart-gantt.pages.dev for a full document
+
 <h1
     align="center"
 >Obsidian Smart Gantt</h1>
