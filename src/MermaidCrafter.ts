@@ -46,6 +46,7 @@ export default class MermaidCrafter {
 				if ("text" in result.token) {
 					let text = result.token.text.trim().split("\n")[0]
 					text = text.replace(parseResult.text, "").trim()
+					text = text.replace(":","🐱")
 					craft += `\t\t${text}:\t ${checked? "done ," : "active ,"}  ${taskId},${startDateString}, ${diff}d\n`
 				}
 			})
