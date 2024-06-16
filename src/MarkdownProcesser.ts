@@ -25,6 +25,7 @@ export default class MarkdownProcesser {
 
 	 async parseAllFiles() {
 		this._files.map(async (file) => {
+			// console.log(file)
 			await this.parseFilesAndUpdateTokens(file)
 		})
 	}

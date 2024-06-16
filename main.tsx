@@ -8,19 +8,22 @@ import {Chrono} from "chrono-node";
 import TimelineExtractor from "./src/TimelineExtractor";
 import MermaidCrafter from "./src/MermaidCrafter";
 import {Helper} from "./src/Helper";
+import SettingManager, {SmartGanttSettings} from "./src/SettingManager";
 
-// const DEFAULT_SETTINGS: SmartGanttSettings = {
-// 	mySetting: 'default'
-// }
+const DEFAULT_SETTINGS: SmartGanttSettings = {
+	pathListFilter: ["/"]
+
+}
 
 export default class SmartGanttPlugin extends Plugin {
-	// settingManager = new SettingManager(this,DEFAULT_SETTINGS);
+	settingManager = new SettingManager(DEFAULT_SETTINGS);
 	public helper = new Helper(this)
 
 
 
 	override async onload() {
-		// await this.settingManager.loadSettings()
+		await this.settingManager.loadSettings()
+		// console.log(this.settingManager.settings)
 		this.addCommand({
 			id: 'smart-gantt-reload',
 			name: 'Reload',
@@ -96,8 +99,9 @@ export default class SmartGanttPlugin extends Plugin {
 
 	}
 
-	override onunload() {
+	override  async onunload() {
 		// this.app.workspace.detachLeavesOfType("gantt-chart")
+		await this.settingManager.saveSettings(this.settingManager.settings)
 
 	}
 

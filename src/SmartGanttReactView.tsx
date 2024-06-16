@@ -137,13 +137,25 @@ export default class SmartGanttReactView extends ItemView {
 			await this.thisPlugin.helper.reloadView()
 		})
 
+		const filterButton = buttonContainer.createEl("button", {
+			text: "Filter",
+			cls: "smart-gantt-filter-button"
+		})
+
+		filterButton.addEventListener("click", async () => {
+			await this.thisPlugin.helper.renderFilterBox(parsedResult)
+		})
+
 		const smartGanttTaskBoard = secondContainer.createEl("div", {
 			cls: "smart-gantt-task-board"
 		})
 
 		parsedResult.forEach((parsedResult, parsedResultIndex) => {
+			if (this.thisPlugin.settingManager.settings.pathListFilter.indexOf(parsedResult.file.parent?.path!) === -1){
+				return
+			}
+				// console.log(parsedResult)
 				if (parsedResult.parsedResults) {
-					// console.log(parsedResult)
 					parsedResult.parsedResults.forEach((_result, resultIndex) => {
 						const smartGanttTaskElementContainer = smartGanttTaskBoard.createEl("div", {
 							cls: "smart-gantt-task-element-container"
@@ -171,7 +183,7 @@ export default class SmartGanttReactView extends ItemView {
 									for: `smart-gantt-task-checkbox-${parsedResultIndex}-${resultIndex}`
 								}
 							})
-							this.createCheckboxTaskHandle(smartGanttTask,parsedResult)
+							this.createCheckboxTaskHandle(smartGanttTask, parsedResult)
 						}
 					})
 
@@ -203,7 +215,7 @@ export default class SmartGanttReactView extends ItemView {
 							}
 						})
 
-						this.createCheckboxTaskHandle(smartGanttTask,parsedResult)
+						this.createCheckboxTaskHandle(smartGanttTask, parsedResult)
 
 					}
 

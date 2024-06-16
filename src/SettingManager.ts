@@ -1,16 +1,9 @@
-import SmartGanttPlugin from "../main";
+
 export interface SmartGanttSettings {
-	mySetting: string;
+	pathListFilter: String[]
 }
+
 export default class SettingManager {
-	get plugin(): SmartGanttPlugin {
-		return this._plugin;
-	}
-
-	set plugin(value: SmartGanttPlugin) {
-		this._plugin = value;
-	}
-
 	get settings(): SmartGanttSettings {
 		return this._settings;
 	}
@@ -18,20 +11,36 @@ export default class SettingManager {
 	set settings(value: SmartGanttSettings) {
 		this._settings = value;
 	}
-    private _plugin: SmartGanttPlugin;
-	private _settings: SmartGanttSettings;
-	constructor(plugin:SmartGanttPlugin,settings:SmartGanttSettings) {
-		this._plugin = plugin;
-		this._settings = settings;
+
+	constructor(private _settings: SmartGanttSettings) {
 
 	}
 
-	async loadSettings(){
-		this.settings = Object.assign({}, this._settings, await this.plugin.loadData())
-
+	async loadSettings() {
+		if (localStorage.getItem("smart-gantt-settings")){
+			this._settings = Object.assign(
+				{},
+				this._settings,
+				//@ts-ignore
+				JSON.parse(localStorage.getItem("smart-gantt-settings")))
+		}
 	}
-	async saveSettings(newSettings:SmartGanttSettings){
-		await this.plugin.saveData(newSettings)
+
+	async saveSettings(newSettings: SmartGanttSettings) {
+		localStorage.setItem("smart-gantt-settings", JSON.stringify(newSettings))
 	}
 
+	async addPath(path: string) {
+		if (this.settings.pathListFilter.indexOf(path) === -1) {
+			this.settings.pathListFilter.push(path)
+			await this.saveSettings(this._settings)
+		}
+	}
+
+	async removePath(path: string) {
+		if (this.settings.pathListFilter.indexOf(path) !== -1) {
+			this.settings.pathListFilter.remove(path)
+			await this.saveSettings(this._settings)
+		}
+	}
 }

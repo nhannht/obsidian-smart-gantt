@@ -1,5 +1,7 @@
 import SmartGanttPlugin from "../main";
 import {WorkspaceLeaf} from "obsidian";
+import {SmartGanttParsesResult} from "./TimelineExtractor";
+import {FilterModal} from "./FilterModal";
 
 export class Helper {
 	constructor(private thisPlugin: SmartGanttPlugin) {
@@ -19,4 +21,8 @@ export class Helper {
 		}
 	}
 
+	async renderFilterBox(parsedResult: SmartGanttParsesResult[]) {
+		new FilterModal(this.thisPlugin.app,this.thisPlugin,parsedResult).open()
+
+	}
 }
