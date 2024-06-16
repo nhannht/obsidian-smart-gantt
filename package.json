@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-smart-gantt",
-	"version": "0.1.3",
+	"version": "0.1.4",
 	"description": "Intelligently generate Gantt chart from your tasks",
 	"main": "main.js",
 	"scripts": {
