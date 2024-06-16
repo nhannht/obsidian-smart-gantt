@@ -70,7 +70,8 @@ export default class SmartGanttReactView extends ItemView {
 	}
 
 	createCheckboxTaskHandle(smartGanttTask: HTMLLabelElement, parsedResult: SmartGanttParsesResult) {
-		smartGanttTask.addEventListener('click', async () => {
+		smartGanttTask.addEventListener('click', async (e) => {
+			e.preventDefault()
 			const leaf = this.thisPlugin.app.workspace.getLeaf(false);
 			await leaf.openFile(parsedResult.file)
 			const view = leaf.view as MarkdownView
@@ -170,12 +171,8 @@ export default class SmartGanttReactView extends ItemView {
 									for: `smart-gantt-task-checkbox-${parsedResultIndex}-${resultIndex}`
 								}
 							})
-
 							this.createCheckboxTaskHandle(smartGanttTask,parsedResult)
-
 						}
-
-
 					})
 
 				} else {
