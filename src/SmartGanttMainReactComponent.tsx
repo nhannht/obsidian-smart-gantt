@@ -8,7 +8,6 @@ export const SmartGanttMainReactComponent = (props: {
 }) => {
 
 
-
 	useEffect(() => {
 		loadMermaid()
 			.then(mermaid => {
@@ -17,10 +16,9 @@ export const SmartGanttMainReactComponent = (props: {
 					// theme: 'default',
 					// securityLevel: 'loose',
 					// fontFamily: 'monospace',
+					maxTextSize:99999999,
 				});
-
 			mermaid.contentLoaded();
-
 		})
 
 	}, [])
