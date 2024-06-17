@@ -1,6 +1,8 @@
+import SmartGanttPlugin from "../main";
 
 export interface SmartGanttSettings {
-	pathListFilter: String[]
+	pathListFilter: String[],
+
 }
 
 export default class SettingManager {
@@ -12,28 +14,34 @@ export default class SettingManager {
 		this._settings = value;
 	}
 
-	constructor(private _settings: SmartGanttSettings) {
+	constructor(private thisPlugin: SmartGanttPlugin,
+				private _settings: SmartGanttSettings) {
 
 	}
 
 	async loadSettings() {
-		if (localStorage.getItem("smart-gantt-settings")){
+		const vaultName = this.thisPlugin.app.vault.getName()
+		if (localStorage.getItem(`smart-gantt-settings-${vaultName}`)) {
 			this._settings = Object.assign(
 				{},
 				this._settings,
 				//@ts-ignore
-				JSON.parse(localStorage.getItem("smart-gantt-settings")))
+				JSON.parse(localStorage.getItem(`smart-gantt-settings-${vaultName}`)))
 		}
 	}
 
 	async saveSettings(newSettings: SmartGanttSettings) {
-		localStorage.setItem("smart-gantt-settings", JSON.stringify(newSettings))
+		const vaultName = this.thisPlugin.app.vault.getName()
+		localStorage.setItem(`smart-gantt-settings-${vaultName}`, JSON.stringify(newSettings))
+
+
 	}
 
 	async addPath(path: string) {
 		if (this.settings.pathListFilter.indexOf(path) === -1) {
 			this.settings.pathListFilter.push(path)
 			await this.saveSettings(this._settings)
+
 		}
 	}
 
@@ -41,6 +49,28 @@ export default class SettingManager {
 		if (this.settings.pathListFilter.indexOf(path) !== -1) {
 			this.settings.pathListFilter.remove(path)
 			await this.saveSettings(this._settings)
+
 		}
+	}
+
+	async setToAllFiles() {
+		if (this.settings.pathListFilter.indexOf("AllFiles") === -1) {
+			this.settings.pathListFilter = []
+			this.settings.pathListFilter.push("AllFiles")
+			await this.saveSettings(this._settings)
+		}
+	}
+
+	async setToCurrentFiles() {
+		if (this.settings.pathListFilter.indexOf("CurrentFile") === -1) {
+			this.settings.pathListFilter = []
+			this.settings.pathListFilter.push("CurrentFile")
+		}
+		await this.saveSettings(this._settings)
+	}
+
+	async clearAllPath(){
+		this.settings.pathListFilter = []
+		await this.saveSettings(this._settings)
 	}
 }

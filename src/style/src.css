@@ -10,7 +10,7 @@ select {
 	@apply pl-2 pr-2 text-xs text-center
 }
 
-.smart-gantt-task-element-container {
+.smart-gantt-checkbox-element-container {
 	@apply flex-nowrap
 }
 
@@ -27,10 +27,22 @@ select {
 	@apply  overflow-y-auto h-screen
 }
 .smart-gantt-button-container {
-	@apply flex justify-center p-4 m-4
+	@apply flex justify-around p-4 m-4
 }
-.smart-gantt-refresh-button {
+.smart-gantt-button {
 	@apply  rounded text-[color:var(--text-normal)]
 	hover:text-[color:var(--text-accent)]
 	bg-[color:var(--background-primary)] hover:bg-[color:var(--background-modifier-hover)]
 }
+
+.smart-gantt-filter-modal-directory-container {
+	@apply border-t flex flex-col p-4
+
+}
+
+.smart-gantt-filter-modal-fieldset {
+	@apply flex flex-row m-4 justify-around
+
+}
+
+

@@ -11,14 +11,12 @@ import {Helper} from "./src/Helper";
 import SettingManager, {SmartGanttSettings} from "./src/SettingManager";
 
 const DEFAULT_SETTINGS: SmartGanttSettings = {
-	pathListFilter: ["/"]
-
+	pathListFilter: ["AllFiles"],
 }
 
 export default class SmartGanttPlugin extends Plugin {
-	settingManager = new SettingManager(DEFAULT_SETTINGS);
+	settingManager = new SettingManager(this, DEFAULT_SETTINGS);
 	public helper = new Helper(this)
-
 
 
 	override async onload() {
@@ -27,14 +25,14 @@ export default class SmartGanttPlugin extends Plugin {
 		this.addCommand({
 			id: 'smart-gantt-reload',
 			name: 'Reload',
-			callback: ()=>{
+			callback: () => {
 				this.helper.reloadView()
 			}
 		})
 
 
 		this.registerView("smart-gantt", (leaf) => {
-			return new SmartGanttReactView(leaf,this);
+			return new SmartGanttReactView(leaf, this);
 		})
 
 		this.addRibbonIcon('gantt-chart', 'Smart Gantt', () => {
@@ -43,7 +41,7 @@ export default class SmartGanttPlugin extends Plugin {
 			if (leafs.length > 0) {
 				// this.app.workspace.detachLeavesOfType("smart-gantt")
 				let leaf = leafs[0];
-				if (this.app.workspace.rightSplit.collapsed){
+				if (this.app.workspace.rightSplit.collapsed) {
 					this.app.workspace.revealLeaf(leaf)
 				} else {
 					this.app.workspace.rightSplit.collapse()
@@ -62,7 +60,7 @@ export default class SmartGanttPlugin extends Plugin {
 
 		})
 
-		this.registerMarkdownCodeBlockProcessor("gantt", async    (_source, el, _ctx) => {
+		this.registerMarkdownCodeBlockProcessor("gantt", async (_source, el, _ctx) => {
 			const allMarkdownFiles = this.app.vault.getMarkdownFiles();
 			const markdownProcesser = new MarkdownProcesser(allMarkdownFiles, this)
 			await markdownProcesser.parseAllFiles()
@@ -99,7 +97,7 @@ export default class SmartGanttPlugin extends Plugin {
 
 	}
 
-	override  async onunload() {
+	override async onunload() {
 		// this.app.workspace.detachLeavesOfType("gantt-chart")
 		await this.settingManager.saveSettings(this.settingManager.settings)
 
