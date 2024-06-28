@@ -1,6 +1,6 @@
 import {App, Modal} from "obsidian";
 import SmartGanttPlugin from "../main";
-import {SmartGanttParsesResult} from "./TimelineExtractor";
+import {TimelineExtractorResult} from "./TimelineExtractor";
 
 export class FilterModal extends Modal {
 	override onOpen() {
@@ -183,7 +183,7 @@ export class FilterModal extends Modal {
 
 	constructor(app: App,
 				private thisPlugin: SmartGanttPlugin,
-				private parsedResults: SmartGanttParsesResult[]
+				private parsedResults: TimelineExtractorResult[]
 	) {
 		super(app)
 	}

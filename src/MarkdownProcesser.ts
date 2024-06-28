@@ -4,7 +4,7 @@ import SmartGanttPlugin from "../main";
 
 export interface TokenWithFile {
 	token: Token,
-	file: TFile
+	file: TFile,
 }
 
 export default class MarkdownProcesser {
@@ -52,26 +52,7 @@ export default class MarkdownProcesser {
 
 	}
 
-	private transformWithTaskPlugin(text: string) {
-		const hourGlass = text.replace(/⏳/g, "due in "),
-			airPlain = hourGlass.replace(/🛫/g, "start from "),
-			heavyPlus = airPlain.replace(/➕/g, "created in "),
-			checkMark = heavyPlus.replace(/✅/g, "done in "),
-			crossMark = checkMark.replace(/❌/g, "cancelled in "),
 
-			createdIn = crossMark.replace(/\[created::\s+(.*)]/g, "created in $1"),
-			scheduledIn = createdIn.replace(/\[scheduled::\s+(.*)]/g, "scheduled in $1"),
-			startFrom = scheduledIn.replace(/\[start::\s+(.*)]/g, "start from $1"),
-			dueTo = startFrom.replace(/\[due::\s+(.*)]/g, "due to $1"),
-			completionIn = dueTo.replace(/\[completion::\s+(.*)]/g, "completion in $1"),
-			cancelledIn = completionIn.replace(/\[cancelled::\s(.*)]/g, "cancelled in $1 "),
-
-			calendarMark = cancelledIn.replace("/📅/g", " to ")
-
-		return calendarMark
-
-
-	}
 
 	private async parseFilesAndUpdateTokens(file: TFile) {
 		if (!file) {
@@ -81,11 +62,10 @@ export default class MarkdownProcesser {
 
 
 		const fileContentStripHTML = this.filterHTMLAndEmphasis(fileContent)
-		const taskPluginReplacer = this.transformWithTaskPlugin(fileContentStripHTML)
 
 
 		// console.log(fileContentStripHTML)
-		const lexerResult = marked.lexer(taskPluginReplacer);
+		const lexerResult = marked.lexer(fileContentStripHTML);
 
 		// console.log(lexerResult)
 
@@ -99,7 +79,10 @@ export default class MarkdownProcesser {
 
 	}
 
-	private recusiveGetToken(document: Token, tokens: TokenWithFile[], file: TFile) {
+	private recusiveGetToken(document: Token,
+							 tokens: TokenWithFile[],
+							 file: TFile,
+							) {
 		const settings = this._currentPlugin.settingManager.settings
 		//@ts-ignore
 		if ("type" in document && document.task === true && document.type === "list_item") {
@@ -120,7 +103,7 @@ export default class MarkdownProcesser {
 			if (settings.todoShowQ && (document.checked === false)) {
 				tokens.push({
 					token: document,
-					file: file
+					file: file,
 
 				})
 			}

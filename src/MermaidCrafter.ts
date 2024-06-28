@@ -1,4 +1,4 @@
-import {SmartGanttParsesResult} from "./TimelineExtractor";
+import {TimelineExtractorResult} from "./TimelineExtractor";
 import * as AES from "crypto-js/aes";
 import SmartGanttPlugin from "../main";
 
@@ -16,7 +16,7 @@ export default class MermaidCrafter {
 		this._thisPlugin = thisPlugin;
 	}
 
-	craftMermaid(results: SmartGanttParsesResult[]) {
+	craftMermaid(results: TimelineExtractorResult[]) {
 		let craft = ""
 		craft += "gantt\n"
 		// craft += "title Gantt diagram\n"
@@ -25,8 +25,8 @@ export default class MermaidCrafter {
 
 		results.forEach(result => {
 			craft += `\tsection ${result.file.basename}\n`
-			if (result.parsedResults){
-							result.parsedResults.forEach(parseResult => {
+			if (result.parsedResultsAndRawText.parsedResults){
+							result.parsedResultsAndRawText.parsedResults.forEach(parseResult => {
 				const startDateString = parseResult.start.date().toDateString()
 				const taskId = AES.encrypt(parseResult.start.date().toDateString(), "secret")
 				taskIdMap.set(taskId, {

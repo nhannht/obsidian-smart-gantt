@@ -1,6 +1,8 @@
 import {Chrono, ParsedResult} from "chrono-node";
 
 import {TokenWithFile} from "./MarkdownProcesser";
+import {Token} from "marked";
+import {TFile} from "obsidian";
 
 // export interface TimelineEntry {
 // 	dateString: string;
@@ -14,9 +16,15 @@ import {TokenWithFile} from "./MarkdownProcesser";
 // 	stringThatParseAsDate: string,
 // }
 
-
-export interface SmartGanttParsesResult extends TokenWithFile {
+export type SmartGanttParsedResults = {
 	parsedResults: ParsedResult[]|null,
+	rawText:string
+
+}
+export type TimelineExtractorResult = {
+	token:Token,
+	file:TFile,
+	parsedResultsAndRawText: SmartGanttParsedResults,
 
 }
 
@@ -24,26 +32,13 @@ export default class TimelineExtractor {
 	get countResultWithChrono(): number {
 		return this.#countResultWithChrono;
 	}
-	get smartGanttParsedResults(): SmartGanttParsesResult[] {
-		return this._smartGanttParsedResults;
-	}
 
-	set smartGanttParsedResults(value: SmartGanttParsesResult[]) {
-		this._smartGanttParsedResults = value;
-	}
 	get customChrono(): Chrono {
 		return this._customChrono;
 	}
 
-	set customChrono(value: Chrono) {
-		this._customChrono = value;
-	}
 
-	private _smartGanttParsedResults: SmartGanttParsesResult[] = [];
-
-
-
-	private _customChrono: Chrono;
+	private readonly _customChrono: Chrono;
 
 	#countResultWithChrono = 0
 
@@ -52,29 +47,63 @@ export default class TimelineExtractor {
 	}
 
 
+	private makeTextCompatibleWithTaskPlugin(text: string) {
+		const hourGlass = text.replace(/⏳/g, "due in "),
+			airPlain = hourGlass.replace(/🛫/g, "start from "),
+			heavyPlus = airPlain.replace(/➕/g, "created in "),
+			checkMark = heavyPlus.replace(/✅/g, "done in "),
+			crossMark = checkMark.replace(/❌/g, "cancelled in "),
+
+			createdIn = crossMark.replace(/\[created::\s+(.*)]/g, "created in $1"),
+			scheduledIn = createdIn.replace(/\[scheduled::\s+(.*)]/g, "scheduled in $1"),
+			startFrom = scheduledIn.replace(/\[start::\s+(.*)]/g, "start from $1"),
+			dueTo = startFrom.replace(/\[due::\s+(.*)]/g, "due to $1"),
+			completionIn = dueTo.replace(/\[completion::\s+(.*)]/g, "completion in $1"),
+			cancelledIn = completionIn.replace(/\[cancelled::\s(.*)]/g, "cancelled in $1 "),
+
+			calendarMark = cancelledIn.replace("/📅/g", " to ")
+
+		return calendarMark
+
+
+	}
+
 
 
 	async GetTimelineDataFromDocumentArrayWithChrono(tokens: TokenWithFile[] | null,
-	): Promise<SmartGanttParsesResult[]> {
+	): Promise<TimelineExtractorResult[]> {
 		// let timelineData: TimelineEntryChrono[] = []
-		let smartGanttParsedResults: SmartGanttParsesResult[] = []
+		let extractorResultList: TimelineExtractorResult[] = []
 		// let documents: Document[] = []
 		// console.log(tokens)
 		tokens?.forEach((token) => {
 			let parsedResult:ParsedResult[] = []
 			if ("text" in token.token) {
-				 parsedResult = this.customChrono.parse(token.token.text)
+				const taskPluginCompatibleText = this.makeTextCompatibleWithTaskPlugin(token.token.text)
+				 parsedResult = this.customChrono.parse(taskPluginCompatibleText)
 			}
 			if (parsedResult && parsedResult.length > 0) {
 				this.#countResultWithChrono = this.#countResultWithChrono + 1
-				smartGanttParsedResults.push({
+				const smartGanttParsedResults:SmartGanttParsedResults = {
+					parsedResults: parsedResult,
+					//@ts-ignore
+					rawText: token.token.text
+
+				}
+
+				 extractorResultList.push({
 					...token,
-					parsedResults: parsedResult
+					parsedResultsAndRawText: smartGanttParsedResults
 				})
 			} else if (parsedResult.length === 0){
-				smartGanttParsedResults.push({
+				const smartGanttParsedResults: SmartGanttParsedResults = {
+					parsedResults:null,
+					//@ts-ignore
+					rawText:token.token.text
+				}
+				 extractorResultList.push({
 					...token,
-					parsedResults: null,
+					parsedResultsAndRawText: smartGanttParsedResults,
 				})
 			}
 		})
@@ -115,9 +144,9 @@ export default class TimelineExtractor {
 		// // sort filterTimelineData
 		//
 		// this.timelineData = timelineData
-		this.smartGanttParsedResults = smartGanttParsedResults
+		this.smartGanttParsedResults =  extractorResultList
 
 
-		return smartGanttParsedResults
+		return  extractorResultList
 	}
 }

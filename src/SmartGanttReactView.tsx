@@ -3,7 +3,7 @@ import {createRoot, Root} from "react-dom/client";
 import {SmartGanttMainReactComponent} from "./SmartGanttMainReactComponent";
 import {AppContext} from "./AppContext";
 import MarkdownProcesser from "./MarkdownProcesser";
-import TimelineExtractor, {SmartGanttParsesResult} from "./TimelineExtractor";
+import TimelineExtractor, {TimelineExtractorResult} from "./TimelineExtractor";
 import {Chrono} from "chrono-node";
 import MermaidCrafter from "./MermaidCrafter";
 import SmartGanttPlugin from "../main";
@@ -37,7 +37,7 @@ export default class SmartGanttReactView extends ItemView {
 		return "Smart Gantt";
 	}
 
-	renderCheckBox(parsedResult: SmartGanttParsesResult, checkbox: HTMLInputElement) {
+	renderCheckBox(parsedResult: TimelineExtractorResult, checkbox: HTMLInputElement) {
 		if ("checked" in parsedResult.token && parsedResult.token.checked) {
 			checkbox.setAttr("checked", "checked")
 		}
@@ -68,14 +68,14 @@ export default class SmartGanttReactView extends ItemView {
 		})
 	}
 
-	createCheckboxTaskHandle(smartGanttTask: HTMLLabelElement, parsedResult: SmartGanttParsesResult) {
+	createCheckboxTaskHandle(smartGanttTask: HTMLLabelElement, extractorResult: TimelineExtractorResult) {
 		smartGanttTask.addEventListener('click', async (e) => {
 			e.preventDefault()
 			const leaf = this.thisPlugin.app.workspace.getLeaf(false);
-			await leaf.openFile(parsedResult.file)
+			await leaf.openFile(extractorResult.file)
 			const view = leaf.view as MarkdownView
-			const fileContent = await this.thisPlugin.app.vault.read(parsedResult.file)
-			const regex = new RegExp(escapeRegExp(smartGanttTask.getText()))
+			const fileContent = await this.thisPlugin.app.vault.read(extractorResult.file)
+			const regex = new RegExp(escapeRegExp(extractorResult.parsedResultsAndRawText.rawText))
 			const lines = fileContent.split("\n")
 			// console.log(smartGanttTask.getText())
 			// console.log(lines)
@@ -177,13 +177,13 @@ export default class SmartGanttReactView extends ItemView {
 		const allSentences = markdownProcesser.documents
 		// console.log(allSentences)
 		const timelineExtractor = new TimelineExtractor(new Chrono())
-		const parsedResult = await timelineExtractor.GetTimelineDataFromDocumentArrayWithChrono(allSentences)
-		// console.log(parsedResult)
+		const chronoExtractorResult = await timelineExtractor.GetTimelineDataFromDocumentArrayWithChrono(allSentences)
+		// console.log(chronoExtractorResult)
 		const mermaidCrafter = new MermaidCrafter(this.thisPlugin)
 		let craft = ""
 
 		if (timelineExtractor.countResultWithChrono > 0){
-			craft = mermaidCrafter.craftMermaid(parsedResult)
+			craft = mermaidCrafter.craftMermaid(chronoExtractorResult)
 		}
 
 
@@ -213,7 +213,7 @@ export default class SmartGanttReactView extends ItemView {
 		})
 
 		filterButton.addEventListener("click", async () => {
-			await this.thisPlugin.helper.renderFilterBox(parsedResult)
+			await this.thisPlugin.helper.renderFilterBox(chronoExtractorResult)
 		})
 
 		const taskTypeFilterContainer = buttonContainer.createEl("div",{
@@ -228,7 +228,7 @@ export default class SmartGanttReactView extends ItemView {
 			cls: "smart-gantt-task-board"
 		})
 
-		parsedResult.forEach((parsedResult, parsedResultIndex) => {
+		chronoExtractorResult.forEach((extractorResult, extractorResultIndex) => {
 				// console.log(this.app.workspace.getActiveFile()?.name)
 				// console.log(parsedResult)
 				// if (this.thisPlugin.settingManager.settings.pathListFilter.indexOf("AllFiles") !== -1) {
@@ -244,35 +244,35 @@ export default class SmartGanttReactView extends ItemView {
 				// 	return
 				// }
 				// console.log(parsedResult)
-				if (parsedResult.parsedResults) {
-					parsedResult.parsedResults.forEach((_result, resultIndex) => {
+				if (extractorResult.parsedResultsAndRawText.parsedResults) {
+					extractorResult.parsedResultsAndRawText.parsedResults.forEach((_result, resultIndex) => {
 						const smartGanttTaskElementContainer = smartGanttTaskBoard.createEl("div", {
 							cls: "smart-gantt-checkbox-element-container"
 						})
-						if ("text" in parsedResult.token) {
-							if ("checked" in parsedResult.token) {
+						if ("text" in extractorResult.token) {
+							if ("checked" in extractorResult.token) {
 								let checkbox = smartGanttTaskElementContainer.createEl("input", {
 									type: "checkbox",
 									cls: "smart-gantt-task-checkbox",
 									attr: {
-										id: `smart-gantt-task-checkbox-${parsedResultIndex}-${resultIndex}`
+										id: `smart-gantt-task-checkbox-${extractorResultIndex}-${resultIndex}`
 									}
 
 								})
-								if (parsedResult.token.checked) {
+								if (extractorResult.token.checked) {
 									checkbox.setAttr("checked", "checked")
 								}
-								this.renderCheckBox(parsedResult, checkbox)
+								this.renderCheckBox(extractorResult, checkbox)
 							}
 
 							const smartGanttTask = smartGanttTaskElementContainer.createEl("label", {
 								cls: "smart-gantt-task-element",
-								text: parsedResult.token.text.split("\n")[0].trim(),
+								text: extractorResult.token.text.split("\n")[0].trim(),
 								attr: {
-									for: `smart-gantt-task-checkbox-${parsedResultIndex}-${resultIndex}`
+									for: `smart-gantt-task-checkbox-${extractorResultIndex}-${resultIndex}`
 								}
 							})
-							this.createCheckboxTaskHandle(smartGanttTask, parsedResult)
+							this.createCheckboxTaskHandle(smartGanttTask, extractorResult)
 						}
 					})
 
@@ -280,31 +280,31 @@ export default class SmartGanttReactView extends ItemView {
 					const smartGanttTaskElementContainer = smartGanttTaskBoard.createEl("div", {
 						cls: "smart-gantt-task-element-container"
 					})
-					if ("text" in parsedResult.token) {
-						if ("checked" in parsedResult.token) {
+					if ("text" in extractorResult.token) {
+						if ("checked" in extractorResult.token) {
 							let checkbox = smartGanttTaskElementContainer.createEl("input", {
 								type: "checkbox",
 								cls: "smart-gantt-task-checkbox",
 								attr: {
-									id: `smart-gantt-task-checkbox-${parsedResultIndex}-non-chrono}`
+									id: `smart-gantt-task-checkbox-${extractorResultIndex}-non-chrono}`
 								}
 
 							})
-							if (parsedResult.token.checked) {
+							if (extractorResult.token.checked) {
 								checkbox.setAttr("checked", "checked")
 							}
-							this.renderCheckBox(parsedResult, checkbox)
+							this.renderCheckBox(extractorResult, checkbox)
 						}
 
 						const smartGanttTask = smartGanttTaskElementContainer.createEl("label", {
 							cls: "smart-gantt-task-element",
-							text: parsedResult.token.text.split("\n")[0].trim(),
+							text: extractorResult.token.text.split("\n")[0].trim(),
 							attr: {
-								for: `smart-gantt-task-checkbox-${parsedResultIndex}-non-chrono}`
+								for: `smart-gantt-task-checkbox-${extractorResultIndex}-non-chrono}`
 							}
 						})
 
-						this.createCheckboxTaskHandle(smartGanttTask, parsedResult)
+						this.createCheckboxTaskHandle(smartGanttTask, extractorResult)
 
 					}
 

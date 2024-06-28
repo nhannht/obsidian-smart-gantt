@@ -63,36 +63,36 @@ export default class SmartGanttPlugin extends Plugin {
 
 		})
 
-		this.registerMarkdownCodeBlockProcessor("gantt", async (_source, el, _ctx) => {
-			const allMarkdownFiles = this.app.vault.getMarkdownFiles();
-			const markdownProcesser = new MarkdownProcesser(allMarkdownFiles, this)
-			await markdownProcesser.parseAllFiles()
-			const allSentences = markdownProcesser.documents
-			// console.log(allSentences)
-			const timelineExtractor = new TimelineExtractor(new Chrono())
-			const parsedResult = await timelineExtractor.GetTimelineDataFromDocumentArrayWithChrono(allSentences)
-			// console.log(parsedResult)
-			// const timelineData = timelineExtractor.timelineData
-			const mermaidCrafter = new MermaidCrafter(this)
-			const craft = mermaidCrafter.craftMermaid(parsedResult)
-			// console.log(craft)
-
-			// console.log(timelineData)
-			// console.log(mermaidCrafter.timelineData)
-			// console.log(allSentencesWithTask)
-
-			let root = el.createEl("div", {
-				cls: "root"
-			})
-			let reactRoot = createRoot(root)
-			reactRoot.render(
-				<AppContext.Provider value={{
-					app: this.app,
-				}}>
-					<SmartGanttMainReactComponent mermaidCraft={craft}/>
-				</AppContext.Provider>
-			)
-		})
+		// this.registerMarkdownCodeBlockProcessor("gantt", async (_source, el, _ctx) => {
+		// 	const allMarkdownFiles = this.app.vault.getMarkdownFiles();
+		// 	const markdownProcesser = new MarkdownProcesser(allMarkdownFiles, this)
+		// 	await markdownProcesser.parseAllFiles()
+		// 	const allSentences = markdownProcesser.documents
+		// 	// console.log(allSentences)
+		// 	const timelineExtractor = new TimelineExtractor(new Chrono())
+		// 	const parsedResult = await timelineExtractor.GetTimelineDataFromDocumentArrayWithChrono(allSentences)
+		// 	// console.log(parsedResult)
+		// 	// const timelineData = timelineExtractor.timelineData
+		// 	const mermaidCrafter = new MermaidCrafter(this)
+		// 	const craft = mermaidCrafter.craftMermaid(parsedResult)
+		// 	// console.log(craft)
+		//
+		// 	// console.log(timelineData)
+		// 	// console.log(mermaidCrafter.timelineData)
+		// 	// console.log(allSentencesWithTask)
+		//
+		// 	let root = el.createEl("div", {
+		// 		cls: "root"
+		// 	})
+		// 	let reactRoot = createRoot(root)
+		// 	reactRoot.render(
+		// 		<AppContext.Provider value={{
+		// 			app: this.app,
+		// 		}}>
+		// 			<SmartGanttMainReactComponent mermaidCraft={craft}/>
+		// 		</AppContext.Provider>
+		// 	)
+		// })
 
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
