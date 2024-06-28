@@ -1,12 +1,12 @@
 import {Plugin, WorkspaceLeaf} from 'obsidian';
 import SmartGanttReactView from "./src/SmartGanttReactView";
-import {createRoot} from "react-dom/client";
-import {AppContext} from "./src/AppContext";
-import {SmartGanttMainReactComponent} from "./src/SmartGanttMainReactComponent";
-import MarkdownProcesser from "./src/MarkdownProcesser";
-import {Chrono} from "chrono-node";
-import TimelineExtractor from "./src/TimelineExtractor";
-import MermaidCrafter from "./src/MermaidCrafter";
+// import {createRoot} from "react-dom/client";
+// import {AppContext} from "./src/AppContext";
+// import {SmartGanttMainReactComponent} from "./src/SmartGanttMainReactComponent";
+// import MarkdownProcesser from "./src/MarkdownProcesser";
+// import {Chrono} from "chrono-node";
+// import TimelineExtractor from "./src/TimelineExtractor";
+// import MermaidCrafter from "./src/MermaidCrafter";
 import {Helper} from "./src/Helper";
 import SettingManager, {SmartGanttSettings} from "./src/SettingManager";
 
