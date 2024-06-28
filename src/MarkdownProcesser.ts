@@ -100,17 +100,32 @@ export default class MarkdownProcesser {
 	}
 
 	private recusiveGetToken(document: Token, tokens: TokenWithFile[], file: TFile) {
-		// @ts-ignore
+		const settings = this._currentPlugin.settingManager.settings
+		//@ts-ignore
 		if ("type" in document && document.task === true && document.type === "list_item") {
 			if (document.raw.search("\n") !== -1) {
 				document.text = document.text.split("\n")[0]
 				document.raw = document.raw.split("\n")[0]
 			}
-			tokens.push({
-				token: document,
-				file: file
+			// console.log(document)
 
-			})
+			if (settings.doneShowQ && (document.checked === true)) {
+				tokens.push({
+					token: document,
+					file: file
+
+				})
+			}
+
+			if (settings.todoShowQ && (document.checked === false)) {
+				tokens.push({
+					token: document,
+					file: file
+
+				})
+			}
+
+
 		}
 		if ("tokens" in document && document.tokens) {
 

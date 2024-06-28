@@ -63,7 +63,6 @@ export default class SmartGanttReactView extends ItemView {
 				await this.thisPlugin.app.vault.modify(parsedResult.file, fileContent.replace(taskRawText.trim(), taskRawTextSwitch.trim()))
 				await this.thisPlugin.helper.reloadView()
 
-
 			}
 
 		})
@@ -106,6 +105,70 @@ export default class SmartGanttReactView extends ItemView {
 		})
 	}
 
+	createFileTypeFilterCheckboxes(el:HTMLDivElement){
+		const todoCheckBoxContainer = el.createEl("div",{
+			cls: "smart-gantt-checkbox-element-container"
+		})
+		const todoCheckbox = todoCheckBoxContainer.createEl("input",{
+			cls: "smart-gantt-task-checkbox",
+			type:"checkbox",
+			attr:{
+				id: "todo-checkbox-id"
+			}
+		})
+		const doneCheckBoxContainer = el.createEl("div",{
+			cls: "smart-gantt-checkbox-element-container"
+		})
+		const doneCheckbox = doneCheckBoxContainer.createEl("input", {
+			cls: "smart-gantt-task-checkbox",
+			type:"checkbox",
+			attr:{
+				id:"done-checkbox-id"
+			}
+		})
+
+		todoCheckbox.checked = this.thisPlugin.settingManager.settings.todoShowQ
+		doneCheckbox.checked = this.thisPlugin.settingManager.settings.doneShowQ
+
+		 todoCheckBoxContainer.createEl("label",{
+			cls: "smart-gantt-task-element",
+			text: "Todo",
+			attr:{
+				for: "todo-checkbox-id"
+			}
+		})
+
+		 doneCheckBoxContainer.createEl("label",{
+			cls: "smart-gantt-task-element",
+			text: "Done",
+			attr:{
+				for: "done-checkbox-id"
+			}
+		})
+
+		todoCheckbox.addEventListener("change", async () =>{
+			if (todoCheckbox.checked){
+				await this.thisPlugin.settingManager.setTodoShowQ(true)
+			} else {
+				await this.thisPlugin.settingManager.setTodoShowQ(false)
+			}
+
+			await this.thisPlugin.helper.reloadView()
+		})
+
+		doneCheckbox.addEventListener("change",async ()=>{
+			if (doneCheckbox.checked){
+				await this.thisPlugin.settingManager.setDoneShowQ(true)
+			} else {
+				await this.thisPlugin.settingManager.setDoneShowQ(false)
+			}
+
+			await this.thisPlugin.helper.reloadView()
+		})
+
+
+	}
+
 
 	override async onOpen() {
 		const allMarkdownFiles = this.app.vault.getMarkdownFiles();
@@ -117,6 +180,8 @@ export default class SmartGanttReactView extends ItemView {
 		const parsedResult = await timelineExtractor.GetTimelineDataFromDocumentArrayWithChrono(allSentences)
 		// console.log(parsedResult)
 		const mermaidCrafter = new MermaidCrafter(this.thisPlugin)
+
+
 		const craft = mermaidCrafter.craftMermaid(parsedResult)
 		// console.log(craft)
 
@@ -127,6 +192,7 @@ export default class SmartGanttReactView extends ItemView {
 		const buttonContainer = secondContainer.createEl("div", {
 			cls: "smart-gantt-button-container"
 		})
+
 
 		const refreshButton = buttonContainer.createEl("button", {
 			text: "Refresh",
@@ -145,6 +211,14 @@ export default class SmartGanttReactView extends ItemView {
 		filterButton.addEventListener("click", async () => {
 			await this.thisPlugin.helper.renderFilterBox(parsedResult)
 		})
+
+		const taskTypeFilterContainer = buttonContainer.createEl("div",{
+			cls:"smart-gantt-file-filter-checkbox-container"
+		})
+
+		this.createFileTypeFilterCheckboxes(taskTypeFilterContainer)
+
+
 
 		const smartGanttTaskBoard = secondContainer.createEl("div", {
 			cls: "smart-gantt-task-board"

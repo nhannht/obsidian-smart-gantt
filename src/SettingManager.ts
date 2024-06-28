@@ -2,6 +2,8 @@ import SmartGanttPlugin from "../main";
 
 export interface SmartGanttSettings {
 	pathListFilter: String[],
+	todoShowQ: boolean,
+	doneShowQ: boolean
 
 }
 
@@ -71,6 +73,16 @@ export default class SettingManager {
 
 	async clearAllPath(){
 		this.settings.pathListFilter = []
+		await this.saveSettings(this._settings)
+	}
+
+	async setTodoShowQ(choice: boolean){
+		this.settings.todoShowQ = choice
+		await this.saveSettings(this._settings)
+	}
+
+	async setDoneShowQ(choice:boolean){
+		this.settings.doneShowQ = choice
 		await this.saveSettings(this._settings)
 	}
 }

@@ -9,26 +9,25 @@ export class FilterModal extends Modal {
 		this.parsedResults.forEach(r => {
 			r.file.parent?.path ? allParentPath.add(r.file.parent.path) : null
 		})
-		let fieldSetAllFilesOrCurrentFile = contentEl.createEl("div",{
-			cls: "smart-gantt-filter-modal-fieldset"
+		let fieldSetAllFilesOrCurrentFile = contentEl.createEl("div", {
+				cls: "smart-gantt-filter-modal-fieldset"
 			}
-			)
+		)
 
 		const directoryContainer = contentEl.createEl("div", {
-				cls: "smart-gantt-filter-modal-directory-container"
-			})
+			cls: "smart-gantt-filter-modal-directory-container"
+		})
 
 
-
-		let allFileCheckBoxContainer = fieldSetAllFilesOrCurrentFile.createEl("div",{
+		let allFileCheckBoxContainer = fieldSetAllFilesOrCurrentFile.createEl("div", {
 			cls: "smart-gantt-checkbox-element-container"
 		})
 
-		let currentFileCheckBoxContainer = fieldSetAllFilesOrCurrentFile.createEl("div",{
+		let currentFileCheckBoxContainer = fieldSetAllFilesOrCurrentFile.createEl("div", {
 			cls: "smart-gantt-checkbox-element-container"
 		})
 
-		let customPathCheckBoxContainer = fieldSetAllFilesOrCurrentFile.createEl("div",{
+		let customPathCheckBoxContainer = fieldSetAllFilesOrCurrentFile.createEl("div", {
 			cls: "smart-gantt-checkbox-element-container"
 		})
 
@@ -140,7 +139,7 @@ export class FilterModal extends Modal {
 		}
 
 		Array.from(allParentPath).forEach((path, pathIndex) => {
-			let singlePathContainer = directoryContainer.createEl("div",{
+			let singlePathContainer = directoryContainer.createEl("div", {
 				cls: "smart-gantt-checkbox-element-container"
 			})
 			let singlePathCheckbox = singlePathContainer.createEl("input", {

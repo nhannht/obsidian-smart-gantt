@@ -14,6 +14,11 @@ select {
 	@apply flex-nowrap
 }
 
+.smart-gantt-file-filter-checkbox-container {
+	@apply flex flex-col
+
+}
+
 .smart-gantt-task-checkbox {
 
 }

@@ -12,6 +12,9 @@ import SettingManager, {SmartGanttSettings} from "./src/SettingManager";
 
 const DEFAULT_SETTINGS: SmartGanttSettings = {
 	pathListFilter: ["AllFiles"],
+	todoShowQ: true,
+	doneShowQ: true
+
 }
 
 export default class SmartGanttPlugin extends Plugin {

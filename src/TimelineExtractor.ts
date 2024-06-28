@@ -42,6 +42,8 @@ export default class TimelineExtractor {
 
 	private _customChrono: Chrono;
 
+	#countResultWithChrono = 0
+
 	constructor(customChrono: Chrono) {
 		this._customChrono = customChrono;
 	}
@@ -61,6 +63,7 @@ export default class TimelineExtractor {
 				 parsedResult = this.customChrono.parse(token.token.text)
 			}
 			if (parsedResult && parsedResult.length > 0) {
+				this.#countResultWithChrono = this.#countResultWithChrono + 1
 				smartGanttParsedResults.push({
 					...token,
 					parsedResults: parsedResult
