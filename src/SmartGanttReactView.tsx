@@ -180,9 +180,13 @@ export default class SmartGanttReactView extends ItemView {
 		const parsedResult = await timelineExtractor.GetTimelineDataFromDocumentArrayWithChrono(allSentences)
 		// console.log(parsedResult)
 		const mermaidCrafter = new MermaidCrafter(this.thisPlugin)
+		let craft = ""
+
+		if (timelineExtractor.countResultWithChrono > 0){
+			craft = mermaidCrafter.craftMermaid(parsedResult)
+		}
 
 
-		const craft = mermaidCrafter.craftMermaid(parsedResult)
 		// console.log(craft)
 
 		this.root = createRoot(this.containerEl.children[1]);

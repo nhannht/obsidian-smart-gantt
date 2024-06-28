@@ -22,7 +22,12 @@ export const SmartGanttMainReactComponent = (props: {
 		})
 
 	}, [])
-
+	if (props.mermaidCraft === ""){
+		return <>
+			<div>Oops, you need at least one task with time can be parse for the Gantt chart being show</div>
+			<div>Trying add a task like: "- [ ] feed my kitty tomorrow" in your editing file</div>
+		</>
+	}
 
 	return <>
 		<main>

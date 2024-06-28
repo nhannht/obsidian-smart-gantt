@@ -21,6 +21,9 @@ export interface SmartGanttParsesResult extends TokenWithFile {
 }
 
 export default class TimelineExtractor {
+	get countResultWithChrono(): number {
+		return this.#countResultWithChrono;
+	}
 	get smartGanttParsedResults(): SmartGanttParsesResult[] {
 		return this._smartGanttParsedResults;
 	}
