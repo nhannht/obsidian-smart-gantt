@@ -26,7 +26,16 @@ export default class MarkdownProcesser {
 	}
 
 	async parseAllFiles() {
+		const pathFilterSettings = this._currentPlugin.settingManager.settings.pathListFilter
 		this._files.map(async (file) => {
+			if (pathFilterSettings.indexOf("AllFiles") !== -1) {
+			} else if (pathFilterSettings.indexOf("CurrentFile") !== -1) {
+				if (this._currentPlugin.app.workspace.getActiveFile()?.name !== file.name) return
+			} else if (
+				(pathFilterSettings.indexOf("AllFiles") !== -1) &&
+				(pathFilterSettings.indexOf("CurrentFile") !== -1) &&
+				(pathFilterSettings.indexOf(file.parent?.path!) !== -1)
+			) return
 			// console.log(file)
 			await this.parseFilesAndUpdateTokens(file)
 		})
@@ -50,14 +59,14 @@ export default class MarkdownProcesser {
 			checkMark = heavyPlus.replace(/✅/g, "done in "),
 			crossMark = checkMark.replace(/❌/g, "cancelled in "),
 
-			createdIn = crossMark.replace(/\[created::\s+(.*)]/g,"created in $1"),
-			scheduledIn = createdIn.replace(/\[scheduled::\s+(.*)]/g,"scheduled in $1"),
-			startFrom = scheduledIn.replace(/\[start::\s+(.*)]/g,"start from $1"),
-			dueTo = startFrom.replace(/\[due::\s+(.*)]/g,"due to $1"),
-			completionIn = dueTo.replace(/\[completion::\s+(.*)]/g,"completion in $1"),
-			cancelledIn = completionIn.replace(/\[cancelled::\s(.*)]/g,"cancelled in $1 "),
+			createdIn = crossMark.replace(/\[created::\s+(.*)]/g, "created in $1"),
+			scheduledIn = createdIn.replace(/\[scheduled::\s+(.*)]/g, "scheduled in $1"),
+			startFrom = scheduledIn.replace(/\[start::\s+(.*)]/g, "start from $1"),
+			dueTo = startFrom.replace(/\[due::\s+(.*)]/g, "due to $1"),
+			completionIn = dueTo.replace(/\[completion::\s+(.*)]/g, "completion in $1"),
+			cancelledIn = completionIn.replace(/\[cancelled::\s(.*)]/g, "cancelled in $1 "),
 
-			calendarMark = cancelledIn.replace("/📅/g"," to ")
+			calendarMark = cancelledIn.replace("/📅/g", " to ")
 
 		return calendarMark
 

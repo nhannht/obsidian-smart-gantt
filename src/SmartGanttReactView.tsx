@@ -153,18 +153,18 @@ export default class SmartGanttReactView extends ItemView {
 		parsedResult.forEach((parsedResult, parsedResultIndex) => {
 				// console.log(this.app.workspace.getActiveFile()?.name)
 				// console.log(parsedResult)
-				if (this.thisPlugin.settingManager.settings.pathListFilter.indexOf("AllFiles") !== -1) {
-
-				} else if (this.thisPlugin.settingManager.settings.pathListFilter.indexOf("CurrentFile") !== -1) {
-					if (parsedResult.file.name !== this.app.workspace.getActiveFile()?.name) {
-						return
-					}
-				} else if (
-					this.thisPlugin.settingManager.settings.pathListFilter.indexOf("AllFiles") === -1 &&
-					this.thisPlugin.settingManager.settings.pathListFilter.indexOf("CurrentFile") === -1 &&
-					this.thisPlugin.settingManager.settings.pathListFilter.indexOf(parsedResult.file.parent?.path!) === -1) {
-					return
-				}
+				// if (this.thisPlugin.settingManager.settings.pathListFilter.indexOf("AllFiles") !== -1) {
+				//
+				// } else if (this.thisPlugin.settingManager.settings.pathListFilter.indexOf("CurrentFile") !== -1) {
+				// 	if (parsedResult.file.name !== this.app.workspace.getActiveFile()?.name) {
+				// 		return
+				// 	}
+				// } else if (
+				// 	this.thisPlugin.settingManager.settings.pathListFilter.indexOf("AllFiles") === -1 &&
+				// 	this.thisPlugin.settingManager.settings.pathListFilter.indexOf("CurrentFile") === -1 &&
+				// 	this.thisPlugin.settingManager.settings.pathListFilter.indexOf(parsedResult.file.parent?.path!) === -1) {
+				// 	return
+				// }
 				// console.log(parsedResult)
 				if (parsedResult.parsedResults) {
 					parsedResult.parsedResults.forEach((_result, resultIndex) => {
