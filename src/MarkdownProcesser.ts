@@ -11,19 +11,21 @@ export default class MarkdownProcesser {
 	get currentPlugin(): SmartGanttPlugin {
 		return this._currentPlugin;
 	}
+
 	get documents(): TokenWithFile[] {
 		return this._documents;
 	}
-	 private _files: TFile[];
-	 private _documents: TokenWithFile[] = [];
-	 private _currentPlugin: SmartGanttPlugin;
+
+	private _files: TFile[];
+	private _documents: TokenWithFile[] = [];
+	private _currentPlugin: SmartGanttPlugin;
 
 	constructor(files: TFile[], currentPlugin: SmartGanttPlugin) {
 		this._files = files;
 		this._currentPlugin = currentPlugin;
 	}
 
-	 async parseAllFiles() {
+	async parseAllFiles() {
 		this._files.map(async (file) => {
 			// console.log(file)
 			await this.parseFilesAndUpdateTokens(file)
@@ -36,11 +38,33 @@ export default class MarkdownProcesser {
 			stripEm2 = stripEm1.replace(/_{1,3}(.*?)_{1,3}/g, "$1"),
 			stripStrike = stripEm2.replace(/~{1,2}(.*?)~{1,2}/g, "$1"),
 			stripLink = stripStrike.replace(/!?\[(.*?)]\((.*?)\)/g, "").replace(/!?\[\[(.*?)]]/g, "");
+
 		return stripLink
 
 	}
 
-	 private async parseFilesAndUpdateTokens(file: TFile) {
+	private transformWithTaskPlugin(text: string) {
+		const hourGlass = text.replace(/⏳/g, "due in "),
+			airPlain = hourGlass.replace(/🛫/g, "start from "),
+			heavyPlus = airPlain.replace(/➕/g, "created in "),
+			checkMark = heavyPlus.replace(/✅/g, "done in "),
+			crossMark = checkMark.replace(/❌/g, "cancelled in "),
+
+			createdIn = crossMark.replace(/\[created::\s+(.*)]/g,"created in $1"),
+			scheduledIn = createdIn.replace(/\[scheduled::\s+(.*)]/g,"scheduled in $1"),
+			startFrom = scheduledIn.replace(/\[start::\s+(.*)]/g,"start from $1"),
+			dueTo = startFrom.replace(/\[due::\s+(.*)]/g,"due to $1"),
+			completionIn = dueTo.replace(/\[completion::\s+(.*)]/g,"completion in $1"),
+			cancelledIn = completionIn.replace(/\[cancelled::\s(.*)]/g,"cancelled in $1 "),
+
+			calendarMark = cancelledIn.replace("/📅/g"," to ")
+
+		return calendarMark
+
+
+	}
+
+	private async parseFilesAndUpdateTokens(file: TFile) {
 		if (!file) {
 			return
 		}
@@ -48,25 +72,28 @@ export default class MarkdownProcesser {
 
 
 		const fileContentStripHTML = this.filterHTMLAndEmphasis(fileContent)
+		const taskPluginReplacer = this.transformWithTaskPlugin(fileContentStripHTML)
+
+
 		// console.log(fileContentStripHTML)
-		const lexerResult = marked.lexer(fileContentStripHTML);
+		const lexerResult = marked.lexer(taskPluginReplacer);
 
 		// console.log(lexerResult)
 
 
 		lexerResult.map((token) => {
 
-			this.recusiveGetToken(token, this._documents,file)
+			this.recusiveGetToken(token, this._documents, file)
 		})
 		// filter token which is the smallest modulo
 
 
 	}
 
-	 private recusiveGetToken(document: Token, tokens: TokenWithFile[],file:TFile) {
+	private recusiveGetToken(document: Token, tokens: TokenWithFile[], file: TFile) {
 		// @ts-ignore
 		if ("type" in document && document.task === true && document.type === "list_item") {
-			if (document.raw.search("\n") !== -1){
+			if (document.raw.search("\n") !== -1) {
 				document.text = document.text.split("\n")[0]
 				document.raw = document.raw.split("\n")[0]
 			}
@@ -79,14 +106,14 @@ export default class MarkdownProcesser {
 		if ("tokens" in document && document.tokens) {
 
 			document.tokens.map((t) => {
-				this.recusiveGetToken(t, tokens,file)
+				this.recusiveGetToken(t, tokens, file)
 			})
 			// table
 		}
 		if ("rows" in document && document.rows) {
 			document.rows.map((row: any[]) => {
 				row.map((cell) => {
-					this.recusiveGetToken(cell, tokens,file)
+					this.recusiveGetToken(cell, tokens, file)
 				})
 			})
 		}
@@ -101,7 +128,7 @@ export default class MarkdownProcesser {
 		// for list
 		if ("items" in document && document.items) {
 			document.items.map((item: any) => {
-				this.recusiveGetToken(item, tokens,file)
+				this.recusiveGetToken(item, tokens, file)
 			})
 		}
 
