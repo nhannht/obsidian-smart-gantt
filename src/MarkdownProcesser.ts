@@ -41,16 +41,16 @@ export default class MarkdownProcesser {
 		})
 	}
 
-	private filterHTMLAndEmphasis(text: string) {
-		const stripHTML = text.replace(/<\/?("[^"]*"|'[^']*'|[^>])*(>|$)/g, ""),
-			stripEm1 = stripHTML.replace(/\*{1,3}(.*?)\*{1,3}/g, "$1"),
-			stripEm2 = stripEm1.replace(/_{1,3}(.*?)_{1,3}/g, "$1"),
-			stripStrike = stripEm2.replace(/~{1,2}(.*?)~{1,2}/g, "$1"),
-			stripLink = stripStrike.replace(/!?\[(.*?)]\((.*?)\)/g, "").replace(/!?\[\[(.*?)]]/g, "");
-
-		return stripLink
-
-	}
+	// private filterHTMLAndEmphasis(text: string) {
+	// 	const stripHTML = text.replace(/<\/?("[^"]*"|'[^']*'|[^>])*(>|$)/g, ""),
+	// 		stripEm1 = stripHTML.replace(/\*{1,3}(.*?)\*{1,3}/g, "$1"),
+	// 		stripEm2 = stripEm1.replace(/_{1,3}(.*?)_{1,3}/g, "$1"),
+	// 		stripStrike = stripEm2.replace(/~{1,2}(.*?)~{1,2}/g, "$1"),
+	// 		stripLink = stripStrike.replace(/!?\[(.*?)]\((.*?)\)/g, "").replace(/!?\[\[(.*?)]]/g, "");
+	//
+	// 	return stripLink
+	//
+	// }
 
 
 
@@ -61,11 +61,12 @@ export default class MarkdownProcesser {
 		const fileContent = await this.currentPlugin.app.vault.cachedRead(file)
 
 
-		const fileContentStripHTML = this.filterHTMLAndEmphasis(fileContent)
+		// const fileContentStripHTML = this.filterHTMLAndEmphasis(fileContent)
 
 
 		// console.log(fileContentStripHTML)
-		const lexerResult = marked.lexer(fileContentStripHTML);
+
+		const lexerResult = marked.lexer(fileContent);
 
 		// console.log(lexerResult)
 
