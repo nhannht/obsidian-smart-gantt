@@ -1,6 +1,7 @@
 >[!tip]
 > Check https://obsidian-smart-gantt.pages.dev for a full document
 
+
 <h1
     align="center"
 >Obsidian Smart Gantt</h1>
@@ -35,6 +36,9 @@
 ![](./assets/README-1712821565619.png)
 
 ###### Gantt code block.
+
+>[!note]
+>This feature is temporary disabled.
 
 ---
 
