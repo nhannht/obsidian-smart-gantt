@@ -1,6 +1,7 @@
 import {TFile} from "obsidian";
 import {marked, Token} from "marked";
 import SmartGanttPlugin from "../main";
+import {SmartGanttSettings} from "./SettingManager";
 
 export interface TokenWithFile {
 	token: Token,
@@ -25,8 +26,8 @@ export default class MarkdownProcesser {
 		this._currentPlugin = currentPlugin;
 	}
 
-	async parseAllFiles() {
-		const pathFilterSettings = this._currentPlugin.settingManager.settings.pathListFilter
+	async parseAllFiles(settings:SmartGanttSettings) {
+		const pathFilterSettings = settings.pathListFilter
 		this._files.map(async (file) => {
 			if (pathFilterSettings.indexOf("AllFiles") !== -1) {
 			} else if (pathFilterSettings.indexOf("CurrentFile") !== -1) {
@@ -37,7 +38,7 @@ export default class MarkdownProcesser {
 				(pathFilterSettings.indexOf(file.parent?.path!) !== -1)
 			) return
 			// console.log(file)
-			await this.parseFilesAndUpdateTokens(file)
+			await this.parseFilesAndUpdateTokens(file,settings)
 		})
 	}
 
@@ -54,7 +55,7 @@ export default class MarkdownProcesser {
 
 
 
-	private async parseFilesAndUpdateTokens(file: TFile) {
+	private async parseFilesAndUpdateTokens(file: TFile,settings: SmartGanttSettings) {
 		if (!file) {
 			return
 		}
@@ -73,7 +74,7 @@ export default class MarkdownProcesser {
 
 		lexerResult.map((token) => {
 
-			this.recusiveGetToken(token, this._documents, file)
+			this.recusiveGetToken(token, this._documents, file,settings)
 		})
 		// filter token which is the smallest modulo
 
@@ -83,8 +84,8 @@ export default class MarkdownProcesser {
 	private recusiveGetToken(document: Token,
 							 tokens: TokenWithFile[],
 							 file: TFile,
+							 settings:SmartGanttSettings
 							) {
-		const settings = this._currentPlugin.settingManager.settings
 		//@ts-ignore
 		if ("type" in document && document.task === true && document.type === "list_item") {
 			if (document.raw.search("\n") !== -1) {
@@ -114,14 +115,14 @@ export default class MarkdownProcesser {
 		if ("tokens" in document && document.tokens) {
 
 			document.tokens.map((t) => {
-				this.recusiveGetToken(t, tokens, file)
+				this.recusiveGetToken(t, tokens, file,settings)
 			})
 			// table
 		}
 		if ("rows" in document && document.rows) {
 			document.rows.map((row: any[]) => {
 				row.map((cell) => {
-					this.recusiveGetToken(cell, tokens, file)
+					this.recusiveGetToken(cell, tokens, file,settings)
 				})
 			})
 		}
@@ -136,7 +137,7 @@ export default class MarkdownProcesser {
 		// for list
 		if ("items" in document && document.items) {
 			document.items.map((item: any) => {
-				this.recusiveGetToken(item, tokens, file)
+				this.recusiveGetToken(item, tokens, file,settings)
 			})
 		}
 

@@ -1,14 +1,8 @@
 import {Plugin, WorkspaceLeaf} from 'obsidian';
 import SmartGanttReactView from "./src/SmartGanttReactView";
-// import {createRoot} from "react-dom/client";
-// import {AppContext} from "./src/AppContext";
-// import {SmartGanttMainReactComponent} from "./src/SmartGanttMainReactComponent";
-// import MarkdownProcesser from "./src/MarkdownProcesser";
-// import {Chrono} from "chrono-node";
-// import TimelineExtractor from "./src/TimelineExtractor";
-// import MermaidCrafter from "./src/MermaidCrafter";
 import {Helper} from "./src/Helper";
 import SettingManager, {SmartGanttSettings} from "./src/SettingManager";
+import GanttBlockManager from "./src/GanttBlockManager";
 
 const DEFAULT_SETTINGS: SmartGanttSettings = {
 	pathListFilter: ["AllFiles"],
@@ -20,6 +14,8 @@ const DEFAULT_SETTINGS: SmartGanttSettings = {
 export default class SmartGanttPlugin extends Plugin {
 	settingManager = new SettingManager(this, DEFAULT_SETTINGS);
 	public helper = new Helper(this)
+	ganttBlockManager = new GanttBlockManager(this)
+
 
 
 	override async onload() {
@@ -63,36 +59,9 @@ export default class SmartGanttPlugin extends Plugin {
 
 		})
 
-		// this.registerMarkdownCodeBlockProcessor("gantt", async (_source, el, _ctx) => {
-		// 	const allMarkdownFiles = this.app.vault.getMarkdownFiles();
-		// 	const markdownProcesser = new MarkdownProcesser(allMarkdownFiles, this)
-		// 	await markdownProcesser.parseAllFiles()
-		// 	const allSentences = markdownProcesser.documents
-		// 	// console.log(allSentences)
-		// 	const timelineExtractor = new TimelineExtractor(new Chrono())
-		// 	const parsedResult = await timelineExtractor.GetTimelineDataFromDocumentArrayWithChrono(allSentences)
-		// 	// console.log(parsedResult)
-		// 	// const timelineData = timelineExtractor.timelineData
-		// 	const mermaidCrafter = new MermaidCrafter(this)
-		// 	const craft = mermaidCrafter.craftMermaid(parsedResult)
-		// 	// console.log(craft)
-		//
-		// 	// console.log(timelineData)
-		// 	// console.log(mermaidCrafter.timelineData)
-		// 	// console.log(allSentencesWithTask)
-		//
-		// 	let root = el.createEl("div", {
-		// 		cls: "root"
-		// 	})
-		// 	let reactRoot = createRoot(root)
-		// 	reactRoot.render(
-		// 		<AppContext.Provider value={{
-		// 			app: this.app,
-		// 		}}>
-		// 			<SmartGanttMainReactComponent mermaidCraft={craft}/>
-		// 		</AppContext.Provider>
-		// 	)
-		// })
+		await this.ganttBlockManager.registerGanttBlock()
+
+
 
 
 		// This adds a settings tab so the user can configure various aspects of the plugin

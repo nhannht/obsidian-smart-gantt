@@ -17,9 +17,9 @@ export const SmartGanttMainReactComponent = (props: {
 					// securityLevel: 'loose',
 					// fontFamily: 'monospace',
 					maxTextSize:99999999,
-					gantt: {
-						displayMode:'compact'
-					}
+					// gantt: {
+					// 	displayMode:'compact'
+					// }
 				});
 			mermaid.contentLoaded();
 		})

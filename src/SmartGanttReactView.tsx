@@ -173,7 +173,8 @@ export default class SmartGanttReactView extends ItemView {
 	override async onOpen() {
 		const allMarkdownFiles = this.app.vault.getMarkdownFiles();
 		const markdownProcesser = new MarkdownProcesser(allMarkdownFiles, this.thisPlugin)
-		await markdownProcesser.parseAllFiles()
+		const settings = this.thisPlugin.settingManager.settings
+		await markdownProcesser.parseAllFiles(settings)
 		const allSentences = markdownProcesser.documents
 		// console.log(allSentences)
 		const timelineExtractor = new TimelineExtractor(new Chrono())
