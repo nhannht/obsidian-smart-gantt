@@ -35,8 +35,6 @@ export default class SettingManager {
 	async saveSettings(newSettings: SmartGanttSettings) {
 		const vaultName = this.thisPlugin.app.vault.getName()
 		localStorage.setItem(`smart-gantt-settings-${vaultName}`, JSON.stringify(newSettings))
-
-
 	}
 
 	async addPath(path: string) {

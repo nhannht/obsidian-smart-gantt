@@ -29,13 +29,14 @@ export default class MarkdownProcesser {
 	async parseAllFiles(settings:SmartGanttSettings) {
 		const pathFilterSettings = settings.pathListFilter
 		this._files.map(async (file) => {
+			// console.log(file)
 			if (pathFilterSettings.indexOf("AllFiles") !== -1) {
 			} else if (pathFilterSettings.indexOf("CurrentFile") !== -1) {
 				if (this._currentPlugin.app.workspace.getActiveFile()?.name !== file.name) return
 			} else if (
-				(pathFilterSettings.indexOf("AllFiles") !== -1) &&
-				(pathFilterSettings.indexOf("CurrentFile") !== -1) &&
-				(pathFilterSettings.indexOf(file.parent?.path!) !== -1)
+				(pathFilterSettings.indexOf("AllFiles") === -1) &&
+				(pathFilterSettings.indexOf("CurrentFile") === -1) &&
+				(pathFilterSettings.indexOf(file.parent?.path!) === -1)
 			) return
 			// console.log(file)
 			await this.parseFilesAndUpdateTokens(file,settings)

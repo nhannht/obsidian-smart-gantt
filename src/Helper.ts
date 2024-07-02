@@ -22,7 +22,10 @@ export class Helper {
 	}
 
 	async renderFilterBox(parsedResult: TimelineExtractorResult[]) {
-		new FilterModal(this.thisPlugin.app,this.thisPlugin,parsedResult).open()
+		new FilterModal(this.thisPlugin.app,
+			this.thisPlugin,
+			parsedResult,
+		).open()
 
 	}
 }

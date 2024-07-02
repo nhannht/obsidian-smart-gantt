@@ -2,6 +2,8 @@ import {App, Modal} from "obsidian";
 import SmartGanttPlugin from "../main";
 import {TimelineExtractorResult} from "./TimelineExtractor";
 
+
+
 export class FilterModal extends Modal {
 	override onOpen() {
 		const {contentEl} = this
@@ -176,14 +178,13 @@ export class FilterModal extends Modal {
 			if (this.thisPlugin.settingManager.settings.pathListFilter.indexOf(path) !== -1) {
 				singlePathCheckbox.setAttr("checked", "checked")
 			}
-
 		})
-
 	}
+
 
 	constructor(app: App,
 				private thisPlugin: SmartGanttPlugin,
-				private parsedResults: TimelineExtractorResult[]
+				private parsedResults: TimelineExtractorResult[],
 	) {
 		super(app)
 	}
