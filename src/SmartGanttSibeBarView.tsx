@@ -16,7 +16,7 @@ import {escapeRegExp} from "lodash";
  * View and leaf is two different term. View must be regist via a "ViewCreator" function that return a view and everyview must be assicate with a type.
  * That type act like an id that other term, like leaf, will bind the view state using that id
  */
-export default class SmartGanttReactView extends ItemView {
+export default class SmartGanttSibeBarView extends ItemView {
 
 
 	root: Root | null = null;

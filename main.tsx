@@ -1,5 +1,5 @@
 import {Plugin, WorkspaceLeaf} from 'obsidian';
-import SmartGanttReactView from "./src/SmartGanttReactView";
+import SmartGanttSibeBarView from "./src/SmartGanttSibeBarView";
 import {Helper} from "./src/Helper";
 import SettingManager, {SmartGanttSettings} from "./src/SettingManager";
 import GanttBlockManager from "./src/GanttBlockManager";
@@ -31,7 +31,7 @@ export default class SmartGanttPlugin extends Plugin {
 
 
 		this.registerView("smart-gantt", (leaf) => {
-			return new SmartGanttReactView(leaf, this);
+			return new SmartGanttSibeBarView(leaf, this);
 		})
 
 		this.addRibbonIcon('gantt-chart', 'Smart Gantt', () => {

@@ -1,6 +1,5 @@
 import {App, Modal} from "obsidian";
 import SmartGanttPlugin from "../main";
-import {TimelineExtractorResult} from "./TimelineExtractor";
 
 
 
@@ -8,8 +7,8 @@ export class FilterModal extends Modal {
 	override onOpen() {
 		const {contentEl} = this
 		let allParentPath: Set<string> = new Set()
-		this.parsedResults.forEach(r => {
-			r.file.parent?.path ? allParentPath.add(r.file.parent.path) : null
+		this.thisPlugin.app.vault.getMarkdownFiles().forEach(file => {
+			file.parent?.path ? allParentPath.add(file.parent.path) : null
 		})
 		let fieldSetAllFilesOrCurrentFile = contentEl.createEl("div", {
 				cls: "smart-gantt-filter-modal-fieldset"
@@ -184,7 +183,7 @@ export class FilterModal extends Modal {
 
 	constructor(app: App,
 				private thisPlugin: SmartGanttPlugin,
-				private parsedResults: TimelineExtractorResult[],
+
 	) {
 		super(app)
 	}

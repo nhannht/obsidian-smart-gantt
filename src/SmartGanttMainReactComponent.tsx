@@ -1,45 +1,46 @@
 // import {useApp} from "./AppContext";
-import {useEffect} from "react";
-import {loadMermaid} from "obsidian";
+import {loadMermaid, MarkdownPostProcessorContext} from "obsidian";
+import SmartGanttPlugin from "../main";
 
 
 export const SmartGanttMainReactComponent = (props: {
 	mermaidCraft: string,
+	ctx?: MarkdownPostProcessorContext,
+	src?: string,
+	thisPlugin?: SmartGanttPlugin,
 }) => {
 
-
-	useEffect(() => {
-		loadMermaid()
-			.then(mermaid => {
-				mermaid.initialize({
-					startOnLoad: true,
-					// theme: 'default',
-					// securityLevel: 'loose',
-					// fontFamily: 'monospace',
-					maxTextSize:99999999,
-					// gantt: {
-					// 	displayMode:'compact'
-					// }
-				});
-			mermaid.contentLoaded();
-		})
-
-	}, [])
-	if (props.mermaidCraft === ""){
+	if (props.mermaidCraft === "") {
 		return <>
 			<div>Oops, you need at least one task with time can be parse for the Gantt chart being show</div>
 			<div>Trying add a task like: "- [ ] feed my kitty tomorrow" in your editing file</div>
 		</>
 	}
 
-	return <>
-		<main>
 
+	let mainComponent = () => {
+		loadMermaid()
+			.then(mermaid => {
+				mermaid.initialize({
+					startOnLoad: true,
+					maxTextSize: 99999999,
+				});
+				mermaid.contentLoaded();
+			})
+
+		return (
+			<main>
 			<pre className={"mermaid"}>
 				{props.mermaidCraft}
 			</pre>
-		</main>
+			</main>
+		)
 
+	}
 
+	return <>
+		{mainComponent()}
 	</>
-};
+
+
+}
