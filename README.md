@@ -38,7 +38,8 @@
 ###### Gantt code block.
 
 >[!note]
->This feature is temporary disabled.
+> Right click/Hold (on mobile) the plot to open the settings view. All the settings will be stored as JSON  in your Gantt block
+> Note that you can also edit the settings manually, Smart Gantt using JSON as domain language.
 
 ---
 
