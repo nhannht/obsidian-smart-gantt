@@ -15,11 +15,7 @@ export const SmartGanttBlockReactComponent = (props: {
 	settings: SmartGanttSettings
 }) => {
 	const [internalSettings, setInternalSettings] =
-		useState<SmartGanttSettings>(props.settings ? structuredClone(props.settings) : {
-			doneShowQ: true,
-			todoShowQ: true,
-			pathListFilter: ["AllFiles"]
-		})
+		useState<SmartGanttSettings>(structuredClone(props.settings))
 	const [isSettingQ, setIsSettingQ] = useState(false)
 	const [craft, setCraft] = useState("")
 	const [resultWithChronoCount, setResultWithChronoCount] = useState(0)

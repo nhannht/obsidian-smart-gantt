@@ -13,7 +13,12 @@ export default class GanttBlockManager {
 		this.thisPlugin.registerMarkdownCodeBlockProcessor("gantt", async (source, el, _ctx) => {
 			//@ts-ignore
 			// console.log(_ctx.getSectionInfo(_ctx.el))
-			const settings: SmartGanttSettings = JSON.parse(source)
+			console.log(source)
+			const settings: SmartGanttSettings =source.trim() !== "" ?  JSON.parse(source) : {
+			doneShowQ: true,
+			todoShowQ: true,
+			pathListFilter: ["AllFiles"]
+		}
 			// console.log(settings)
 			// console.log(allSentences)
 
