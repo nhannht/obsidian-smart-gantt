@@ -40,6 +40,7 @@ export default class SmartGanttPlugin extends Plugin {
 			if (leafs.length > 0) {
 				// this.app.workspace.detachLeavesOfType("smart-gantt")
 				let leaf = leafs[0];
+				// console.log(leaf.getEphemeralState())
 				if (this.app.workspace.rightSplit.collapsed) {
 					this.app.workspace.revealLeaf(leaf)
 				} else {

@@ -1,7 +1,6 @@
 import {IconName, ItemView, MarkdownView, WorkspaceLeaf} from "obsidian";
 import {createRoot, Root} from "react-dom/client";
-import {SmartGanttMainReactComponent} from "./SmartGanttMainReactComponent";
-import {AppContext} from "./AppContext";
+import {SmartGanttSideBarReactComponent} from "./SmartGanttSideBarReactComponent";
 import MarkdownProcesser from "./MarkdownProcesser";
 import TimelineExtractor, {TimelineExtractorResult} from "./TimelineExtractor";
 import {Chrono} from "chrono-node";
@@ -214,7 +213,7 @@ export default class SmartGanttSibeBarView extends ItemView {
 		})
 
 		filterButton.addEventListener("click", async () => {
-			await this.thisPlugin.helper.renderFilterBox(chronoExtractorResult)
+			await this.thisPlugin.helper.renderFilterBox()
 		})
 
 		const taskTypeFilterContainer = buttonContainer.createEl("div",{
@@ -316,13 +315,7 @@ export default class SmartGanttSibeBarView extends ItemView {
 
 
 		this.root.render(
-			<AppContext.Provider value={{
-				app: this.app,
-			}}>
-				<SmartGanttMainReactComponent mermaidCraft={craft}
-
-				/>
-			</AppContext.Provider>
+				<SmartGanttSideBarReactComponent mermaidCraft={craft}/>
 		)
 	}
 

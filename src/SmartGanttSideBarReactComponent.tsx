@@ -1,14 +1,16 @@
 // import {useApp} from "./AppContext";
 import {loadMermaid, MarkdownPostProcessorContext} from "obsidian";
 import SmartGanttPlugin from "../main";
+import {useMeasure} from "react-use";
 
 
-export const SmartGanttMainReactComponent = (props: {
+export const SmartGanttSideBarReactComponent = (props: {
 	mermaidCraft: string,
 	ctx?: MarkdownPostProcessorContext,
 	src?: string,
 	thisPlugin?: SmartGanttPlugin,
 }) => {
+
 
 	if (props.mermaidCraft === "") {
 		return <>
@@ -17,10 +19,15 @@ export const SmartGanttMainReactComponent = (props: {
 		</>
 	}
 
+	const [mainContainerRef , mainContainerMeasure] = useMeasure()
 
-	let mainComponent = () => {
-		loadMermaid()
-			.then(mermaid => {
+
+	const mermaidSvgComponent = ()=>{
+		if (mainContainerMeasure.width <=0){
+			return <></>
+		}
+
+		loadMermaid().then((mermaid) => {
 				mermaid.initialize({
 					startOnLoad: true,
 					maxTextSize: 99999999,
@@ -30,16 +37,26 @@ export const SmartGanttMainReactComponent = (props: {
 
 		return (
 			<main>
-			<pre className={"mermaid"}>
+			<pre   className={"mermaid"}>
 				{props.mermaidCraft}
 			</pre>
 			</main>
 		)
+	}
+
+
+	let mainComponent = () => {
+		// @ts-ignore
+		return <div ref={mainContainerRef} id={"mainContainer"}>
+			{mermaidSvgComponent()}
+		</div>
 
 	}
 
+
+
 	return <>
-		{mainComponent()}
+			{mainComponent()}
 	</>
 
 
