@@ -37,9 +37,7 @@
 
 ###### Gantt code block.
 
->[!note]
-> Right click/Hold (on mobile) the plot to open the settings view. All the settings will be stored as JSON  in your Gantt block
-> Note that you can also edit the settings manually, Smart Gantt using JSON as domain language.
+
 
 ---
 
@@ -54,6 +52,11 @@
 ![](./assets/README-1712821625314.png)
 
 ---
+
+>[!note]
+> Right click/Hold (on mobile) the plot to open the settings view. All the settings will be stored as JSON  in your Gantt block
+>
+> You can also edit the settings manually, Smart Gantt using JSON as domain language.
 
 ##### Limitation
 
