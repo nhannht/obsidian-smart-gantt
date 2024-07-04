@@ -1,5 +1,5 @@
 import SmartGanttPlugin from "../main";
-import {useLocalStorage} from "react-use";
+import {useLocalStorage, useMeasure} from "react-use";
 import {SmartGanttSettings} from "./SettingManager";
 import {useEffect, useState} from "react";
 import MarkdownProcesser, {TokenWithFile} from "./MarkdownProcesser";
@@ -18,6 +18,7 @@ const SidebarReactComponentNg = (props: {
 	const [timelineResults, setTimelineResults] = useState<TimelineExtractorResult[]>([])
 	const [craft, setCraft] = useState("")
 	const [isSettingQ, setIsSettingQ] = useState(false)
+	const [mermaidSvgRef, mermaidSvgRefMeasure] = useMeasure()
 
 	const countResultWithChrono = (results: TimelineExtractorResult[]) => {
 		setResultWithChronoCount(0)
@@ -62,20 +63,19 @@ const SidebarReactComponentNg = (props: {
 	}
 
 
-	function reinitMermaid() {
-		const mermaidHolder = document.getElementById('mermaidHolder')
-		if (mermaidHolder) {
-			mermaidHolder.removeAttribute('data-processed');
-		}
+	function initMermaid() {
+
 		loadMermaid()
 			.then((mermaid: any) => {
 				mermaid.initialize({
 					startOnLoad: true,
-					maxTextSize: 99999999,
+					maxTextSize: 99999,
 				});
 				mermaid.contentLoaded();
 			})
 	}
+
+
 
 	const getAllParentPath = () => {
 		if (props.thisPlugin) {
@@ -88,9 +88,8 @@ const SidebarReactComponentNg = (props: {
 		return []
 	}
 
-	useEffect(() => {
-		reinitMermaid()
-	}, [craft])
+
+
 
 
 	useEffect(() => {
@@ -106,6 +105,7 @@ const SidebarReactComponentNg = (props: {
 					setCraft(mermaidCrafter.craftMermaid(parsedResults))
 					// console.log(craft)
 					// console.log(settings)
+					console.log(craft)
 				})
 			}
 		)
@@ -128,7 +128,9 @@ const SidebarReactComponentNg = (props: {
 							todoShowQ: false,
 							doneShowQ: tempSettings.doneShowQ,
 							pathListFilter: tempSettings.pathListFilter
-						})}}}
+						})
+					}
+				}}
 				type={"checkbox"} id={"smart-gantt-sidebar-todoq"}
 				checked={tempSettings.todoShowQ}
 
@@ -149,7 +151,9 @@ const SidebarReactComponentNg = (props: {
 							todoShowQ: tempSettings.todoShowQ,
 							doneShowQ: false,
 							pathListFilter: tempSettings.pathListFilter
-						})}}}
+						})
+					}
+				}}
 				type={"checkbox"} id={"smart-gantt-sidebar-doneq"}
 				checked={tempSettings.doneShowQ}
 			/>
@@ -165,15 +169,14 @@ const SidebarReactComponentNg = (props: {
 			onClick={() => {
 				saveSettings(tempSettings)
 				setIsSettingQ(false)
-				// props.thisPlugin.helper.reloadView()
+				props.thisPlugin.helper.reloadView()
 			}}
 		>Save
 		</button>
 		<button
 			onClick={() => {
 				setIsSettingQ(false)
-				// props.thisPlugin.helper.reloadView()
-				reinitMermaid()
+				props.thisPlugin.helper.reloadView()
 			}}
 		>Cancel
 		</button>
@@ -394,21 +397,19 @@ const SidebarReactComponentNg = (props: {
 
 
 	const mermaidSvgComponent = () => {
-
-
-		// console.log(craft)
-
-
 		return (
-			<main>
-				<pre className={"mermaid"} id={"mermaidHolder"}>
-				{craft}
-			</pre>
+			// @ts-ignore
+			<main ref={mermaidSvgRef}>
+				{
+					mermaidSvgRefMeasure.width > 0
+						? <pre className={"mermaid"} id={"mermaidHolder"}>{craft}</pre> : <></>
+				}
 			</main>
 		)
 	}
 
 	const mainComponent = () => {
+		initMermaid()
 		if (isSettingQ) {
 			return settingView()
 		} else {
@@ -423,11 +424,11 @@ const SidebarReactComponentNg = (props: {
 		}
 	}
 
-	return <>
+	return <div className={"h-screen"}>
 		{/*<button onClick={()=>setCount(count + 1)}>click</button>*/}
 		{/*<div>{count}</div>*/}
 		{mainComponent()}
-	</>
+	</div>
 
 
 }
