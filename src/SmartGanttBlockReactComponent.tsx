@@ -30,8 +30,8 @@ export const SmartGanttBlockReactComponent = (props: {
 			}
 		})
 
-
 	}
+
 	const updateBlockSettingWithInternalSetting = (settingObject: SmartGanttSettings,
 												   context: MarkdownPostProcessorContext) => {
 

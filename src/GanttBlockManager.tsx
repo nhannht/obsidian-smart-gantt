@@ -13,7 +13,7 @@ export default class GanttBlockManager {
 		this.thisPlugin.registerMarkdownCodeBlockProcessor("gantt", async (source, el, _ctx) => {
 			//@ts-ignore
 			// console.log(_ctx.getSectionInfo(_ctx.el))
-			console.log(source)
+			// console.log(source)
 			const settings: SmartGanttSettings =source.trim() !== "" ?  JSON.parse(source) : {
 			doneShowQ: true,
 			todoShowQ: true,
