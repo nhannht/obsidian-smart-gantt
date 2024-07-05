@@ -6,6 +6,7 @@ import MarkdownProcesser from "./MarkdownProcesser";
 import TimelineExtractor, {TimelineExtractorResult} from "./TimelineExtractor";
 import {Chrono} from "chrono-node";
 import MermaidCrafter from "./MermaidCrafter";
+import {useMeasure} from "react-use";
 
 
 export const SmartGanttBlockReactComponent = (props: {
@@ -21,6 +22,7 @@ export const SmartGanttBlockReactComponent = (props: {
 	const [resultWithChronoCount, setResultWithChronoCount] = useState(0)
 	const [timelineResults, setTimelineResults] = useState<TimelineExtractorResult[]>([])
 	const [appStyle,] = useState(getComputedStyle(document.body))
+	const [blockContainerComponentRef, blockContainerComponentMeasure] = useMeasure()
 
 	const countResultWithChrono = (results: TimelineExtractorResult[]) => {
 		setResultWithChronoCount(0)
@@ -335,7 +337,8 @@ fill: ${appStyle.getPropertyValue("--text-normal")} !important;
 		</main>
 	}
 
-	return <>
-		{mainComponent}
-	</>
+	//@ts-ignore
+	return <div ref={blockContainerComponentRef}>
+		 {blockContainerComponentMeasure.width > 0 ? mainComponent : <></>}
+	</div>
 };
