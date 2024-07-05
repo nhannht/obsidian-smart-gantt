@@ -26,4 +26,9 @@ export class Helper {
 		).open()
 
 	}
+
+	getComputedStyleOfVault(){
+		return getComputedStyle(document.body)
+
+	}
 }

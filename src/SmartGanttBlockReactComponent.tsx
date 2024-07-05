@@ -76,6 +76,7 @@ export const SmartGanttBlockReactComponent = (props: {
 			// const timelineData = timelineExtractor.timelineData
 			const mermaidCrafter = new MermaidCrafter(props.thisPlugin)
 			setCraft(mermaidCrafter.craftMermaid(parsedResults))
+
 			// updateBlockSettingWithInternalSetting(internalSettings, props.ctx)
 
 		})()

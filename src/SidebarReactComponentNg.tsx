@@ -19,6 +19,7 @@ const SidebarReactComponentNg = (props: {
 	const [craft, setCraft] = useState("")
 	const [isSettingQ, setIsSettingQ] = useState(false)
 	const [mermaidSvgRef, mermaidSvgRefMeasure] = useMeasure()
+	const [appStyle,_setAppStyle] = useState(getComputedStyle(document.body))
 
 	const countResultWithChrono = (results: TimelineExtractorResult[]) => {
 		setResultWithChronoCount(0)
@@ -63,13 +64,48 @@ const SidebarReactComponentNg = (props: {
 	}
 
 
+
 	function initMermaid() {
+		// console.log(appStyle.getPropertyValue("--text-normal"))
 
 		loadMermaid()
 			.then((mermaid: any) => {
 				mermaid.initialize({
+					// security: 'loose',
 					startOnLoad: true,
 					maxTextSize: 99999,
+					theme: "forest",
+					themeCSS:`
+.grid .tick {
+  stroke: lightgrey;
+  opacity: 0.3;
+  shape-rendering: crispEdges;
+}
+
+
+.taskText.clickable {
+  fill: ${appStyle.getPropertyValue("--text-normal")} !important; 
+  text-anchor: middle;
+}
+
+.taskTextOutsideRight.clickable  {
+fill: ${appStyle.getPropertyValue("--text-normal")} !important;
+
+}
+.taskTextOutsideLeft.clickable {
+  fill: ${appStyle.getPropertyValue("--text-normal")} !important ; 
+  text-anchor: end;
+}
+
+
+.sectionTitle {
+fill: ${appStyle.getPropertyValue("--text-muted")} !important;
+}
+
+text {
+fill: ${appStyle.getPropertyValue("--text-normal")} !important;
+}
+					`,
 				});
 				mermaid.contentLoaded();
 			})
@@ -101,7 +137,7 @@ const SidebarReactComponentNg = (props: {
 					setCraft(mermaidCrafter.craftMermaid(parsedResults))
 					// console.log(craft)
 					// console.log(settings)
-					console.log(craft)
+					// console.log(craft)
 				})
 			}
 		)
@@ -198,9 +234,9 @@ const SidebarReactComponentNg = (props: {
 						Settings
 					</div>
 					<div className={"cursor-pointer"}
-					onClick={async ()=>{
-						await props.thisPlugin.helper.reloadView()
-					}}
+						 onClick={async () => {
+							 await props.thisPlugin.helper.reloadView()
+						 }}
 					>
 						Reload
 					</div>
