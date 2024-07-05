@@ -10,6 +10,7 @@ module.exports = {
 	plugins: [],
 	safelist: [
 		"opacity-50"
-	]
+	],
+	important:true
 }
 

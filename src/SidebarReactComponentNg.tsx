@@ -76,7 +76,6 @@ const SidebarReactComponentNg = (props: {
 	}
 
 
-
 	const getAllParentPath = () => {
 		if (props.thisPlugin) {
 			let allParentPath: Set<string> = new Set()
@@ -87,9 +86,6 @@ const SidebarReactComponentNg = (props: {
 		}
 		return []
 	}
-
-
-
 
 
 	useEffect(() => {
@@ -116,6 +112,7 @@ const SidebarReactComponentNg = (props: {
 	const statusCheckboxFilterPanel = <div>
 		<div>
 			<input
+				className={"cursor-pointer"}
 				onChange={(e) => {
 					if (e.target.checked) {
 						setTempSettings({
@@ -139,6 +136,7 @@ const SidebarReactComponentNg = (props: {
 		</div>
 		<div>
 			<input
+				className={"cursor-pointer"}
 				onChange={(e) => {
 					if (e.target.checked) {
 						setTempSettings({
@@ -162,27 +160,54 @@ const SidebarReactComponentNg = (props: {
 	</div>
 
 
-	const settingsViewButtonPanel = <div
-		className={"flex flex-row justify-around items-center"}
-	>
-		<button
-			onClick={() => {
-				saveSettings(tempSettings)
-				setIsSettingQ(false)
-				props.thisPlugin.helper.reloadView()
-			}}
-		>Save
-		</button>
-		<button
-			onClick={() => {
-				setIsSettingQ(false)
-				props.thisPlugin.helper.reloadView()
-			}}
-		>Cancel
-		</button>
-		{statusCheckboxFilterPanel}
+	const settingsViewButtonPanel = () => {
+		if (isSettingQ) {
+			return <div
+				className={"flex flex-row justify-around items-center"}
+			>
+				<div
+					className={"cursor-pointer"}
+					onClick={() => {
+						saveSettings(tempSettings)
+						setIsSettingQ(false)
+						props.thisPlugin.helper.reloadView()
+					}}
+				>Save
+				</div>
+				<div
 
-	</div>
+					className={"cursor-pointer"}
+					onClick={() => {
+						setIsSettingQ(false)
+						// props.thisPlugin.helper.reloadView()
+					}}
+				>Cancel
+				</div>
+				{statusCheckboxFilterPanel}
+
+			</div>
+		} else {
+			return (
+				<div className={"flex flex-row  justify-around"}>
+					<div
+						className={"cursor-pointer"}
+						onClick={() => {
+							setIsSettingQ(true)
+						}}
+					>
+						Settings
+					</div>
+					<div className={"cursor-pointer"}
+					onClick={async ()=>{
+						await props.thisPlugin.helper.reloadView()
+					}}
+					>
+						Reload
+					</div>
+				</div>
+			)
+		}
+	}
 
 	const customPathListCheckboxs = <div
 		hidden={
@@ -274,7 +299,6 @@ const SidebarReactComponentNg = (props: {
 	const settingView = () => {
 		return <>
 			{/*<div>hello world</div>*/}
-			{settingsViewButtonPanel}
 			{pathFilterSettingsPanel()}
 			{customPathListCheckboxs}
 
@@ -424,12 +448,20 @@ const SidebarReactComponentNg = (props: {
 		}
 	}
 
+
 	return <div className={"h-screen"}>
 		{/*<button onClick={()=>setCount(count + 1)}>click</button>*/}
 		{/*<div>{count}</div>*/}
 		{mainComponent()}
+		<div
+			className={" fixed p-2  bottom-8 left-1/2 w-[360px] max-w-[92%] z-50 -translate-x-1/2 rounded-xl bg-[--text-normal] text-[--background-primary] mb-safe mb-5  backdrop-blur-lg"}
+		>
+			{settingsViewButtonPanel()}
+
+		</div>
 	</div>
 
 
 }
+
 export default SidebarReactComponentNg
