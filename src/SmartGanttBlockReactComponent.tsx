@@ -20,6 +20,7 @@ export const SmartGanttBlockReactComponent = (props: {
 	const [craft, setCraft] = useState("")
 	const [resultWithChronoCount, setResultWithChronoCount] = useState(0)
 	const [timelineResults, setTimelineResults] = useState<TimelineExtractorResult[]>([])
+	const [appStyle,] = useState(getComputedStyle(document.body))
 
 	const countResultWithChrono = (results: TimelineExtractorResult[]) => {
 		setResultWithChronoCount(0)
@@ -289,6 +290,38 @@ export const SmartGanttBlockReactComponent = (props: {
 				mermaid.initialize({
 					startOnLoad: true,
 					maxTextSize: 99999999,
+					theme:'forest',
+					themeCSS:`
+.grid .tick {
+  stroke: lightgrey;
+  opacity: 0.3;
+  shape-rendering: crispEdges;
+}
+
+
+.taskText.clickable {
+  fill: ${appStyle.getPropertyValue("--text-normal")} !important; 
+  text-anchor: middle;
+}
+
+.taskTextOutsideRight.clickable  {
+fill: ${appStyle.getPropertyValue("--text-normal")} !important;
+
+}
+.taskTextOutsideLeft.clickable {
+  fill: ${appStyle.getPropertyValue("--text-normal")} !important ; 
+  text-anchor: end;
+}
+
+
+.sectionTitle {
+fill: ${appStyle.getPropertyValue("--text-muted")} !important;
+}
+
+text {
+fill: ${appStyle.getPropertyValue("--text-normal")} !important;
+}
+					`
 				});
 				mermaid.contentLoaded();
 			})
