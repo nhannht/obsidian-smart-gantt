@@ -18,12 +18,12 @@ if (!existsSync((vaultName))) {
 }
 
 const numberOfFiles = argv.fileN ? argv.fileN : 1
-const numberOfEl = argv.taskN ? argv.taskN : 10
+const numberOfEl = argv.elN ? argv.elN : 10
 
 
 
 const filePaths = faker.helpers.uniqueArray(()=>{
-	return path.join(vaultName,faker.system.filePath())
+	return path.join(vaultName,faker.system.directoryPath(),faker.system.commonFileName("md"))
 },numberOfFiles)
 
 
