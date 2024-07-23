@@ -4,12 +4,12 @@ import {AppContext} from "./AppContext";
 import {SmartGanttSettings} from "./SettingManager";
 import {SmartGanttBlockReactComponent} from "./SmartGanttBlockReactComponent";
 import {SmartGanttBlockReactComponentNg} from "./SmartGanttBlockReactComponentNg";
-import {StrictMode} from "react";
+// import {StrictMode} from "react";
 
 
 
 export default class GanttBlockManager {
-	constructor(private thisPlugin: SmartGanttPlugin) {
+	constructor(public thisPlugin: SmartGanttPlugin) {
 	}
 
 	async registerGanttBlockNg() {
@@ -27,7 +27,7 @@ export default class GanttBlockManager {
 			})
 			let reactRoot = createRoot(root)
 			reactRoot.render(
-				<StrictMode>
+				// <StrictMode>
 					<AppContext.Provider value={this.thisPlugin}>
 						<SmartGanttBlockReactComponentNg
 							src={source}
@@ -37,7 +37,7 @@ export default class GanttBlockManager {
 						/>
 
 					</AppContext.Provider>
-				</StrictMode>
+				// </StrictMode>
 			)
 
 

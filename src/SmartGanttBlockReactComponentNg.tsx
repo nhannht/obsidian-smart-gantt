@@ -120,6 +120,7 @@ export const SmartGanttBlockReactComponentNg = (props: {
 			updateBlockSettingHandle={(s)=>{
 				updateBlockSettingWithInternalSetting(s,props.ctx)
 			}}
+			thisPlugin={props.thisPlugin}
 			/>
 		</main>
 	} else {
