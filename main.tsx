@@ -61,6 +61,7 @@ export default class SmartGanttPlugin extends Plugin {
 		})
 
 		await this.ganttBlockManager.registerGanttBlock()
+		await this.ganttBlockManager.registerGanttBlockNg()
 
 
 

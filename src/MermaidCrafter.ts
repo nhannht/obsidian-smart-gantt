@@ -51,7 +51,7 @@ export default class MermaidCrafter {
 					// text = text.replace(/+/g, "😺" )
 					// text = text.replace(/-/g, "" )
 					craft += `\t\t${text}:\t ${checked? "done ," : "active ,"}  ${taskId},${startDateString}, ${diff}d\n`
-					console.log(craft)
+					// console.log(craft)
 				}
 			})
 

@@ -1,20 +1,10 @@
 import {Chrono, ParsedResult} from "chrono-node";
 
-import {TokenWithFile} from "./MarkdownProcesser";
+import {NodeFromParseTree, TokenWithFile} from "./MarkdownProcesser";
 import {Token} from "marked";
 import {TFile} from "obsidian";
+import {Node} from "unist"
 
-// export interface TimelineEntry {
-// 	dateString: string;
-// 	dateStringCompact: string,
-// 	unixTime: number;
-// 	sentence: string;
-//
-// }
-//
-// export interface TimelineEntryChrono extends TimelineEntry {
-// 	stringThatParseAsDate: string,
-// }
 
 export type SmartGanttParsedResults = {
 	parsedResults: ParsedResult[]|null,
@@ -25,6 +15,13 @@ export type TimelineExtractorResult = {
 	token:Token,
 	file:TFile,
 	parsedResultsAndRawText: SmartGanttParsedResults,
+
+}
+
+export type TimelineExtractorResultNg = {
+	node:Node,
+	file:TFile,
+	parsedResult: ParsedResult|null
 
 }
 
@@ -65,6 +62,37 @@ export default class TimelineExtractor {
 
 		return calendarMark
 
+
+	}
+
+	async GetTimelineDataFromNodes(nodes:NodeFromParseTree[]):Promise<TimelineExtractorResultNg[]> {
+		let results:TimelineExtractorResultNg[] = []
+		nodes.forEach(node=>{
+			//@ts-ignore
+			let rawText = node.node.children[0].children[0].value
+			let transformedText = this.makeTextCompatibleWithTaskPlugin(rawText)
+			const parsedResults = this.customChrono.parse(transformedText)
+			if (parsedResults && parsedResults.length > 0 ){
+				parsedResults.forEach(r =>{
+					results.push({
+						node:node.node,
+						file:node.file,
+						parsedResult:r
+					})
+
+				})
+			} else {
+				results.push({
+					node:node.node,
+					file:node.file,
+					parsedResult:null
+				})
+
+
+			}
+
+		})
+		return results
 
 	}
 
