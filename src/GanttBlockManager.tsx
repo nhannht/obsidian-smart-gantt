@@ -20,18 +20,23 @@ export default class GanttBlockManager {
 				pathListFilter: ["CurrentFile"]
 			}
 
+
+
 			let root = el.createEl("div", {
 				cls: "root"
 			})
 			let reactRoot = createRoot(root)
 			reactRoot.render(
 				<StrictMode>
-					<SmartGanttBlockReactComponentNg
-						src={source}
-						ctx={ctx}
-						thisPlugin={this.thisPlugin}
-						settings={settings}
-					/>
+					<AppContext.Provider value={this.thisPlugin}>
+						<SmartGanttBlockReactComponentNg
+							src={source}
+							ctx={ctx}
+							thisPlugin={this.thisPlugin}
+							settings={settings}
+						/>
+
+					</AppContext.Provider>
 				</StrictMode>
 			)
 

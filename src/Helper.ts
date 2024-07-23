@@ -27,8 +27,17 @@ export class Helper {
 
 	}
 
-	getComputedStyleOfVault(){
+	getComputedStyleOfVault() {
 		return getComputedStyle(document.body)
 
 	}
+
+	getAllParentPath = () => {
+		let allParentPath: Set<string> = new Set()
+		this.thisPlugin.app.vault.getMarkdownFiles().forEach(r => {
+			r.parent?.path ? allParentPath.add(r.parent.path) : null
+		})
+		return Array.from(allParentPath)
+	}
+
 }

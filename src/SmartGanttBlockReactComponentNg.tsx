@@ -7,6 +7,7 @@ import TimelineExtractor, {TimelineExtractorResultNg} from "./TimelineExtractor"
 import {Chrono, ParsedComponents} from "chrono-node";
 // import {useMeasure} from "react-use";
 import {Gantt, Task} from 'gantt-task-react';
+import SettingViewComponent from "./SettingViewComponent";
 
 
 export const SmartGanttBlockReactComponentNg = (props: {
@@ -21,19 +22,7 @@ export const SmartGanttBlockReactComponentNg = (props: {
 	// const [resultWithChronoCount, setResultWithChronoCount] = useState(0)
 	const [timelineResults, setTimelineResults] = useState<TimelineExtractorResultNg[]>([])
 	const [tasks, setTasks] = useState<Task[]>([])
-	// const [appStyle,] = useState(getComputedStyle(document.body))
-	// const [blockContainerComponentRef, blockContainerComponentMeasure] = useMeasure()
 
-	// const countResultWithChrono = (results: TimelineExtractorResult[]) => {
-	// 	setResultWithChronoCount(0)
-	// 	results.forEach(r => {
-	// 		if (r.parsedResultsAndRawText.parsedResults) {
-	// 			setResultWithChronoCount(resultWithChronoCount + 1)
-	//
-	// 		}
-	// 	})
-	//
-	// }
 
 	const updateBlockSettingWithInternalSetting = (settingObject: SmartGanttSettings,
 												   context: MarkdownPostProcessorContext) => {
@@ -105,228 +94,39 @@ export const SmartGanttBlockReactComponentNg = (props: {
 					styles: {progressColor: '#ffbb54', progressSelectedColor: '#ff9e0d'},
 				}
 				// console.log(task)
-				console.log(task)
+				// console.log(task)
 				tempTasks.push(task)
 			}
 		})
 		setTasks(tempTasks)
 	}, [timelineResults])
 
-	// useEffect(() => {
-	// 	console.log(timelineResults)
-	// 	console.log(tasks)
-	// 	console.log(timelineResults.length)
-	//
-	// }, [tasks]);
-
-
-
-
-	const getAllParentPath = () => {
-		if (props.thisPlugin) {
-			let allParentPath: Set<string> = new Set()
-			props.thisPlugin?.app.vault.getMarkdownFiles().forEach(r => {
-				r.parent?.path ? allParentPath.add(r.parent.path) : null
-			})
-			return Array.from(allParentPath)
-		}
-		return []
-	}
-
 	let mainComponent = <></>
 
-	const allFileFilterRadio = <div><input
-		onChange={(e) => {
-			if (e.target.checked) {
-				let tempSetting: SmartGanttSettings = structuredClone(internalSettings)
-				tempSetting.pathListFilter = ["AllFiles"]
-				setInternalSettings(tempSetting)
-			}
-		}}
-		name={"pathFilterRadio"}
-		type={"radio"}
-		id={"allFiles"}
-		checked={internalSettings.pathListFilter.indexOf("AllFiles") !== -1}
-	></input>
-		<label htmlFor={"allFiles"}>All files</label></div>;
-	const currentFileFilterRadio = <div>
-		<input
-			onChange={(e) => {
-				if (e.target.checked) {
-					let tempSetting: SmartGanttSettings = structuredClone(internalSettings)
-					tempSetting.pathListFilter = ["CurrentFile"]
-					setInternalSettings(tempSetting)
-				}
-			}}
-			name={"pathFilterRadio"} type={"radio"} id={"currentFile"}
-			checked={internalSettings.pathListFilter.indexOf("CurrentFile") !== -1}
-		>
 
-		</input>
-		<label htmlFor={"currentFile"}>Current file</label></div>;
-
-	const customPathFilterRadio = <div><input
-		onChange={(e) => {
-			if (e.target.checked) {
-				const temp: SmartGanttSettings = structuredClone(internalSettings)
-				temp.pathListFilter = []
-				setInternalSettings(temp)
-			}
-
-		}}
-		name={"pathFilterRadio"} type={"radio"} id={"customPath"}
-		checked={internalSettings.pathListFilter.indexOf("AllFiles") === -1 &&
-			internalSettings.pathListFilter.indexOf("CurrentFile") === -1
-		}>
-
-	</input>
-		<label htmlFor={"customPath"}>Custom path</label>
-	</div>;
-	const customPathListCheckboxs = <div
-		hidden={
-			internalSettings.pathListFilter.indexOf("AllFiles") !== -1 ||
-			internalSettings.pathListFilter.indexOf("CurrentFile") !== -1
-		}
-	>
-		{getAllParentPath().map((path, pathIndex) => {
-			return <div
-				key={path}
-			>
-				<input
-					onChange={(e) => {
-						const temp: SmartGanttSettings = structuredClone(internalSettings)
-						if (e.target instanceof HTMLInputElement && e.target.checked) {
-							temp.pathListFilter.push(path)
-							setInternalSettings(temp)
-						} else {
-							temp.pathListFilter.remove(path)
-							setInternalSettings(temp)
-						}
-					}}
-					type={"checkbox"}
-					id={`pathFilterRadioGanttBlock-${pathIndex}`}
-					checked={internalSettings.pathListFilter.indexOf(path) !== -1}
-				></input>
-				<label htmlFor={`pathFilterRadioGanttBlock-${pathIndex}`}>{path}</label>
-			</div>
-		})}
-	</div>;
-	const filterBaseOnStatusCheckbox = <div
-		className={"flex flex-col"}
-	>
-		<div>
-			<input
-				onChange={(e) => {
-					let temp: SmartGanttSettings = structuredClone(internalSettings)
-					temp.todoShowQ = e.target.checked;
-					setInternalSettings(temp)
-
-				}}
-				type={"checkbox"} id={"TodoQ"}
-				checked={internalSettings.todoShowQ}
-
-			></input>
-			<label htmlFor={"TodoQ"}>Todo</label>
-		</div>
-		<div>
-			<input
-				onChange={(e) => {
-					let temp: SmartGanttSettings = structuredClone(internalSettings)
-					temp.doneShowQ = e.target.checked;
-					setInternalSettings(temp)
-				}}
-				type={"checkbox"} id={"DoneQ"}
-				checked={internalSettings.doneShowQ}
-
-			></input>
-			<label htmlFor={"DoneQ"}>Done</label>
-		</div>
-	</div>;
-
-
-	// let mermaidComponent = <></>
-	// if (resultWithChronoCount === 0) {
-	// 	// console.log(timelineResults)
-	// 	let taskStrings: string[] = []
-	// 	timelineResults.forEach(r => {
-	// 		taskStrings.push(r.token.raw)
-	// 	})
-	//
-	// 	mermaidComponent = <>We don't have any tasks that can extract time to plot
-	// 		<br/>
-	// 		{
-	// 			taskStrings.length !== 0 ?
-	// 				<> Current we have these task
-	// 					<br/>
-	// 					{
-	// 						taskStrings.join("\n")
-	// 					}
-	// 				</> :
-	// 				<>There is no line with checkbox in target files</>
-	// 		}
-	// 	</>
-	// } else {
-	// 	mermaidComponent = <pre className={"mermaid"}>
-	// 			{craft}
-	// 		</pre>
-	//
-	// }
-
-
-	let settingButton = <button/>
-	if (isSettingQ) {
-		settingButton = <button
-			onClick={async () => {
-				setIsSettingQ(false)
-				updateBlockSettingWithInternalSetting(internalSettings, props.ctx)
-			}}
-		>
-			Save
-		</button>
-	} else {
-		settingButton = <button
-			onClick={() => {
-				setIsSettingQ(!isSettingQ)
-			}}
-		>
-			Settings
-		</button>
-	}
-
-	const cancelButton = <button
-		onClick={() => {
-			setIsSettingQ(false)
-		}}>
-		Cancel
-	</button>
-
-	const buttonsPanel = <div className={"flex flex-row justify-around p-2"}>
-		{settingButton}
-		{isSettingQ ? cancelButton : null}
-	</div>
-
-	const settingView = <>
-		{buttonsPanel}
-		<div className={"flex flex-row justify-around items-center"}>
-			{allFileFilterRadio}
-			{currentFileFilterRadio}
-			{customPathFilterRadio}
-			{filterBaseOnStatusCheckbox}
-		</div>
-
-		{customPathListCheckboxs}
-
-	</>
 
 	if (isSettingQ) {
 		mainComponent = <main>
-			{settingView}
+			<SettingViewComponent
+			isSettingsQ={isSettingQ}
+			isSettingsQHandle={ (is)=>{
+				setIsSettingQ(is)
+			}}
+			inputS={internalSettings}
+			saveSettings={(s)=>{
+				setInternalSettings(s)
+
+			}}
+			updateBlockSettingHandle={(s)=>{
+				updateBlockSettingWithInternalSetting(s,props.ctx)
+			}}
+			/>
 		</main>
 	} else {
 		if (tasks.length > 0) {
 			mainComponent = <main
 			onContextMenu={()=> setIsSettingQ(true)}>
-				<button onClick={() => reupdateData()}>Update data</button>
+				{/*<button onClick={() => reupdateData()}>Update data</button>*/}
 				<Gantt
 					ganttHeight={400}
 					tasks={tasks}></Gantt>
@@ -337,21 +137,6 @@ export const SmartGanttBlockReactComponentNg = (props: {
 				onContextMenu={()=> setIsSettingQ(true)}>
 				<button onClick={() => reupdateData()}>Update data</button>
 			</main>
-		}
-	}
-
-	//@ts-ignore
-	// return <div ref={blockContainerComponentRef}>
-	// 	{blockContainerComponentMeasure.width > 0 ? mainComponent : <></>}
-	// </div>
-	let tasksChart = () => {
-		if (timelineResults.length > 0 && tasks.length > 0) {
-			return <Gantt tasks={tasks}
-						  ganttHeight={400}
-				// listCellWidth={"1"}
-			/>
-		} else {
-			return <></>
 		}
 	}
 
