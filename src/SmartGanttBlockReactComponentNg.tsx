@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {MarkdownPostProcessorContext} from "obsidian";
 import SmartGanttPlugin from "../main";
 import {SmartGanttSettings} from "./SettingManager";
@@ -6,8 +6,10 @@ import MarkdownProcesser from "./MarkdownProcesser";
 import TimelineExtractor, {TimelineExtractorResultNg} from "./TimelineExtractor";
 import {Chrono, ParsedComponents} from "chrono-node";
 // import {useMeasure} from "react-use";
-import {Gantt, Task} from 'gantt-task-react';
+import {Task} from 'gantt-task-react';
 import SettingViewComponent from "./SettingViewComponent";
+import {Button} from "@/component/Button";
+import TaskList from "@/component/TaskList";
 
 
 export const SmartGanttBlockReactComponentNg = (props: {
@@ -24,53 +26,26 @@ export const SmartGanttBlockReactComponentNg = (props: {
 	const [tasks, setTasks] = useState<Task[]>([])
 
 
-	const updateBlockSettingWithInternalSetting = (settingObject: SmartGanttSettings,
-												   context: MarkdownPostProcessorContext) => {
 
-		const sourcePath = context.sourcePath
-		//@ts-ignore
-		const elInfo = context.getSectionInfo(context.el)
-		// console.log(elInfo)
-		if (elInfo) {
-			// console.log(elInfo.text)
-			let linesFromFile = elInfo.text.split(/(.*?\n)/g)
-			linesFromFile.forEach((e, i) => {
-				if (e === "") linesFromFile.splice(i, 1)
-			})
-			// console.log(linesFromFile)
-			linesFromFile.splice(elInfo.lineStart + 1,
-				elInfo.lineEnd - elInfo.lineStart - 1,
-				JSON.stringify(settingObject, null, "\t"), "\n")
-			// console.log(linesFromFile)
-			const newSettingsString = linesFromFile.join("")
-			const file = props.thisPlugin.app.vault.getFileByPath(sourcePath)
-			if (file) {
-				props.thisPlugin.app.vault.modify(file, newSettingsString)
-			}
-		}
+	const reupdateData = useCallback(async () => {
+			const allMarkdownFiles = props.thisPlugin.app.vault.getMarkdownFiles();
+			const markdownProcesser = new MarkdownProcesser(allMarkdownFiles, props.thisPlugin)
+			await markdownProcesser.parseAllFilesNg(internalSettings)
+			const allNodes = markdownProcesser.nodes
+			// console.log(allNodes)
+			const timelineExtractor = new TimelineExtractor(new Chrono())
+			const timelineExtractorResults = await timelineExtractor.GetTimelineDataFromNodes(allNodes)
+			// console.log(timelineExtractorResults)
+			setTimelineResults(timelineExtractorResults)
+			// console.log(tasks)
+		},[internalSettings])
 
-	}
-
-	const reupdateData = async () => {
-		const allMarkdownFiles = props.thisPlugin.app.vault.getMarkdownFiles();
-		const markdownProcesser = new MarkdownProcesser(allMarkdownFiles, props.thisPlugin)
-		await markdownProcesser.parseAllFilesNg(internalSettings)
-		const allNodes = markdownProcesser.nodes
-		// console.log(allNodes)
-		const timelineExtractor = new TimelineExtractor(new Chrono())
-		const timelineExtractorResults = await timelineExtractor.GetTimelineDataFromNodes(allNodes)
-		// console.log(timelineExtractorResults)
-		setTimelineResults(timelineExtractorResults)
-		// console.log(tasks)
-	}
-	const createDateFromKnownValues = (p: ParsedComponents) => {
-		//@ts-ignore
-		const knownValues = p.knownValues
-		const date = new Date(knownValues.year, knownValues.month, knownValues.day)
-		// console.log(date)
-		return date
-	}
-
+	const createDateFromKnownValues = useCallback((p: ParsedComponents) => {
+			//@ts-ignore
+			const knownValues = p.knownValues
+			return new Date(knownValues.year, knownValues.month, knownValues.day)
+		},[]
+	)
 	useEffect(() => {
 		reupdateData().then(_r => null)
 	}, [internalSettings]);
@@ -103,39 +78,58 @@ export const SmartGanttBlockReactComponentNg = (props: {
 
 	let mainComponent = <></>
 
+	const modifyResultsStatus = useCallback((resultId:string,status:boolean)=>{
+		let resultsClone = [...timelineResults]
+		// console.log(resultsClone)
+		// console.log(timelineResults)
+		let resultFind = resultsClone.find(r=>r.id ===resultId)
+		// console.log(resultId)
+		// console.log(resultFind)
+		if (resultFind){
+			//@ts-ignore
+			resultFind.node.checked =status
+			setTimelineResults(resultsClone)
+		}
+
+	},[timelineResults])
 
 
 	if (isSettingQ) {
 		mainComponent = <main>
 			<SettingViewComponent
-			isSettingsQ={isSettingQ}
-			isSettingsQHandle={ (is)=>{
-				setIsSettingQ(is)
-			}}
-			inputS={internalSettings}
-			saveSettings={(s)=>{
-				setInternalSettings(s)
+				isSettingsQ={isSettingQ}
+				isSettingsQHandle={(is) => {
+					setIsSettingQ(is)
+				}}
+				inputS={internalSettings}
+				saveSettings={(s) => {
+					setInternalSettings(s)
 
-			}}
-			updateBlockSettingHandle={(s)=>{
-				updateBlockSettingWithInternalSetting(s,props.ctx)
-			}}
-			thisPlugin={props.thisPlugin}
+				}}
+				updateBlockSettingHandle={(s) => {
+					props.thisPlugin.helper.updateBlockSettingWithInternalSetting(s, props.ctx)
+				}}
+				thisPlugin={props.thisPlugin}
 			/>
 		</main>
 	} else {
 		if (tasks.length > 0) {
 			mainComponent = <main
-			onContextMenu={()=> setIsSettingQ(true)}>
-				{/*<button onClick={() => reupdateData()}>Update data</button>*/}
-				<Gantt
-					ganttHeight={400}
-					tasks={tasks}></Gantt>
+			>
+				<Button onClick={e=>setIsSettingQ(true)}>Settings</Button>
+				{/*<GanttChart tasks={tasks}*/}
+				{/*			thisPlugin={props.thisPlugin}*/}
+				{/*			settings={internalSettings}*/}
+				{/*			results={timelineResults}*/}
+				{/*/>*/}
+				<TaskList results={timelineResults}
+						  thisPlugin={props.thisPlugin}
+						  changeResultStatusFn={modifyResultsStatus}
+						  />
 			</main>
-
 		} else {
 			mainComponent = <main
-				onContextMenu={()=> setIsSettingQ(true)}>
+				onContextMenu={() => setIsSettingQ(true)}>
 				<button onClick={() => reupdateData()}>Update data</button>
 			</main>
 		}

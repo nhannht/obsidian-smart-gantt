@@ -19,6 +19,7 @@ export type TimelineExtractorResult = {
 }
 
 export type TimelineExtractorResultNg = {
+	id: string,
 	node:Node,
 	file:TFile,
 	parsedResult: ParsedResult|null
@@ -45,36 +46,37 @@ export default class TimelineExtractor {
 
 
 	private makeTextCompatibleWithTaskPlugin(text: string) {
-		const hourGlass = text.replace(/⏳/g, "due in "),
-			airPlain = hourGlass.replace(/🛫/g, "start from "),
-			heavyPlus = airPlain.replace(/➕/g, "created in "),
-			checkMark = heavyPlus.replace(/✅/g, "done in "),
-			crossMark = checkMark.replace(/❌/g, "cancelled in "),
+		const hourGlass = text.replace(/⏳/g, " due in "),
+			airPlain = hourGlass.replace(/🛫/g, " start from "),
+			heavyPlus = airPlain.replace(/➕/g, " created in "),
+			checkMark = heavyPlus.replace(/✅/g, " done in "),
+			crossMark = checkMark.replace(/❌/g, " cancelled in "),
 
-			createdIn = crossMark.replace(/\[created::\s+(.*)]/g, "created in $1"),
-			scheduledIn = createdIn.replace(/\[scheduled::\s+(.*)]/g, "scheduled in $1"),
-			startFrom = scheduledIn.replace(/\[start::\s+(.*)]/g, "start from $1"),
-			dueTo = startFrom.replace(/\[due::\s+(.*)]/g, "due to $1"),
-			completionIn = dueTo.replace(/\[completion::\s+(.*)]/g, "completion in $1"),
-			cancelledIn = completionIn.replace(/\[cancelled::\s(.*)]/g, "cancelled in $1 "),
+			createdIn = crossMark.replace(/\[created::\s+(.*)]/g, " created in $1 "),
+			scheduledIn = createdIn.replace(/\[scheduled::\s+(.*)]/g, " scheduled in $1 "),
+			startFrom = scheduledIn.replace(/\[start::\s+(.*)]/g, " start from $1 "),
+			dueTo = startFrom.replace(/\[due::\s+(.*)]/g, " due to $1 "),
+			completionIn = dueTo.replace(/\[completion::\s+(.*)]/g, " completion in $1 "),
+			cancelledIn = completionIn.replace(/\[cancelled::\s(.*)]/g, " cancelled in $1 "),
 
 			calendarMark = cancelledIn.replace("/📅/g", " to ")
 
 		return calendarMark
 
-
 	}
+
 
 	async GetTimelineDataFromNodes(nodes:NodeFromParseTree[]):Promise<TimelineExtractorResultNg[]> {
 		let results:TimelineExtractorResultNg[] = []
-		nodes.forEach(node=>{
+		nodes.forEach(((node,nodeId)=>{
 			//@ts-ignore
 			let rawText = node.node.children[0].children[0].value
 			let transformedText = this.makeTextCompatibleWithTaskPlugin(rawText)
 			const parsedResults = this.customChrono.parse(transformedText)
 			if (parsedResults && parsedResults.length > 0 ){
-				parsedResults.forEach(r =>{
+				parsedResults.forEach((r,rId) =>{
 					results.push({
+						id: `${nodeId}-${rId}`,
 						node:node.node,
 						file:node.file,
 						parsedResult:r
@@ -83,19 +85,16 @@ export default class TimelineExtractor {
 				})
 			} else {
 				results.push({
+					id: `${nodeId}`,
 					node:node.node,
 					file:node.file,
 					parsedResult:null
 				})
-
-
 			}
-
-		})
+		}))
 		return results
 
 	}
-
 
 
 	async GetTimelineDataFromDocumentArrayWithChrono(tokens: TokenWithFile[] | null,
@@ -116,9 +115,7 @@ export default class TimelineExtractor {
 					parsedResults: parsedResult,
 					//@ts-ignore
 					rawText: token.token.text
-
 				}
-
 				 extractorResultList.push({
 					...token,
 					parsedResultsAndRawText: smartGanttParsedResults
@@ -135,45 +132,6 @@ export default class TimelineExtractor {
 				})
 			}
 		})
-
-		// @ts-ignore
-		// documents?.forEach((doc) => {
-		// 	// console.log(text)
-		// 	let parseResults;
-		//
-		// 	parseResults = this.customChrono.parse(doc.raw)
-		// 	// console.log(parseResults)
-		//
-		// 	// console.log(parseResults)
-		// 	// console.log(parseResults)
-		// 	if (!parseResults || parseResults.length === 0) {
-		// 		return
-		// 	}
-		// 	parseResults.forEach((parseResult) => {
-		// 		const [startData, endData] = this.extractDataToParseResult(parseResult, doc.raw)
-		// 		if (startData) {
-		// 			timelineData.push(startData)
-		// 		}
-		// 		if (endData) {
-		// 			timelineData.push(endData)
-		// 		}
-		// 	})
-		//
-		//
-		// })
-		//
-		// timelineData.sort((a, b) => {
-		// 	return a.unixTime - b.unixTime
-		// })
-		//
-		//
-		// // console.log(parsedUserQueryArray)
-		//
-		// // sort filterTimelineData
-		//
-		// this.timelineData = timelineData
-		this.smartGanttParsedResults =  extractorResultList
-
 
 		return  extractorResultList
 	}

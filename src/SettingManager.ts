@@ -1,9 +1,14 @@
 import SmartGanttPlugin from "../main";
+import {ViewMode} from "gantt-task-react";
 
 export interface SmartGanttSettings {
 	pathListFilter: String[],
 	todoShowQ: boolean,
-	doneShowQ: boolean
+	doneShowQ: boolean,
+	viewMode: ViewMode,
+	leftBarChartDisplayQ :boolean,
+	// viewDate?: Date,
+
 
 }
 

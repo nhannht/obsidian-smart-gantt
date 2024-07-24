@@ -6,6 +6,11 @@ import {Label} from "@/component/Label";
 import {RadioGroup, RadioGroupItem} from "@/component/RadioGroup";
 import SmartGanttPlugin from "../main";
 import {ScrollArea} from "@/component/ScrollableList";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/component/Select";
+import {ViewMode} from "gantt-task-react";
+import {Button} from "@/component/Button";
+
+
 
 const SettingViewComponent = (props: {
 	inputS: SmartGanttSettings,
@@ -60,7 +65,9 @@ const SettingViewComponent = (props: {
 	>
 		<ScrollArea className={"h-72 w-48 rounded-md m-2"}>
 			<div className={" space-y-2 px-4"}>
-				<div className={"mb-4 text-sm font-medium leading-none sticky top-0 bg-gray-200 p-2"}>List of directories</div>
+				<div className={"mb-4 text-sm font-medium leading-none sticky top-0 bg-gray-200 p-2"}>List of
+					directories
+				</div>
 
 				{props.thisPlugin.helper.getAllParentPath().map((path: string, pathIndex: number) => {
 					// console.log(path)
@@ -85,7 +92,8 @@ const SettingViewComponent = (props: {
 						></Checkbox>
 						<Label htmlFor={`pathFilterRadioGanttBlock-${pathIndex}`}>{path}</Label>
 					</div>
-				})}</div></ScrollArea>
+				})}</div>
+		</ScrollArea>
 	</div>;
 
 
@@ -118,9 +126,9 @@ const SettingViewComponent = (props: {
 		</div>
 	</div>;
 
-	let settingButton = <button/>
+	let settingButton = <Button/>
 	if (props.isSettingsQ) {
-		settingButton = <button
+		settingButton = <Button
 			onClick={async () => {
 				props.isSettingsQHandle(false)
 				props.saveSettings(s)
@@ -128,28 +136,72 @@ const SettingViewComponent = (props: {
 			}}
 		>
 			Save
-		</button>
+		</Button>
 	} else {
-		settingButton = <button
+		settingButton = <Button
 			onClick={() => {
 				props.isSettingsQHandle(false)
 			}}
 		>
 			Settings
-		</button>
+		</Button>
 
 
 	}
-	const cancelButton = <button
+	const cancelButton = <Button
+		variant={"secondary"}
 		onClick={() => {
 			props.isSettingsQHandle(false)
 		}}>
 		Cancel
-	</button>
+	</Button>
 	const buttonsPanel = <div className={"flex flex-row justify-around p-2"}>
 		{settingButton}
 		{props.isSettingsQ ? cancelButton : null}
 	</div>
+
+	const viewModeSelect = () => {
+		return <Select
+			value={s.viewMode}
+			onValueChange={e => {
+				 if (e === "Month"){
+					setS({...s,viewMode:ViewMode.Month})
+				} else if (e === "Day"){
+					setS({...s,viewMode:ViewMode.Day})
+				} else if (e === "Week"){
+					setS({...s,viewMode:ViewMode.Week})
+				} else if (e === "Year"){
+					setS({...s,viewMode:ViewMode.Year})
+				}
+			}}
+		>
+			<SelectTrigger className={"w-[180px]"}>
+				<SelectValue placeholder={"Select view mode of chart"}/>
+			</SelectTrigger>
+			<SelectContent>
+				<SelectItem value={"Day"}>Day</SelectItem>
+				<SelectItem value={"Week"}>Week</SelectItem>
+				<SelectItem value={"Month"}>Month</SelectItem>
+				<SelectItem value={"Year"}>Year</SelectItem>
+			</SelectContent>
+
+		</Select>
+	}
+
+	const showTaskListInChartCheckbox = ()=>{
+		return <div className={"flex space-x-2 items-center"}>
+			<Checkbox
+			onCheckedChange={e=>{
+				setS({...s,leftBarChartDisplayQ: Boolean(e)})
+			}}
+			checked={s.leftBarChartDisplayQ}
+			id={"showtasklistinchartcheckbox"}
+			/>
+			<Label htmlFor={"showtasklistinchartcheckbox"}>Show the left task list in chart</Label>
+		</div>
+	}
+
+
 	const settingView = <>
 		{buttonsPanel}
 		<div className={"flex flex-row justify-around"}><RadioGroup onValueChange={e => {
@@ -164,7 +216,12 @@ const SettingViewComponent = (props: {
 			{currentFileFilterRadio}
 			{customPathFilterRadio}
 		</RadioGroup>
-			{filterBaseOnStatusCheckbox}</div>
+			{filterBaseOnStatusCheckbox}
+			{viewModeSelect()}
+			{showTaskListInChartCheckbox()}
+
+		</div>
+
 
 		{customPathListCheckboxs}
 

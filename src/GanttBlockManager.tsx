@@ -1,10 +1,10 @@
 import SmartGanttPlugin from "../main";
 import {createRoot} from "react-dom/client";
-import {AppContext} from "./AppContext";
 import {SmartGanttSettings} from "./SettingManager";
 import {SmartGanttBlockReactComponent} from "./SmartGanttBlockReactComponent";
 import {SmartGanttBlockReactComponentNg} from "./SmartGanttBlockReactComponentNg";
-// import {StrictMode} from "react";
+import {StrictMode} from "react";
+import {ViewMode} from "gantt-task-react";
 
 
 
@@ -17,7 +17,9 @@ export default class GanttBlockManager {
 			const settings: SmartGanttSettings = source.trim() !== "" ? JSON.parse(source) : {
 				doneShowQ: true,
 				todoShowQ: true,
-				pathListFilter: ["CurrentFile"]
+				pathListFilter: ["CurrentFile"],
+				viewMode:ViewMode.Day,
+				leftBarChartDisplayQ:true
 			}
 
 
@@ -27,17 +29,14 @@ export default class GanttBlockManager {
 			})
 			let reactRoot = createRoot(root)
 			reactRoot.render(
-				// <StrictMode>
-					<AppContext.Provider value={this.thisPlugin}>
+				<StrictMode>
 						<SmartGanttBlockReactComponentNg
 							src={source}
 							ctx={ctx}
 							thisPlugin={this.thisPlugin}
 							settings={settings}
 						/>
-
-					</AppContext.Provider>
-				// </StrictMode>
+				 </StrictMode>
 			)
 
 
@@ -64,9 +63,7 @@ export default class GanttBlockManager {
 			})
 			let reactRoot = createRoot(root)
 			reactRoot.render(
-				<AppContext.Provider value={{
-					app: this.thisPlugin.app,
-				}}>
+
 					<SmartGanttBlockReactComponent
 						src={source}
 						ctx={_ctx}
@@ -74,7 +71,6 @@ export default class GanttBlockManager {
 						settings={settings}
 
 					/>
-				</AppContext.Provider>
 			)
 		})
 

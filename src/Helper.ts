@@ -1,7 +1,10 @@
 import SmartGanttPlugin from "../main";
-import {WorkspaceLeaf} from "obsidian";
+import {EditorPosition, MarkdownPostProcessorContext, MarkdownView, WorkspaceLeaf} from "obsidian";
 import {FilterModal} from "./FilterModal";
-
+import {Task} from "gantt-task-react";
+import {TimelineExtractorResultNg} from "@/TimelineExtractor";
+import {Node} from "mdast"
+import {SmartGanttSettings} from "@/SettingManager";
 export class Helper {
 	constructor(private thisPlugin: SmartGanttPlugin) {
 	}
@@ -39,5 +42,51 @@ export class Helper {
 		})
 		return Array.from(allParentPath)
 	}
+	jumpToPositionOfNode= async (task:Task,results:TimelineExtractorResultNg[])=>{
+		const result = results[Number(task.id)]
+		const leaf = this.thisPlugin.app.workspace.getLeaf(true)
+		await leaf.openFile(result.file)
+		const view = leaf.view as MarkdownView
+		const node:Node = result.node
+		// console.log(node)
+
+		view.editor.setSelection({
+			line:  Number(node.position?.start.line) - 1,
+			ch: Number(node.position?.start.column) - 1,
+		} as EditorPosition,
+			{
+			line:Number(node.position?.end.line) - 1,
+			ch: Number(node.position?.end.column) - 1
+		} as EditorPosition)
+	}
+
+	updateBlockSettingWithInternalSetting = (settingObject: SmartGanttSettings,
+												   context: MarkdownPostProcessorContext) => {
+
+		const sourcePath = context.sourcePath
+		//@ts-ignore
+		const elInfo = context.getSectionInfo(context.el)
+		// console.log(elInfo)
+		if (elInfo) {
+			// console.log(elInfo.text)
+			let linesFromFile = elInfo.text.split(/(.*?\n)/g)
+			linesFromFile.forEach((e, i) => {
+				if (e === "") linesFromFile.splice(i, 1)
+			})
+			// console.log(linesFromFile)
+			linesFromFile.splice(elInfo.lineStart + 1,
+				elInfo.lineEnd - elInfo.lineStart - 1,
+				JSON.stringify(settingObject, null, "\t"), "\n")
+			// console.log(linesFromFile)
+			const newSettingsString = linesFromFile.join("")
+			const file = this.thisPlugin.app.vault.getFileByPath(sourcePath)
+			if (file) {
+				this.thisPlugin.app.vault.modify(file, newSettingsString)
+			}
+		}
+
+	}
+
+
 
 }

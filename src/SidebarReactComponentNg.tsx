@@ -9,6 +9,7 @@ import MermaidCrafter from "./MermaidCrafter";
 import {loadMermaid, MarkdownView, TFile} from "obsidian";
 import {JSX} from "react/jsx-runtime";
 import {escapeRegExp} from "lodash";
+import {ViewMode} from "gantt-task-react";
 
 const SidebarReactComponentNg = (props: {
 	thisPlugin: SmartGanttPlugin
@@ -42,7 +43,9 @@ const SidebarReactComponentNg = (props: {
 			{
 				doneShowQ: true,
 				todoShowQ: true,
-				pathListFilter: ["AllFiles"]
+				pathListFilter: ["AllFiles"],
+				leftBarChartDisplayQ:true,
+				viewMode:ViewMode.Day
 			})
 
 	const [tempSettings, setTempSettings] = useState<SmartGanttSettings>(structuredClone(settings))
@@ -151,17 +154,9 @@ fill: ${appStyle.getPropertyValue("--text-normal")} !important;
 				className={"cursor-pointer"}
 				onChange={(e) => {
 					if (e.target.checked) {
-						setTempSettings({
-							todoShowQ: true,
-							doneShowQ: tempSettings.doneShowQ,
-							pathListFilter: tempSettings.pathListFilter
-						})
+						setTempSettings(({...tempSettings,todoShowQ:true}))
 					} else {
-						setTempSettings({
-							todoShowQ: false,
-							doneShowQ: tempSettings.doneShowQ,
-							pathListFilter: tempSettings.pathListFilter
-						})
+						setTempSettings({...tempSettings,todoShowQ:false})
 					}
 				}}
 				type={"checkbox"} id={"smart-gantt-sidebar-todoq"}
@@ -175,17 +170,9 @@ fill: ${appStyle.getPropertyValue("--text-normal")} !important;
 				className={"cursor-pointer"}
 				onChange={(e) => {
 					if (e.target.checked) {
-						setTempSettings({
-							todoShowQ: tempSettings.todoShowQ,
-							doneShowQ: true,
-							pathListFilter: tempSettings.pathListFilter
-						})
+						setTempSettings({...tempSettings,doneShowQ:true})
 					} else {
-						setTempSettings({
-							todoShowQ: tempSettings.todoShowQ,
-							doneShowQ: false,
-							pathListFilter: tempSettings.pathListFilter
-						})
+						setTempSettings({...tempSettings,doneShowQ:false})
 					}
 				}}
 				type={"checkbox"} id={"smart-gantt-sidebar-doneq"}
@@ -283,11 +270,7 @@ fill: ${appStyle.getPropertyValue("--text-normal")} !important;
 					   name={"smart-gantt-sidebar-radio-filter-path"}
 					   onChange={(e) => {
 						   if (e.target.checked) {
-							   setTempSettings({
-								   pathListFilter: ["AllFiles"],
-								   todoShowQ: tempSettings.todoShowQ,
-								   doneShowQ: tempSettings.doneShowQ
-							   })
+							   setTempSettings({...tempSettings,pathListFilter:["AllFiles"]})
 						   }
 					   }}
 					   checked={tempSettings?.pathListFilter.indexOf("AllFiles") !== -1}
@@ -300,11 +283,7 @@ fill: ${appStyle.getPropertyValue("--text-normal")} !important;
 					   name={"smart-gantt-sidebar-radio-filter-path"}
 					   onChange={(e) => {
 						   if (e.target.checked) {
-							   setTempSettings({
-								   pathListFilter: ["CurrentFile"],
-								   todoShowQ: tempSettings.todoShowQ,
-								   doneShowQ: tempSettings.doneShowQ
-							   })
+							   setTempSettings({...tempSettings,pathListFilter:["CurrentFile"]})
 						   }
 					   }}
 					   checked={tempSettings?.pathListFilter.indexOf("CurrentFile") !== -1}
@@ -317,11 +296,7 @@ fill: ${appStyle.getPropertyValue("--text-normal")} !important;
 					   name={"smart-gantt-sidebar-radio-filter-path"}
 					   onChange={(e) => {
 						   if (e.target.checked) {
-							   setTempSettings({
-								   pathListFilter: [],
-								   doneShowQ: tempSettings.doneShowQ,
-								   todoShowQ: tempSettings.todoShowQ
-							   })
+							   setTempSettings({...tempSettings,pathListFilter:[]})
 						   }
 					   }}
 					   checked={tempSettings?.pathListFilter.indexOf("CurrentFile") === -1 &&

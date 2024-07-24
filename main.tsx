@@ -3,11 +3,14 @@ import SmartGanttSibeBarView from "./src/SmartGanttSibeBarView";
 import {Helper} from "./src/Helper";
 import SettingManager, {SmartGanttSettings} from "./src/SettingManager";
 import GanttBlockManager from "./src/GanttBlockManager";
+import {ViewMode} from "gantt-task-react";
 
 const DEFAULT_SETTINGS: SmartGanttSettings = {
 	pathListFilter: ["AllFiles"],
 	todoShowQ: true,
-	doneShowQ: true
+	doneShowQ: true,
+	leftBarChartDisplayQ:true,
+	viewMode:ViewMode.Day
 
 }
 

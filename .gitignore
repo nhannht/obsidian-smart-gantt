@@ -23,3 +23,5 @@ data.json
 /styles.css
 /main.css
 /obsidian-smart-gantt-document/.obsidian/
+/script/test-remark.mjs
+/script/test-tree-shitter.mjs
