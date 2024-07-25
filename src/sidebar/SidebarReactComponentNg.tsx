@@ -1,38 +1,21 @@
 import SmartGanttPlugin from "../../main";
-import {useLocalStorage, useMeasure} from "react-use";
-import {SmartGanttSettings} from "../SettingManager";
-import {useEffect, useState} from "react";
-import MarkdownProcesser, {TokenWithFile} from "../MarkdownProcesser";
-import TimelineExtractor, {TimelineExtractorResult} from "../TimelineExtractor";
-import {Chrono} from "chrono-node";
-import MermaidCrafter from "../util/MermaidCrafter";
-import {loadMermaid, MarkdownView, TFile} from "obsidian";
-import {JSX} from "react/jsx-runtime";
-import {escapeRegExp} from "lodash";
-import {ViewMode} from "gantt-task-react";
+import {useLocalStorage} from "react-use";
+import {SmartGanttSettings} from "@/SettingManager";
+import {useCallback, useEffect, useState} from "react";
+import MarkdownProcesser from "../MarkdownProcesser";
+import TimelineExtractor, {TimelineExtractorResultNg} from "../TimelineExtractor";
+import {Chrono, ParsedComponents} from "chrono-node";
+import {Task, ViewMode} from "gantt-task-react";
+import {ListItem} from "mdast";
+import SmartGanttChart from "@/component/SmartGanttChart";
+import SettingViewComponent from "@/component/SettingViewComponent";
+import {NavBar} from "@/BlockComponent/SmartGanttBlockReactComponentNg";
+import {ResizableHandle, ResizablePanel, ResizablePanelGroup} from "@/component/ResizablePanel";
+import TaskList from "@/component/TaskList";
 
 const SidebarReactComponentNg = (props: {
 	thisPlugin: SmartGanttPlugin
 }) => {
-
-	const [resultWithChronoCount, setResultWithChronoCount] = useState(0)
-	const [timelineResults, setTimelineResults] = useState<TimelineExtractorResult[]>([])
-	const [craft, setCraft] = useState("")
-	const [isSettingQ, setIsSettingQ] = useState(false)
-	const [mermaidSvgRef, mermaidSvgRefMeasure] = useMeasure()
-	const [appStyle,_setAppStyle] = useState(getComputedStyle(document.body))
-
-	const countResultWithChrono = (results: TimelineExtractorResult[]) => {
-		setResultWithChronoCount(0)
-		results.forEach(r => {
-			if (r.parsedResultsAndRawText.parsedResults) {
-				setResultWithChronoCount(resultWithChronoCount + 1)
-
-			}
-		})
-
-
-	}
 
 
 	const [settings,
@@ -43,434 +26,158 @@ const SidebarReactComponentNg = (props: {
 			{
 				doneShowQ: true,
 				todoShowQ: true,
-				pathListFilter: ["AllFiles"],
-				leftBarChartDisplayQ:true,
-				viewMode:ViewMode.Day
+				pathListFilter: ["CurrentFile"],
+				leftBarChartDisplayQ: false,
+				viewMode: ViewMode.Day
 			})
+	const [timelineResults, setTimelineResults] = useState<TimelineExtractorResultNg[]>([])
 
-	const [tempSettings, setTempSettings] = useState<SmartGanttSettings>(structuredClone(settings))
-
-	async function extractedSentencesTokenFromFiles(allMarkdownFiles: TFile[]) {
-		if (settings) {
-			// console.log(settings)
-			// let s = settings
-			const markdownProcesser = new MarkdownProcesser(allMarkdownFiles, props.thisPlugin)
-			await markdownProcesser.parseAllFiles(settings)
-			return markdownProcesser.documents;
+	const [isSettingQ, setIsSettingQ] = useState(false)
+	const [tasks, setTasks] = useState<Task[]>([])
+	const reupdateData = useCallback(async () => {
+		const allMarkdownFiles = props.thisPlugin.app.vault.getMarkdownFiles();
+		const markdownProcesser = new MarkdownProcesser(allMarkdownFiles, props.thisPlugin)
+		if (!settings) {
+			console.log("settings is undefined")
+			saveSettings({
+				doneShowQ: true,
+				todoShowQ: true,
+				pathListFilter: ["CurrentFile"],
+				leftBarChartDisplayQ: false,
+				viewMode: ViewMode.Day
+			})
 		}
-		return []
-	}
-
-	async function getResultsWithChrono(allSentences: TokenWithFile[] | any[]) {
+		//@ts-ignore
+		await markdownProcesser.parseAllFilesNg(settings)
+		const allNodes = markdownProcesser.nodes
+		// console.log(allNodes)
 		const timelineExtractor = new TimelineExtractor(new Chrono())
-		return await timelineExtractor.GetTimelineDataFromDocumentArrayWithChrono(allSentences);
-	}
+		const timelineExtractorResults = await timelineExtractor.GetTimelineDataFromNodes(allNodes)
+		// console.log(timelineExtractorResults)
+		setTimelineResults(timelineExtractorResults)
+		// console.log(tasks)
+	}, [settings])
 
 
-
-	function initMermaid() {
-		// console.log(appStyle.getPropertyValue("--text-normal"))
-
-		loadMermaid()
-			.then((mermaid: any) => {
-				mermaid.initialize({
-					// security: 'loose',
-					startOnLoad: true,
-					maxTextSize: 99999,
-					theme: "forest",
-					themeCSS:`
-.grid .tick {
-  stroke: lightgrey;
-  opacity: 0.3;
-  shape-rendering: crispEdges;
-}
-
-
-.taskText.clickable {
-  fill: ${appStyle.getPropertyValue("--text-normal")} !important; 
-  text-anchor: middle;
-}
-
-.taskTextOutsideRight.clickable  {
-fill: ${appStyle.getPropertyValue("--text-normal")} !important;
-
-}
-.taskTextOutsideLeft.clickable {
-  fill: ${appStyle.getPropertyValue("--text-normal")} !important ; 
-  text-anchor: end;
-}
-
-
-.sectionTitle {
-fill: ${appStyle.getPropertyValue("--text-muted")} !important;
-}
-
-text {
-fill: ${appStyle.getPropertyValue("--text-normal")} !important;
-}
-					`,
-				});
-				mermaid.contentLoaded();
-			})
-	}
-
-
-	const getAllParentPath = () => {
-		if (props.thisPlugin) {
-			let allParentPath: Set<string> = new Set()
-			props.thisPlugin?.app.vault.getMarkdownFiles().forEach(r => {
-				r.parent?.path ? allParentPath.add(r.parent.path) : null
-			})
-			return Array.from(allParentPath)
-		}
-		return []
-	}
-
+	const createDateFromKnownValues = useCallback((p: ParsedComponents) => {
+			//@ts-ignore
+			const knownValues = p.knownValues
+			return new Date(knownValues.year, knownValues.month, knownValues.day)
+		}, []
+	)
 
 	useEffect(() => {
-		const allMarkdownFiles = props.thisPlugin.app.vault.getMarkdownFiles();
-		extractedSentencesTokenFromFiles(allMarkdownFiles).then((allSentences) => {
-				getResultsWithChrono(allSentences).then((parsedResults) => {
-					// console.log(parsedResult)
-					countResultWithChrono(parsedResults)
-					// console.log(resultWithChronoCount)
-					setTimelineResults(parsedResults)
-					// const timelineData = timelineExtractor.timelineData
-					const mermaidCrafter = new MermaidCrafter(props.thisPlugin)
-					setCraft(mermaidCrafter.craftMermaid(parsedResults))
-					// console.log(craft)
-					// console.log(settings)
-					// console.log(craft)
-				})
-			}
-		)
-		// console.log(allSentences)
+		reupdateData().then(_r => null)
+	}, [settings])
 
-
-	}, [settings]);
-	const statusCheckboxFilterPanel = <div>
-		<div>
-			<input
-				className={"cursor-pointer"}
-				onChange={(e) => {
-					if (e.target.checked) {
-						setTempSettings(({...tempSettings,todoShowQ:true}))
-					} else {
-						setTempSettings({...tempSettings,todoShowQ:false})
-					}
-				}}
-				type={"checkbox"} id={"smart-gantt-sidebar-todoq"}
-				checked={tempSettings.todoShowQ}
-
-			/>
-			<label htmlFor={"smart-gantt-sidebar-todoq"}>TodoQ</label>
-		</div>
-		<div>
-			<input
-				className={"cursor-pointer"}
-				onChange={(e) => {
-					if (e.target.checked) {
-						setTempSettings({...tempSettings,doneShowQ:true})
-					} else {
-						setTempSettings({...tempSettings,doneShowQ:false})
-					}
-				}}
-				type={"checkbox"} id={"smart-gantt-sidebar-doneq"}
-				checked={tempSettings.doneShowQ}
-			/>
-			<label htmlFor={"smart-gantt-sidebar-doneq"}>Done</label>
-		</div>
-	</div>
-
-
-	const settingsViewButtonPanel = () => {
-		if (isSettingQ) {
-			return <div
-				className={"flex flex-row justify-around items-center"}
-			>
-				<div
-					className={"cursor-pointer"}
-					onClick={() => {
-						saveSettings(tempSettings)
-						setIsSettingQ(false)
-						props.thisPlugin.helper.reloadView()
-					}}
-				>Save
-				</div>
-				<div
-
-					className={"cursor-pointer"}
-					onClick={() => {
-						setIsSettingQ(false)
-						// props.thisPlugin.helper.reloadView()
-					}}
-				>Cancel
-				</div>
-				{statusCheckboxFilterPanel}
-
-			</div>
-		} else {
-			return (
-				<div className={"flex flex-row  justify-around"}>
-					<div
-						className={"cursor-pointer"}
-						onClick={() => {
-							setIsSettingQ(true)
-						}}
-					>
-						Settings
-					</div>
-					<div className={"cursor-pointer"}
-						 onClick={async () => {
-							 await props.thisPlugin.helper.reloadView()
-						 }}
-					>
-						Reload
-					</div>
-				</div>
-			)
-		}
-	}
-
-	const customPathListCheckboxs = <div
-		hidden={
-			tempSettings.pathListFilter.indexOf("AllFiles") !== -1 ||
-			tempSettings.pathListFilter.indexOf("CurrentFile") !== -1
-		}
-	>
-		{getAllParentPath().map((path, pathIndex) => {
-			return <div
-				key={path}
-			>
-				<input
-					onChange={(e) => {
-						const temp: SmartGanttSettings = structuredClone(tempSettings)
-						if (e.target instanceof HTMLInputElement && e.target.checked) {
-							temp.pathListFilter.push(path)
-							setTempSettings(temp)
-						} else {
-							temp.pathListFilter.remove(path)
-							setTempSettings(temp)
-						}
-					}}
-					type={"checkbox"}
-					id={`pathFilterRadioGanttBlock-${pathIndex}`}
-					checked={tempSettings.pathListFilter.indexOf(path) !== -1}
-				></input>
-				<label htmlFor={`pathFilterRadioGanttBlock-${pathIndex}`}>{path}</label>
-			</div>
-		})}
-	</div>;
-
-
-	const pathFilterSettingsPanel = () => {
-		return <div className={"flex flex-row justify-around"}>
-			<div>
-				<input type={"radio"} id={"smart-gantt-sidebar-radio-all-files-settings"}
-					   name={"smart-gantt-sidebar-radio-filter-path"}
-					   onChange={(e) => {
-						   if (e.target.checked) {
-							   setTempSettings({...tempSettings,pathListFilter:["AllFiles"]})
-						   }
-					   }}
-					   checked={tempSettings?.pathListFilter.indexOf("AllFiles") !== -1}
-				></input>
-				<label htmlFor={"smart-gantt-sidebar-radio-all-files-settings"}>All Files</label>
-			</div>
-
-			<div>
-				<input type={"radio"} id={"smart-gantt-sidebar-radio-current-file-settings"}
-					   name={"smart-gantt-sidebar-radio-filter-path"}
-					   onChange={(e) => {
-						   if (e.target.checked) {
-							   setTempSettings({...tempSettings,pathListFilter:["CurrentFile"]})
-						   }
-					   }}
-					   checked={tempSettings?.pathListFilter.indexOf("CurrentFile") !== -1}
-				></input>
-				<label htmlFor={"smart-gantt-sidebar-radio-current-file-settings"}>Current File</label>
-			</div>
-
-			<div>
-				<input type={"radio"} id={"smart-gantt-sidebar-radio-custom-path-settings"}
-					   name={"smart-gantt-sidebar-radio-filter-path"}
-					   onChange={(e) => {
-						   if (e.target.checked) {
-							   setTempSettings({...tempSettings,pathListFilter:[]})
-						   }
-					   }}
-					   checked={tempSettings?.pathListFilter.indexOf("CurrentFile") === -1 &&
-						   tempSettings?.pathListFilter.indexOf("AllFiles") === -1}
-				></input>
-				<label htmlFor={"smart-gantt-sidebar-radio-custom-path-settings"}>Custom Directory</label>
-			</div>
-		</div>
-	}
-
-	const settingView = () => {
-		return <>
-			{/*<div>hello world</div>*/}
-			{pathFilterSettingsPanel()}
-			{customPathListCheckboxs}
-
-		</>
-	}
-
-	async function searchAndJumpToTask(text: string, file: TFile) {
-		const leaf = props.thisPlugin.app.workspace.getLeaf(false);
-		await leaf.openFile(file)
-		const view = leaf.view as MarkdownView
-		const fileContent = await props.thisPlugin.app.vault.read(file)
-		const regex = new RegExp(escapeRegExp(text))
-		const lines = fileContent.split("\n")
-		// console.log(smartGanttTask.getText())
-		// console.log(lines)
-		for (let i = 0; i < lines.length; i++) {
-			const match = lines[i].trim().search(regex)
-			// console.log(match)
-			if (match !== -1) {
-				// console.log(lines[i])
-				view.editor.setCursor({
-					line: i,
-					ch: 0
-				})
-				view.editor.setSelection({
-						line: i,
-						ch: match
+	useEffect(() => {
+		let tempTasks: Task[] = []
+		timelineResults.forEach((timelineResult, _tIndex) => {
+			if (timelineResult.parsedResult) {
+				// console.log(timelineResult.parsedResult.start)
+				const startComponent = timelineResult.parsedResult.start
+				const endComponent = timelineResult.parsedResult.end
+				let task: Task = {
+					start: createDateFromKnownValues(startComponent),
+					end: endComponent ? createDateFromKnownValues(endComponent) : createDateFromKnownValues(startComponent),
+					//@ts-ignore
+					name: timelineResult.node.children[0].children[0].value,
+					id: `${timelineResult.id}`,
+					type: 'task',
+					progress: 50,
+					isDisabled: true,
+					styles: (timelineResult.node as ListItem).checked ? {
+						progressColor: '#df1fc0',
+						progressSelectedColor: '#20f323'
+					} : {
+						progressColor: '#ffffff',
+						progressSelectedColor: '#000000'
 					},
-					{
-						line: i,
-						ch: match + text.length
-					})
-				view.editor.scrollTo(i)
-				break
-			}
-
-		}
-	}
-
-	async function switchCheckBoxHandler(timelineR: TimelineExtractorResult, _index: number, checkbox: HTMLInputElement) {
-		// console.log(text)
-		// console.log(file)
-		if (checkbox.checked) {
-
-			// console.log(taskRawText)
-			const taskRawTextSwitch = timelineR.token.raw.replace("[ ]", "[x]")
-
-			let fileContent = await props.thisPlugin.app.vault.read(timelineR.file)
-			await props.thisPlugin.app.vault.modify(timelineR.file, fileContent.replace(timelineR.token.raw.trim(), taskRawTextSwitch.trim()))
-
-
-		} else if (!checkbox.checked) {
-			// console.log(taskRawText)
-			const taskRawTextSwitch = timelineR.token.raw.replace("[x]", "[ ]")
-			// console.log(taskRawTextSwitch)
-
-			let fileContent = await props.thisPlugin.app.vault.read(timelineR.file)
-			// console.log(fileContent)
-			await props.thisPlugin.app.vault.modify(timelineR.file, fileContent.replace(timelineR.token.raw.trim(), taskRawTextSwitch.trim()))
-
-
-		}
-		props.thisPlugin.helper.reloadView()
-
-
-	}
-
-	const listTaskView = () => {
-		// console.log(timelineResults)
-		let o: JSX.Element[] = []
-		timelineResults.forEach((timelineR, timelineRIndex) => {
-			if (timelineR.parsedResultsAndRawText.parsedResults) {
-				timelineR.parsedResultsAndRawText.parsedResults.forEach((_r, rIndex) => {
-					o.push(
-						<div key={`smart-gantt-sidebar-task-list-${timelineRIndex}-${rIndex}`}>
-							<input
-								onChange={async (e) => {
-									await switchCheckBoxHandler(timelineR, timelineRIndex, e.target)
-								}}
-								type={"checkbox"} id={`smart-gantt-sidebar-task-list-${timelineRIndex}-${rIndex}`}
-								//@ts-ignore
-								checked={timelineResults[timelineRIndex].token.checked}
-
-							></input>
-
-							<label
-								onClick={async (e) => {
-									e.preventDefault()
-									await searchAndJumpToTask(timelineR.parsedResultsAndRawText.rawText, timelineR.file)
-
-								}}
-								htmlFor={`smart-gantt-sidebar-task-list-${timelineRIndex}-${rIndex}`}>{timelineR.parsedResultsAndRawText.rawText}</label>
-						</div>
-					)
-				})
-			} else {
-				o.push(
-					<div key={`smart-gantt-sidebar-task-list-${timelineRIndex}`}>
-						<input
-							onChange={async (e) => {
-								await switchCheckBoxHandler(timelineR, timelineRIndex, e.target)
-							}}
-							type={"checkbox"} id={`smart-gantt-sidebar-task-list-${timelineRIndex}`}
-							//@ts-ignore
-							checked={timelineResults[timelineRIndex].token.checked}
-						></input>
-						<label
-							onClick={async (e) => {
-								e.preventDefault()
-								await searchAndJumpToTask(timelineR.parsedResultsAndRawText.rawText, timelineR.file)
-							}}
-							htmlFor={`smart-gantt-sidebar-task-list-${timelineRIndex}`}>{timelineR.parsedResultsAndRawText.rawText}</label>
-					</div>
-				)
+				}
+				// console.log(task)
+				tempTasks.push(task)
 			}
 		})
-		return o
+		setTasks(tempTasks)
+	}, [timelineResults])
+	const modifyResultsStatus = useCallback((resultId: string, status: boolean) => {
+		let resultsClone = [...timelineResults]
+		// console.log(resultsClone)
+		// console.log(timelineResults)
+		let resultFind = resultsClone.find(r => r.id === resultId)
+		// console.log(resultId)
+		// console.log(resultFind)
+		if (resultFind) {
+			//@ts-ignore
+			resultFind.node.checked = status
+			setTimelineResults(resultsClone)
+		}
 
-	}
+	}, [timelineResults])
 
 
-	const mermaidSvgComponent = () => {
-		return (
-			// @ts-ignore
-			<main ref={mermaidSvgRef}>
-				{
-					mermaidSvgRefMeasure.width > 0
-						? <pre className={"mermaid"} id={"mermaidHolder"}>{craft}</pre> : <></>
-				}
+	let mainComponent = <></>
+
+
+	if (isSettingQ) {
+		mainComponent = <main>
+			<SettingViewComponent
+				isSettingsQ={isSettingQ}
+				isSettingsQHandle={(is) => {
+					setIsSettingQ(is)
+				}}
+				inputS={settings}
+				saveSettings={(s) => {
+					saveSettings(s)
+				}}
+				thisPlugin={props.thisPlugin}
+			/>
+		</main>
+	} else {
+		if (tasks.length > 0) {
+			mainComponent = <main>
+				<div className={"w-full flex justify-center p-2"}>
+					<NavBar
+						setIsSettingQFn={setIsSettingQ}
+						thisPlugin={props.thisPlugin}
+						reloadViewButtonQ={true}
+					/>
+				</div>
+				<ResizablePanelGroup
+					direction={"vertical"}
+					className={"h-screen"}
+				>
+					<ResizablePanel defaultSize={50} minSize={30}>
+						<SmartGanttChart
+							tasks={tasks}
+							thisPlugin={props.thisPlugin}
+							settings={settings}
+							results={timelineResults}
+						/>
+					</ResizablePanel>
+					<ResizableHandle withHandle={true}/>
+					<ResizablePanel defaultSize={50}>
+						<TaskList results={timelineResults}
+								  thisPlugin={props.thisPlugin}
+								  changeResultStatusFn={modifyResultsStatus}/>
+					</ResizablePanel>
+				</ResizablePanelGroup>
+				{/*<TaskList results={timelineResults}*/}
+				{/*		  thisPlugin={props.thisPlugin}*/}
+				{/*		  changeResultStatusFn={modifyResultsStatus}*/}
+				{/*/>*/}
 			</main>
-		)
-	}
-
-	const mainComponent = () => {
-		initMermaid()
-		if (isSettingQ) {
-			return settingView()
 		} else {
-			return <main
-				onContextMenu={() => {
-					setIsSettingQ(true)
-				}}>
-				{mermaidSvgComponent()}
-				{listTaskView()}
-
+			mainComponent = <main
+				onContextMenu={() => setIsSettingQ(true)}>
+				<button onClick={() => reupdateData()}>Update data</button>
 			</main>
 		}
 	}
 
-
-	return <div className={"h-screen"}>
-		{/*<button onClick={()=>setCount(count + 1)}>click</button>*/}
-		{/*<div>{count}</div>*/}
-		{mainComponent()}
-		<div
-			className={" fixed p-2  bottom-8 left-1/2 w-[360px] max-w-[92%] z-50 -translate-x-1/2 rounded-xl bg-[--text-normal] text-[--background-primary] mb-safe mb-5  backdrop-blur-lg"}
-		>
-			{settingsViewButtonPanel()}
-
-		</div>
-	</div>
+	return <>
+		{mainComponent}
+	</>
 
 
 }

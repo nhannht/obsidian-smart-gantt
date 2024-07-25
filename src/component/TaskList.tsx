@@ -12,6 +12,7 @@ const TodoList = (props: {
 	todos: TimelineExtractorResultNg[],
 	modifyCheckboxFn: (t: TimelineExtractorResultNg, status: boolean) => void
 	changeResultStatusFn: (rId: string, status: boolean) => void
+	jumpToResultPositionFn: (t:TimelineExtractorResultNg)=>void
 }) => {
 	return <ScrollArea className={"h-72 w-full rounded-md border p-2"}>
 		<div className="mb-4 text-sm font-medium leading-none bg-gray-900 sticky top-0 text-white p-2 text-center">Unchecked</div>
@@ -31,7 +32,11 @@ const TodoList = (props: {
 					>
 						{/*@ts-ignore*/}
 						{t.node.children[0].children[0].value}
-					</Label></div>
+						<p className={"text-gray-600 underline text-sm hover:cursor-pointer"}
+						onClick={()=>{props.jumpToResultPositionFn(t)}}
+						> {t.file.path} </p>
+					</Label>
+				</div>
 				<Separator className={"my-2"}/>
 
 			</div>
@@ -44,6 +49,7 @@ const DoneList = (props: {
 	dones: TimelineExtractorResultNg[],
 	modifyCheckboxFn: (t: TimelineExtractorResultNg, status: boolean) => void,
 	changeResultStatusFn: (rId: string, status: boolean) => void
+	jumpToResultPositionFn: (t: TimelineExtractorResultNg)=> void;
 }) => {
 	return <ScrollArea className={"h-72 w-full rounded-md border p-2"}>
 		<div className="mb-4 text-sm font-medium leading-none bg-gray-900 sticky top-0 text-white p-2 text-center">Checked</div>
@@ -58,11 +64,13 @@ const DoneList = (props: {
 					}}
 					checked={Boolean((props.dones.find(e => e.id === d.id)?.node as ListItem).checked)}
 				/>
-					<Label
-						htmlFor={d.id}
-					>
+					<Label htmlFor={d.id}>
 						{/*@ts-ignore*/}
 						{d.node.children[0].children[0].value}
+						<p className={"text-gray-600 underline text-sm hover:cursor-pointer"}
+						onClick={()=>{props.jumpToResultPositionFn(d)}}
+						> {d.file.path} </p>
+
 					</Label></div>
 				<Separator className={"my-2"}/>
 			</div>
@@ -91,7 +99,7 @@ const TaskList = (props: {
 		})
 		setTodos(ts)
 		setDones(ds)
-	}, [])
+	}, [props.results])
 
 	useEffect(() => {
 		classifyResults()
@@ -125,21 +133,27 @@ const TaskList = (props: {
 	// }, [todos]);
 
 
+
+
 	return <div>
 		<ResizablePanelGroup
 			direction={"horizontal"}
-			className={"rounded-lg-border"}
+			className={"rounded-lg border"}
 		>
 			<ResizablePanel defaultSize={50}>
 				<TodoList todos={todos}
 						  modifyCheckboxFn={modifyCheckboxFn}
-						  changeResultStatusFn={props.changeResultStatusFn}/>
+						  changeResultStatusFn={props.changeResultStatusFn}
+						  jumpToResultPositionFn={props.thisPlugin.helper.jumpToPositionOfResult}
+				/>
 			</ResizablePanel>
-			<ResizableHandle/>
+			<ResizableHandle withHandle={true}/>
 			<ResizablePanel defaultSize={50}>
 				<DoneList dones={dones}
 						  modifyCheckboxFn={modifyCheckboxFn}
-						  changeResultStatusFn={props.changeResultStatusFn}/>
+						  changeResultStatusFn={props.changeResultStatusFn}
+						  jumpToResultPositionFn={props.thisPlugin.helper.jumpToPositionOfResult}
+				/>
 			</ResizablePanel>
 		</ResizablePanelGroup>
 	</div>

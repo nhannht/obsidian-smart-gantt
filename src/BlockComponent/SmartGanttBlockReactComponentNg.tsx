@@ -7,10 +7,66 @@ import TimelineExtractor, {TimelineExtractorResultNg} from "../TimelineExtractor
 import {Chrono, ParsedComponents} from "chrono-node";
 import {Task} from 'gantt-task-react';
 import SettingViewComponent from "../component/SettingViewComponent";
-import TaskList from "../component/TaskList";
-import {NavBar} from "./SmartGanttBlockReactComponentNg";
+import {
+	NavigationMenu,
+	NavigationMenuItem,
+	NavigationMenuLink,
+	NavigationMenuList,
+	navigationMenuTriggerStyle
+} from "@/component/NavMenu";
+import SmartGanttChart from "../component/SmartGanttChart";
+import {ListItem} from "mdast";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/component/Tooltip";
 
-export const TaskListMdBlock = (props: {
+export const NavBar = (props: {
+	setIsSettingQFn: (status: boolean) => void
+	thisPlugin?: SmartGanttPlugin,
+	reloadViewButtonQ?: boolean,
+}) => {
+	let reloadButton: JSX.Element
+	if ("reloadViewButtonQ" in props && "thisPlugin" in props && props.reloadViewButtonQ === true) {
+		reloadButton = <NavigationMenuItem>
+			<TooltipProvider>
+				<Tooltip >
+					<TooltipTrigger asChild>
+						<NavigationMenuLink
+							className={navigationMenuTriggerStyle()}
+							onClick={() => {
+								props.thisPlugin?.helper.reloadView()
+							}}>
+							Reload
+						</NavigationMenuLink>
+					</TooltipTrigger>
+					<TooltipContent side={"bottom"}>
+						<div >
+							<br/>
+							The change from inside this plugin (sidebar/block) will affect outside.<br/>
+							But any change from the outside (eg. you edit the file) will not auto trigger the update.<br/>
+							So please click this button to manual update
+						</div>
+					</TooltipContent>
+				</Tooltip>
+			</TooltipProvider>
+
+		</NavigationMenuItem>
+	} else {
+		reloadButton = <></>
+	}
+
+	return <NavigationMenu>
+		<NavigationMenuList>
+			<NavigationMenuItem>
+				<NavigationMenuLink
+					onClick={() => props.setIsSettingQFn(true)}
+					className={navigationMenuTriggerStyle()}>Settings</NavigationMenuLink>
+			</NavigationMenuItem>
+			{reloadButton}
+
+		</NavigationMenuList>
+	</NavigationMenu>
+}
+
+export const SmartGanttBlockReactComponentNg = (props: {
 	ctx: MarkdownPostProcessorContext,
 	src: string,
 	thisPlugin: SmartGanttPlugin,
@@ -50,7 +106,7 @@ export const TaskListMdBlock = (props: {
 
 	useEffect(() => {
 		let tempTasks: Task[] = []
-		timelineResults.forEach((timelineResult, tIndex) => {
+		timelineResults.forEach((timelineResult, _tIndex) => {
 			if (timelineResult.parsedResult) {
 				// console.log(timelineResult.parsedResult.start)
 				const startComponent = timelineResult.parsedResult.start
@@ -60,11 +116,17 @@ export const TaskListMdBlock = (props: {
 					end: endComponent ? createDateFromKnownValues(endComponent) : createDateFromKnownValues(startComponent),
 					//@ts-ignore
 					name: timelineResult.node.children[0].children[0].value,
-					id: `${tIndex}`,
+					id: `${timelineResult.id}`,
 					type: 'task',
 					progress: 50,
 					isDisabled: true,
-					styles: {progressColor: '#ffbb54', progressSelectedColor: '#ff9e0d'},
+					styles: (timelineResult.node as ListItem).checked ? {
+						progressColor: '#df1fc0',
+						progressSelectedColor: '#20f323'
+					} : {
+						progressColor: '#ffffff',
+						progressSelectedColor: '#000000'
+					},
 				}
 				// console.log(task)
 				// console.log(task)
@@ -74,24 +136,7 @@ export const TaskListMdBlock = (props: {
 		setTasks(tempTasks)
 	}, [timelineResults])
 
-	let mainComponent = <></>
-
-
-	const modifyResultsStatus = useCallback((resultId: string, status: boolean) => {
-		let resultsClone = [...timelineResults]
-		// console.log(resultsClone)
-		// console.log(timelineResults)
-		let resultFind = resultsClone.find(r => r.id === resultId)
-		// console.log(resultId)
-		// console.log(resultFind)
-		if (resultFind) {
-			//@ts-ignore
-			resultFind.node.checked = status
-			setTimelineResults(resultsClone)
-		}
-
-	}, [timelineResults])
-
+	let mainComponent: JSX.Element
 
 
 	if (isSettingQ) {
@@ -114,24 +159,28 @@ export const TaskListMdBlock = (props: {
 		</main>
 	} else {
 		if (tasks.length > 0) {
-			mainComponent = <main
-			>
-
-				{/*<GanttChart tasks={tasks}*/}
-				{/*			thisPlugin={props.thisPlugin}*/}
-				{/*			settings={internalSettings}*/}
-				{/*			results={timelineResults}*/}
-				{/*/>*/}
-				<TaskList results={timelineResults}
-						  thisPlugin={props.thisPlugin}
-						  changeResultStatusFn={modifyResultsStatus}
+			mainComponent = <main>
+				<div className={"w-full flex justify-center"}>
+					<NavBar
+						setIsSettingQFn={setIsSettingQ}/>
+				</div>
+				<SmartGanttChart
+					tasks={tasks}
+					thisPlugin={props.thisPlugin}
+					settings={internalSettings}
+					results={timelineResults}
 				/>
-				<div className={"flex justify-center"}><NavBar setIsSettingQFn={setIsSettingQ}/></div>
+				{/*<TaskList results={timelineResults}*/}
+				{/*		  thisPlugin={props.thisPlugin}*/}
+				{/*		  changeResultStatusFn={modifyResultsStatus}*/}
+				{/*/>*/}
 			</main>
 		} else {
-			mainComponent = <main
-				onContextMenu={() => setIsSettingQ(true)}>
-				<button onClick={() => reupdateData()}>Update data</button>
+			mainComponent = <main>
+				<div className={"w-full flex justify-center"}>
+					<NavBar
+						setIsSettingQFn={setIsSettingQ}/>
+				</div>
 			</main>
 		}
 	}

@@ -5,7 +5,7 @@ import {SmartGanttSettings} from "../SettingManager";
 import MarkdownProcesser from "../MarkdownProcesser";
 import TimelineExtractor, {TimelineExtractorResult} from "../TimelineExtractor";
 import {Chrono} from "chrono-node";
-import MermaidCrafter from "../util/MermaidCrafter";
+import MermaidCrafter from "../lib/MermaidCrafter";
 import {useMeasure} from "react-use";
 
 

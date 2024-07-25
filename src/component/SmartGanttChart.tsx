@@ -7,11 +7,11 @@ const SmartGanttChart = (props:{
 	tasks:Task[],
 	results:TimelineExtractorResultNg[]
 	thisPlugin:SmartGanttPlugin
-	settings:SmartGanttSettings
+	settings:SmartGanttSettings|undefined
 })=>{
 
 	let listCellWidthAttr = null
-	if (!props.settings.leftBarChartDisplayQ){
+	if (!props.settings?.leftBarChartDisplayQ){
 		listCellWidthAttr = {
 			listCellWidth: ""
 		}
@@ -24,10 +24,11 @@ const SmartGanttChart = (props:{
 		onDoubleClick={(t:Task) => props.thisPlugin.helper.jumpToPositionOfNode(t,props.results)}
 		tasks={props.tasks}
 				  // listCellWidth=""
-				  viewMode={props.settings.viewMode}
+				  viewMode={props.settings?.viewMode}
 				  {...listCellWidthAttr}
 
 				  onClick={props.thisPlugin.helper.jumpToPositionOfNode}
+		ganttHeight={300}
 	/>
 
 
