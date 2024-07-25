@@ -1,11 +1,11 @@
-import SmartGanttPlugin from "../main";
+import SmartGanttPlugin from "../../main";
 import {useLocalStorage, useMeasure} from "react-use";
-import {SmartGanttSettings} from "./SettingManager";
+import {SmartGanttSettings} from "../SettingManager";
 import {useEffect, useState} from "react";
-import MarkdownProcesser, {TokenWithFile} from "./MarkdownProcesser";
-import TimelineExtractor, {TimelineExtractorResult} from "./TimelineExtractor";
+import MarkdownProcesser, {TokenWithFile} from "../MarkdownProcesser";
+import TimelineExtractor, {TimelineExtractorResult} from "../TimelineExtractor";
 import {Chrono} from "chrono-node";
-import MermaidCrafter from "./MermaidCrafter";
+import MermaidCrafter from "../util/MermaidCrafter";
 import {loadMermaid, MarkdownView, TFile} from "obsidian";
 import {JSX} from "react/jsx-runtime";
 import {escapeRegExp} from "lodash";

@@ -1,11 +1,11 @@
 import {useEffect, useState} from "react";
 import {loadMermaid, MarkdownPostProcessorContext} from "obsidian";
-import SmartGanttPlugin from "../main";
-import {SmartGanttSettings} from "./SettingManager";
-import MarkdownProcesser from "./MarkdownProcesser";
-import TimelineExtractor, {TimelineExtractorResult} from "./TimelineExtractor";
+import SmartGanttPlugin from "../../main";
+import {SmartGanttSettings} from "../SettingManager";
+import MarkdownProcesser from "../MarkdownProcesser";
+import TimelineExtractor, {TimelineExtractorResult} from "../TimelineExtractor";
 import {Chrono} from "chrono-node";
-import MermaidCrafter from "./MermaidCrafter";
+import MermaidCrafter from "../util/MermaidCrafter";
 import {useMeasure} from "react-use";
 
 

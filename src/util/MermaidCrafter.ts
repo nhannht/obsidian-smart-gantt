@@ -1,6 +1,6 @@
-import {TimelineExtractorResult} from "./TimelineExtractor";
+import {TimelineExtractorResult} from "../TimelineExtractor";
 import * as AES from "crypto-js/aes";
-import SmartGanttPlugin from "../main";
+import SmartGanttPlugin from "../../main";
 
 export default class MermaidCrafter {
 	private _thisPlugin: SmartGanttPlugin;

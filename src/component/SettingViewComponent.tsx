@@ -1,14 +1,14 @@
-import {SmartGanttSettings} from "./SettingManager";
+import {SmartGanttSettings} from "../SettingManager";
 import {useState} from "react";
 // import {usePlugin} from "./ReactContext";
-import {Checkbox} from "@/component/Checkbox";
-import {Label} from "@/component/Label";
-import {RadioGroup, RadioGroupItem} from "@/component/RadioGroup";
-import SmartGanttPlugin from "../main";
-import {ScrollArea} from "@/component/ScrollableList";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/component/Select";
+import {Checkbox} from "./Checkbox";
+import {Label} from "./Label";
+import {RadioGroup, RadioGroupItem} from "./RadioGroup";
+import SmartGanttPlugin from "../../main";
+import {ScrollArea} from "./ScrollableList";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "./Select";
 import {ViewMode} from "gantt-task-react";
-import {Button} from "@/component/Button";
+import {Button} from "./Button";
 
 
 

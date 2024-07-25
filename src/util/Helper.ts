@@ -1,6 +1,6 @@
-import SmartGanttPlugin from "../main";
+import SmartGanttPlugin from "../../main";
 import {EditorPosition, MarkdownPostProcessorContext, MarkdownView, WorkspaceLeaf} from "obsidian";
-import {FilterModal} from "./FilterModal";
+import {FilterModal} from "../FilterModal";
 import {Task} from "gantt-task-react";
 import {TimelineExtractorResultNg} from "@/TimelineExtractor";
 import {Node} from "mdast"
@@ -43,7 +43,7 @@ export class Helper {
 		return Array.from(allParentPath)
 	}
 	jumpToPositionOfNode= async (task:Task,results:TimelineExtractorResultNg[])=>{
-		const result = results[Number(task.id)]
+		const result = results.find(r => r.id === task.id) as TimelineExtractorResultNg
 		const leaf = this.thisPlugin.app.workspace.getLeaf(true)
 		await leaf.openFile(result.file)
 		const view = leaf.view as MarkdownView

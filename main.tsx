@@ -1,6 +1,6 @@
 import {Plugin, WorkspaceLeaf} from 'obsidian';
-import SmartGanttSibeBarView from "./src/SmartGanttSibeBarView";
-import {Helper} from "./src/Helper";
+import SmartGanttSibeBarView from "@/sidebar/SmartGanttSibeBarView";
+import {Helper} from "@/util/Helper";
 import SettingManager, {SmartGanttSettings} from "./src/SettingManager";
 import GanttBlockManager from "./src/GanttBlockManager";
 import {ViewMode} from "gantt-task-react";
@@ -63,8 +63,9 @@ export default class SmartGanttPlugin extends Plugin {
 
 		})
 
-		await this.ganttBlockManager.registerGanttBlock()
+		// await this.ganttBlockManager.registerGanttBlock()
 		await this.ganttBlockManager.registerGanttBlockNg()
+		await this.ganttBlockManager.registerTaskListBlock()
 
 
 

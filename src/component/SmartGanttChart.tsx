@@ -3,7 +3,7 @@ import {Gantt, Task} from "gantt-task-react";
 import SmartGanttPlugin from "../../main";
 import {SmartGanttSettings} from "@/SettingManager";
 
-const GanttChart = (props:{
+const SmartGanttChart = (props:{
 	tasks:Task[],
 	results:TimelineExtractorResultNg[]
 	thisPlugin:SmartGanttPlugin
@@ -19,7 +19,10 @@ const GanttChart = (props:{
 		listCellWidthAttr = {}
 	}
 
-	return <Gantt tasks={props.tasks}
+
+	return <Gantt
+		onDoubleClick={(t:Task) => props.thisPlugin.helper.jumpToPositionOfNode(t,props.results)}
+		tasks={props.tasks}
 				  // listCellWidth=""
 				  viewMode={props.settings.viewMode}
 				  {...listCellWidthAttr}
@@ -30,4 +33,4 @@ const GanttChart = (props:{
 
 }
 
-export default GanttChart
+export default SmartGanttChart
