@@ -5,10 +5,9 @@ import {existsSync, rm, rmdirSync} from "node:fs";
 import {faker} from '@faker-js/faker'
 
 const vaultName = argv.vault ? argv.vault : (() => {
-	console.log("need --vault name argument")
+	// console.log("need --vault name argument")
 	process.exit(0)
 })()
-
 
 if (!existsSync((vaultName))) {
 	mkdirSync(vaultName)
@@ -32,19 +31,25 @@ function generateOneTaskOrParagraphs(){
 	return faker.helpers.weightedArrayElement([
 		{
 			weight: 3,
-			value: `- [ ] ${faker.lorem.slug()}`
+			value: `- [ ] ${faker.lorem.slug()}\n`
 		},
 		{
 			weight: 3,
-			value: `${faker.lorem.paragraphs({min: 1, max: 5}, "\n\n")}`
+			value: `${faker.lorem.paragraphs({min: 1, max: 5}, "\n")}\n`
 		},
 		{
 			weight: 2,
-			value: `- [ ] ${faker.lorem.slug()} from ${faker.date.past()} to ${faker.date.future()}`
+			value: (()=> {
+				let r = faker.date.recent().toLocaleString()
+				// console.log(r)
+				let s = faker.date.soon().toLocaleString()
+
+				return `\n- [ ] ${faker.lorem.slug()} from ${r} to ${s}\n`
+			})()
 		},
 		{
 			weight: 2,
-			value: `- [ ] ${faker.lorem.slug()} at ${faker.date.anytime()}`
+			value: `- [ ] ${faker.lorem.slug()} at ${faker.date.soon().toLocaleString()}\n`
 		}
 	])
 

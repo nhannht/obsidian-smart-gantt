@@ -1,9 +1,13 @@
 // import {useApp} from "./AppContext";
 import {loadMermaid, MarkdownPostProcessorContext} from "obsidian";
-import SmartGanttPlugin from "../main";
+import SmartGanttPlugin from "../../main";
 import {useMeasure} from "react-use";
 
-
+/**
+ * Very old component, not exposed anymore and better not touch this sh*t
+ * @param props
+ * @constructor
+ */
 export const SmartGanttSideBarReactComponent = (props: {
 	mermaidCraft: string,
 	ctx?: MarkdownPostProcessorContext,

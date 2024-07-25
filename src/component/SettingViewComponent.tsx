@@ -13,11 +13,11 @@ import {Button} from "./Button";
 
 
 const SettingViewComponent = (props: {
-	inputS: SmartGanttSettings,
+	inputS: SmartGanttSettings|undefined,
 	saveSettings: (s: SmartGanttSettings) => void,
 	isSettingsQ: boolean,
 	isSettingsQHandle: (b: boolean) => void,
-	updateBlockSettingHandle: (s: SmartGanttSettings) => void,
+	updateSettingInCodeBlockHandle?: (s: SmartGanttSettings) => void,
 	thisPlugin: SmartGanttPlugin
 
 }) => {
@@ -132,7 +132,9 @@ const SettingViewComponent = (props: {
 			onClick={async () => {
 				props.isSettingsQHandle(false)
 				props.saveSettings(s)
-				props.updateBlockSettingHandle(s)
+				if (props.updateSettingInCodeBlockHandle){
+					props.updateSettingInCodeBlockHandle(s)
+				}
 			}}
 		>
 			Save
