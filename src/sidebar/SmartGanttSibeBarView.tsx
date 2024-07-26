@@ -51,7 +51,7 @@ export default class SmartGanttSibeBarView extends ItemView {
 	}
 
 	override getIcon(): IconName {
-		return 'gantt-chart'
+		return 'egg'
 	}
 
 

@@ -1,6 +1,6 @@
 import SmartGanttPlugin from "../../main";
 import {EditorPosition, MarkdownPostProcessorContext, MarkdownView, WorkspaceLeaf} from "obsidian";
-import {FilterModal} from "../FilterModal";
+import {FilterModal} from "@/FilterModal";
 import {Task} from "gantt-task-react";
 import {TimelineExtractorResultNg} from "@/TimelineExtractor";
 import {Node} from "mdast"

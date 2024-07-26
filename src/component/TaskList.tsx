@@ -12,10 +12,14 @@ const TodoList = (props: {
 	todos: TimelineExtractorResultNg[],
 	modifyCheckboxFn: (t: TimelineExtractorResultNg, status: boolean) => void
 	changeResultStatusFn: (rId: string, status: boolean) => void
-	jumpToResultPositionFn: (t:TimelineExtractorResultNg)=>void
+	jumpToResultPositionFn: (t: TimelineExtractorResultNg) => void
 }) => {
+
+
 	return <ScrollArea className={"h-72 w-full rounded-md border p-2"}>
-		<div className="mb-4 text-sm font-medium leading-none bg-gray-900 sticky top-0 text-white p-2 text-center">Unchecked</div>
+		<div
+			className="mb-4 text-sm font-medium leading-none bg-gray-900 sticky top-0 text-white p-2 text-center">Unchecked
+		</div>
 		{props.todos.map((t, id) => (
 			<div key={id} className={"space-x-2 "}>
 				<div className={"flex items-center space-x-2"}><Checkbox
@@ -33,13 +37,16 @@ const TodoList = (props: {
 						{/*@ts-ignore*/}
 						{t.node.children[0].children[0].value}
 						<p className={"text-gray-600 underline text-sm hover:cursor-pointer"}
-						onClick={()=>{props.jumpToResultPositionFn(t)}}
+						   onClick={() => {
+							   props.jumpToResultPositionFn(t)
+						   }}
 						> {t.file.path} </p>
 					</Label>
 				</div>
 				<Separator className={"my-2"}/>
 
 			</div>
+
 
 		))}
 	</ScrollArea>
@@ -49,10 +56,12 @@ const DoneList = (props: {
 	dones: TimelineExtractorResultNg[],
 	modifyCheckboxFn: (t: TimelineExtractorResultNg, status: boolean) => void,
 	changeResultStatusFn: (rId: string, status: boolean) => void
-	jumpToResultPositionFn: (t: TimelineExtractorResultNg)=> void;
+	jumpToResultPositionFn: (t: TimelineExtractorResultNg) => void;
 }) => {
 	return <ScrollArea className={"h-72 w-full rounded-md border p-2"}>
-		<div className="mb-4 text-sm font-medium leading-none bg-gray-900 sticky top-0 text-white p-2 text-center">Checked</div>
+		<div
+			className="mb-4 text-sm font-medium leading-none bg-gray-900 sticky top-0 text-white p-2 text-center">Checked
+		</div>
 		{props.dones.map((d, id) => (
 			<div key={id} className={"space-x-2 "}>
 				<div className={"flex items-center space-x-2"}><Checkbox
@@ -68,7 +77,9 @@ const DoneList = (props: {
 						{/*@ts-ignore*/}
 						{d.node.children[0].children[0].value}
 						<p className={"text-gray-600 underline text-sm hover:cursor-pointer"}
-						onClick={()=>{props.jumpToResultPositionFn(d)}}
+						   onClick={() => {
+							   props.jumpToResultPositionFn(d)
+						   }}
 						> {d.file.path} </p>
 
 					</Label></div>
@@ -133,8 +144,6 @@ const TaskList = (props: {
 	// }, [todos]);
 
 
-
-
 	return <div>
 		<ResizablePanelGroup
 			direction={"horizontal"}
@@ -156,6 +165,7 @@ const TaskList = (props: {
 				/>
 			</ResizablePanel>
 		</ResizablePanelGroup>
+
 	</div>
 }
 

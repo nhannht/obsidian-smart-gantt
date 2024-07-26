@@ -33,11 +33,12 @@ export default class SmartGanttPlugin extends Plugin {
 		})
 
 
+
 		this.registerView("smart-gantt", (leaf) => {
 			return new SmartGanttSibeBarView(leaf, this);
 		})
 
-		this.addRibbonIcon('gantt-chart', 'Smart Gantt', () => {
+		this.addRibbonIcon('egg', 'Smart Gantt', () => {
 
 			let leafs = this.app.workspace.getLeavesOfType("smart-gantt");
 			if (leafs.length > 0) {

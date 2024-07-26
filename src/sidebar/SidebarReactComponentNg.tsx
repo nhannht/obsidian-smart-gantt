@@ -166,6 +166,7 @@ const SidebarReactComponentNg = (props: {
 				{/*		  thisPlugin={props.thisPlugin}*/}
 				{/*		  changeResultStatusFn={modifyResultsStatus}*/}
 				{/*/>*/}
+
 			</main>
 		} else {
 			mainComponent = <main>
