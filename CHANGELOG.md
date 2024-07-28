@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.14](https://github.com/nhannht/obsidian-smart-gantt/tree/0.1.14) (2024-07-28)
+
+[Full Changelog](https://github.com/nhannht/obsidian-smart-gantt/compare/0.1.13...0.1.14)
+
+**Closed issues:**
+
+- separate gantt chart component [\#23](https://github.com/nhannht/obsidian-smart-gantt/issues/23)
+- add json syntax highlight in the blocks [\#18](https://github.com/nhannht/obsidian-smart-gantt/issues/18)
+- Display Syntax error in text [\#8](https://github.com/nhannht/obsidian-smart-gantt/issues/8)
+- \[possible bug\]: Maximum text size in diagram exceeded [\#6](https://github.com/nhannht/obsidian-smart-gantt/issues/6)
+
 ## [0.1.13](https://github.com/nhannht/obsidian-smart-gantt/tree/0.1.13) (2024-07-26)
 
 [Full Changelog](https://github.com/nhannht/obsidian-smart-gantt/compare/0.1.12...0.1.13)
