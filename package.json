@@ -38,6 +38,8 @@
 		"zx": "^8.1.4"
 	},
 	"dependencies": {
+		"@codemirror/state": "^6.4.1",
+		"@codemirror/view": "^6.29.0",
 		"@radix-ui/react-checkbox": "^1.1.1",
 		"@radix-ui/react-label": "^2.1.0",
 		"@radix-ui/react-navigation-menu": "^1.2.0",

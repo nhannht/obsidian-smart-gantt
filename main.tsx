@@ -4,7 +4,9 @@ import {Helper} from "@/lib/Helper";
 import SettingManager, {SmartGanttSettings} from "./src/SettingManager";
 import GanttBlockManager from "./src/GanttBlockManager";
 import {ViewMode} from "gantt-task-react";
-
+import './src/lib/codemirror';
+import './src/mode/gantt/gantt'
+import './src/mode/gantt/gantt-list'
 const DEFAULT_SETTINGS: SmartGanttSettings = {
 	pathListFilter: ["AllFiles"],
 	todoShowQ: true,
@@ -18,11 +20,24 @@ export default class SmartGanttPlugin extends Plugin {
 	settingManager = new SettingManager(this, DEFAULT_SETTINGS);
 	public helper = new Helper(this)
 	ganttBlockManager = new GanttBlockManager(this)
+	modesToKeep = ["hypermd", "markdown", "null", "xml"];
+
+	refreshLeaves = () => {
+		// re-set the editor mode to refresh the syntax highlighting
+		//@ts-ignore
+		this.app.workspace.iterateCodeMirrors(cm => cm.setOption("mode", cm.getOption("mode")))
+	}
 
 
 
 	override async onload() {
 		await this.settingManager.loadSettings()
+
+		this.app.workspace.onLayoutReady(() => {
+			this.refreshLeaves()
+
+		})
+
 		// console.log(this.settingManager.settings)
 		this.addCommand({
 			id: 'smart-gantt-reload',
@@ -79,6 +94,16 @@ export default class SmartGanttPlugin extends Plugin {
 	override async onunload() {
 		// this.app.workspace.detachLeavesOfType("gantt-chart")
 		await this.settingManager.saveSettings(this.settingManager.settings)
+		//@ts-ignore
+		for (const key in CodeMirror.modes) {
+			// @ts-ignore
+			if (CodeMirror.modes.hasOwnProperty(key) && !this.modesToKeep.includes(key)) {
+				// @ts-ignore
+				delete CodeMirror.modes[key];
+			}
+			this.refreshLeaves()
+
+		}
 
 	}
 
