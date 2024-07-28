@@ -12,8 +12,8 @@ const DEFAULT_SETTINGS: SmartGanttSettings = {
 	pathListFilter: ["AllFiles"],
 	todoShowQ: true,
 	doneShowQ: true,
-	leftBarChartDisplayQ:true,
-	viewMode:ViewMode.Day
+	leftBarChartDisplayQ: true,
+	viewMode: ViewMode.Day
 
 }
 
@@ -23,12 +23,12 @@ export default class SmartGanttPlugin extends Plugin {
 	ganttBlockManager = new GanttBlockManager(this)
 	modesToKeep = ["hypermd", "markdown", "null", "xml"];
 
+
 	refreshLeaves = () => {
 		// re-set the editor mode to refresh the syntax highlighting
 		//@ts-ignore
 		this.app.workspace.iterateCodeMirrors(cm => cm.setOption("mode", cm.getOption("mode")))
 	}
-
 
 
 	override async onload() {
@@ -82,8 +82,6 @@ export default class SmartGanttPlugin extends Plugin {
 		// await this.ganttBlockManager.registerGanttBlock()
 		await this.ganttBlockManager.registerGanttBlockNg()
 		await this.ganttBlockManager.registerTaskListBlock()
-
-
 
 
 		// This adds a settings tab so the user can configure various aspects of the plugin

@@ -70,7 +70,7 @@ export default class GanttBlockManager {
 							thisPlugin={this.thisPlugin}
 							settings={settings}/>
 					</AppContext.Provider>
-				</StrictMode>
+				 </StrictMode>
 
 			)
 		})
