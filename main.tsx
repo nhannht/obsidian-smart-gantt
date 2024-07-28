@@ -7,6 +7,7 @@ import {ViewMode} from "gantt-task-react";
 import './src/lib/codemirror';
 import './src/mode/gantt/gantt'
 import './src/mode/gantt/gantt-list'
+
 const DEFAULT_SETTINGS: SmartGanttSettings = {
 	pathListFilter: ["AllFiles"],
 	todoShowQ: true,
@@ -46,7 +47,6 @@ export default class SmartGanttPlugin extends Plugin {
 				this.helper.reloadView()
 			}
 		})
-
 
 
 		this.registerView("smart-gantt", (leaf) => {

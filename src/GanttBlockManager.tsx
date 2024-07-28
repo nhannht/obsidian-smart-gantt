@@ -5,6 +5,7 @@ import {SmartGanttBlockReactComponentNg} from "./BlockComponent/SmartGanttBlockR
 import {StrictMode} from "react";
 import {ViewMode} from "gantt-task-react";
 import {TaskListMdBlock} from "@/BlockComponent/TaskListMdBlock";
+import {AppContext} from "@/lib/AppContext";
 
 
 
@@ -13,6 +14,9 @@ export default class GanttBlockManager {
 	}
 
 	async registerGanttBlockNg() {
+		// this.thisPlugin.registerEvent(this.thisPlugin.app.vault.on('modify',(file) =>{
+		// 	console.log(file)
+		// }))
 
 		this.thisPlugin.registerMarkdownCodeBlockProcessor("gantt", async (source, el, ctx) => {
 			const settings: SmartGanttSettings = source.trim() !== "" ? JSON.parse(source) : {
@@ -59,11 +63,13 @@ export default class GanttBlockManager {
 			let reactRoot = createRoot(root)
 			reactRoot.render(
 				<StrictMode>
-					<TaskListMdBlock
-						ctx={_ctx}
-						src={source}
-						thisPlugin={this.thisPlugin}
-						settings={settings}/>
+					<AppContext.Provider value={this.thisPlugin.app}>
+						<TaskListMdBlock
+							ctx={_ctx}
+							src={source}
+							thisPlugin={this.thisPlugin}
+							settings={settings}/>
+					</AppContext.Provider>
 				</StrictMode>
 
 			)

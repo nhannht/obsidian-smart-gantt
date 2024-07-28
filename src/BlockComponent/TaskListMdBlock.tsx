@@ -1,5 +1,5 @@
-import {useCallback, useEffect, useState} from "react";
-import {MarkdownPostProcessorContext} from "obsidian";
+import {useCallback, useEffect, useMemo, useState} from "react";
+import {App, MarkdownPostProcessorContext, TAbstractFile} from "obsidian";
 import SmartGanttPlugin from "../../main";
 import {SmartGanttSettings} from "@/SettingManager";
 import MarkdownProcesser from "../MarkdownProcesser";
@@ -10,6 +10,7 @@ import SettingViewComponent from "../component/SettingViewComponent";
 import TaskList from "../component/TaskList";
 
 import {NavBar} from "@/BlockComponent/NavBar";
+import {useApp} from "@/lib/AppContext";
 
 export const TaskListMdBlock = (props: {
 	ctx: MarkdownPostProcessorContext,
@@ -23,7 +24,25 @@ export const TaskListMdBlock = (props: {
 	// const [resultWithChronoCount, setResultWithChronoCount] = useState(0)
 	const [timelineResults, setTimelineResults] = useState<TimelineExtractorResultNg[]>([])
 	const [tasks, setTasks] = useState<Task[]>([])
+	const app = useApp() as App
 
+
+	const consoleMyName = useCallback( (file:TAbstractFile)=>{
+		console.log(file)
+	},[])
+
+	useEffect(() => {
+		return ()=>{
+			app.vault.off('modify',consoleMyName)
+			app.vault.off('modify',consoleMyName)
+		}
+	});
+
+
+	useMemo(()=>{
+		props.thisPlugin.registerEvent(app.vault.on('modify',consoleMyName))
+		// console.log("Memo memo")
+	},[])
 
 	const reupdateData = useCallback(async () => {
 		const allMarkdownFiles = props.thisPlugin.app.vault.getMarkdownFiles();
