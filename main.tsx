@@ -30,6 +30,14 @@ export default class SmartGanttPlugin extends Plugin {
 		this.app.workspace.iterateCodeMirrors(cm => cm.setOption("mode", cm.getOption("mode")))
 	}
 
+	darkModeAdapt = ()=>{
+		if (document.body.hasClass("theme-dark")){
+			document.body.addClass("dark")
+		} else {
+			document.body.removeClass("dark")
+		}
+	}
+
 
 	override async onload() {
 		await this.settingManager.loadSettings()
@@ -82,13 +90,9 @@ export default class SmartGanttPlugin extends Plugin {
 		// await this.ganttBlockManager.registerGanttBlock()
 		await this.ganttBlockManager.registerGanttBlockNg()
 		await this.ganttBlockManager.registerTaskListBlock()
-		this.registerEvent(this.app.workspace.on('css-change',()=>{
-			if (document.body.hasClass("theme-dark")){
-				document.body.addClass("dark")
-			} else {
-				document.body.removeClass("dark")
-			}
-		}))
+
+
+		this.registerEvent(this.app.workspace.on('css-change',this.darkModeAdapt))
 
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
@@ -109,6 +113,7 @@ export default class SmartGanttPlugin extends Plugin {
 			this.refreshLeaves()
 
 		}
+		this.app.workspace.off('css-change',this.darkModeAdapt)
 
 	}
 
