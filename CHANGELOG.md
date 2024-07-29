@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.16](https://github.com/nhannht/obsidian-smart-gantt/tree/0.1.16) (2024-07-29)
+
+[Full Changelog](https://github.com/nhannht/obsidian-smart-gantt/compare/0.1.14...0.1.16)
+
+**Closed issues:**
+
+- make dark mode automatic oh-my-good-it-working [\#27](https://github.com/nhannht/obsidian-smart-gantt/issues/27)
+
 ## [0.1.14](https://github.com/nhannht/obsidian-smart-gantt/tree/0.1.14) (2024-07-28)
 
 [Full Changelog](https://github.com/nhannht/obsidian-smart-gantt/compare/0.1.13...0.1.14)
