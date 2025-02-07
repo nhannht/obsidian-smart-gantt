@@ -1,57 +1,10 @@
 @import "gantt-task-react/dist/index.css";
+@import "frappe-gantt/dist/frappe-gantt.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-button {
-	@apply p-3 text-xs
+#gantt {
 }
-
-select {
-	@apply pl-2 pr-2 text-xs text-center
-}
-
-.smart-gantt-checkbox-element-container {
-	@apply flex-nowrap
-}
-
-.smart-gantt-file-filter-checkbox-container {
-	@apply flex flex-col
-
-}
-
-.smart-gantt-task-checkbox {
-
-}
-.smart-gantt-task-element {
-	@apply m-4 text-[color:var(--text-normal)] hover:text-[color:var(--text-accent)]
-}
-.smart-gantt-task-board {
-	@apply p-4 h-1/2 overflow-y-auto
-}
-.smart-gantt-second-container {
-	@apply  overflow-y-auto h-screen
-}
-.smart-gantt-button-container {
-	@apply flex justify-around p-4 m-4
-}
-.smart-gantt-button {
-	@apply  rounded text-[color:var(--text-normal)]
-	hover:text-[color:var(--text-accent)]
-	bg-[color:var(--background-primary)] hover:bg-[color:var(--background-modifier-hover)]
-}
-
-.smart-gantt-filter-modal-directory-container {
-	@apply border-t flex flex-col p-4
-
-}
-
-.smart-gantt-filter-modal-fieldset {
-	@apply flex flex-row m-4 justify-around
-
-}
-
-
 
 
 @layer base {

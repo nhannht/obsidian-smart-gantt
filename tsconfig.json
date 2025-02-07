@@ -1,26 +1,17 @@
 {
 	"compilerOptions": {
+		"allowSyntheticDefaultImports": true,
 		"baseUrl": ".",
 		"inlineSourceMap": true,
 		"inlineSources": true,
 		"module": "ESNext",
-		"target": "es6",
+		"target": "ES6",
 		"allowJs": true,
 		"noImplicitAny": true,
 		"moduleResolution": "node",
 		"importHelpers": true,
 		"isolatedModules": true,
 		"strictNullChecks": true,
-		"noImplicitThis": true,
-		"noImplicitReturns": true,
-
-		"noImplicitOverride": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"alwaysStrict": true,
-		"strictBindCallApply": true,
-		"strictFunctionTypes": true,
-		"strictPropertyInitialization": true,
 		"jsx": "react-jsx",
 		"lib": [
 			"DOM",

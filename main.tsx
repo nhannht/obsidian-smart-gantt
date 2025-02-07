@@ -7,6 +7,9 @@ import {ViewMode} from "gantt-task-react";
 import './src/lib/codemirror';
 import './src/mode/gantt/gantt'
 import './src/mode/gantt/gantt-list'
+import SmartGanttItemView, {SMART_GANTT_ITEM_VIEW_TYPE, SmartGanttItemViewState} from "@/GanttItemView";
+import HelperNg from "@/HelperNg";
+// import "frappe-gantt/dist/frappe-gantt.css"
 
 const DEFAULT_SETTINGS: SmartGanttSettings = {
 	pathListFilter: ["AllFiles"],
@@ -16,6 +19,7 @@ const DEFAULT_SETTINGS: SmartGanttSettings = {
 	viewMode: ViewMode.Day
 
 }
+
 
 export default class SmartGanttPlugin extends Plugin {
 	settingManager = new SettingManager(this, DEFAULT_SETTINGS);
@@ -43,6 +47,34 @@ export default class SmartGanttPlugin extends Plugin {
 		this.darkModeAdapt()
 
 		await this.settingManager.loadSettings()
+		this.registerView(SMART_GANTT_ITEM_VIEW_TYPE,(leaf)=> new SmartGanttItemView(leaf, this))
+		this.registerExtensions(["smartgantt"],SMART_GANTT_ITEM_VIEW_TYPE)
+
+
+		this.addRibbonIcon("shell", "Debug, open Gantt view",async ()=>{
+			// let leaf = this.app.workspace.getLeaf(false)
+			// leaf.setViewState({
+			// 	type:SMART_GANTT_ITEM_VIEW_TYPE,
+			// 	active:true,
+			// 	state:{
+			// 		projectId: "default",
+			// 		projectName: "default"
+			// 	}as SmartGanttItemViewState
+			// })
+			//
+			const currentFile = this.app.workspace.getActiveFile()
+			if (currentFile){
+				// console.log(currentFile)
+				// const helper = new HelperNg(this)
+				// const tree = await helper.getParseTree(currentFile)
+				// console.log(tree)
+				const view = this.app.workspace.getActiveViewOfType(SmartGanttItemView)
+				if (view){
+					console.log(view.getState())
+				}
+
+			}
+		})
 
 		this.app.workspace.onLayoutReady(() => {
 			this.refreshLeaves()
