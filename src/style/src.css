@@ -1,5 +1,4 @@
 @import "gantt-task-react/dist/index.css";
-@import "frappe-gantt/dist/frappe-gantt.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

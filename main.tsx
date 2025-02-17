@@ -7,9 +7,7 @@ import {ViewMode} from "gantt-task-react";
 import './src/lib/codemirror';
 import './src/mode/gantt/gantt'
 import './src/mode/gantt/gantt-list'
-import SmartGanttItemView, {SMART_GANTT_ITEM_VIEW_TYPE, SmartGanttItemViewState} from "@/GanttItemView";
-import HelperNg from "@/HelperNg";
-// import "frappe-gantt/dist/frappe-gantt.css"
+import SmartGanttItemView, {SMART_GANTT_ITEM_VIEW_TYPE} from "@/GanttItemView";
 
 const DEFAULT_SETTINGS: SmartGanttSettings = {
 	pathListFilter: ["AllFiles"],

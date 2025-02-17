@@ -4,16 +4,16 @@ import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import {TFile} from "obsidian";
 import wikiLinkPlugin from "remark-wiki-link";
-import {Root} from "react-dom/client";
-import {Node} from "unist"
+
 
 export type TaskWithMetaData = {
-	content: string,
+	name: string,
 	checkbox: boolean,
 	metadata: {
 		[key: string]: string
 
-	}
+	},
+	lineIndex: number
 }
 
 export default class HelperNg {
@@ -24,7 +24,12 @@ export default class HelperNg {
 	}
 
 	async getAllLinesContainCheckboxInMarkdown(file: TFile) {
+		console.log("we are in the helper")
+		console.log("before read file")
+		console.log(file)
+
 		const fileContent = await this.plugin.app.vault.read(file)
+		console.log("after read file conent")
 		let results: { lineContent: string; lineIndex: number; }[] = []
 		const lines = fileContent.split("\n")
 		const regexForTask = /^- \[([ |x])] (.+)$/
@@ -42,16 +47,16 @@ export default class HelperNg {
 		return results
 	}
 
-	async extractLineWithCheckboxToTaskWithMetaData(task:string){
+	async extractLineWithCheckboxToTaskWithMetaData(task:{lineContent:string,lineIndex:number}) {
 		const regex = /- \[(x| )\] (.*?)(\[.*\])/
-		const matches = task.match(regex);
+		const matches = task.lineContent.match(regex);
 		// console.log(matches)
 
 		if (matches) {
 			const checkbox = matches[1] === 'x';
-			const content = matches[2].trim();
+			const name = matches[2].trim();
 			const keyValueRegex = /\[([^\[\]]*?)::([^\[\]]*?)]/g;
-			let keyValuePairs:{[key:string]:string} = {}
+			const keyValuePairs:{[key:string]:string} = {}
 
 			let match;
 			while ((match = keyValueRegex.exec(matches[3])) !== null) {
@@ -61,8 +66,9 @@ export default class HelperNg {
 
 			return {
 				checkbox,
-				content,
-				metadata: keyValuePairs
+				name,
+				metadata: keyValuePairs,
+				lineIndex: task.lineIndex
 			} as TaskWithMetaData
 		}
 	}

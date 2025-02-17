@@ -1,36 +1,39 @@
 import {FileView, TFile, ViewStateResult, WorkspaceLeaf} from "obsidian";
 import SmartGanttPlugin from "../main";
-import Gantt from "frappe-gantt"
 import HelperNg from "@/HelperNg";
 import {Node} from "unist"
-import {Task,Options} from "frappe-gantt";
-import { v4 } from "uuid";
+import {v4} from "uuid";
 import moment from "moment";
+import {Gantt, Task} from "gantt-task-react";
+import {createRoot, Root} from "react-dom/client";
+import {createContext, StrictMode, useContext, useState} from "react";
+
 
 export const DATE_FORMAT = "YYYY-MM-DD"
 
-export interface TaskForFrappeGantt extends Task {
+export interface SmartGanttTask extends Task {
 	id: string,
 	name: string,
-	start: string,
-	end: string,
-	created: string,
+	start: Date,
+	end: Date,
+	created: Date,
 	completion?: Date,
-	dependencies: string,
+	dependencies: string[],
 	progress: number,
 	duration?: string,
-	important?: boolean
+	important?: boolean,
+	lineIndex: number
 
 }
 
-export interface FrappeGanttOptions extends Options {
+export interface GanttOptions {
 	infinite_padding: boolean,
 	view_mode_select: boolean,
 	container_height: number
 
 }
 
-export interface SmartGanttItemViewState {
+export interface SmartGanttItemViewState extends Record<string, unknown> {
 	projectId: string,
 	projectName: string,
 	taskMarkDownItems: Node[]
@@ -39,25 +42,92 @@ export interface SmartGanttItemViewState {
 	file: TFile | null
 }
 
-function daysSince(days: number) {
-	const date = new Date();
-	date.setDate(date.getDate() + days);
-	return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
+
+const useCustomContext = () => {
+	const context = useContext(Context)
+	if (!context) {
+		throw new Error("useCustomContext must be used within a Provider")
+	}
+	return useContext(Context)
 }
 
-function random() {
-	return Math.floor(Math.random() * 100);
+export function MainComponent() {
+	const {view} = useCustomContext() as { view: SmartGanttItemView }
+	const [tasks, setTasks] = useState(view.tasks)
+
+	const updateTaskInComponentAndView = (tasks: SmartGanttTask[]) => {
+		setTasks(tasks)
+		view.tasks = tasks
+	}
+
+	const onDateChange = (task: Task) => {
+		const newTasks: SmartGanttTask[] = tasks.map(t => {
+			if (t.id === task.id) {
+				return {
+					...t,
+					start: task.start,
+					end: task.end
+				}
+			}
+			return t
+		})
+		updateTaskInComponentAndView(newTasks)
+	}
+
+	const onProgressChange = (task: Task, children: Task[]) => {
+		const newTasks: SmartGanttTask[] = tasks.map(t => {
+			if (t.id === task.id) {
+				return {
+					...t,
+					progress: task.progress
+				}
+			}
+			return t
+		})
+		updateTaskInComponentAndView(newTasks)
+	}
+
+
+	return <div>
+		{/*<button onClick={() => {*/}
+		{/*	updateTaskInComponentAndView([...tasks, {*/}
+		{/*		id: v4(),*/}
+		{/*		name: "Absolute hillarious",*/}
+		{/*		progress: 0,*/}
+		{/*		start: new Date(),*/}
+		{/*		end: new Date(),*/}
+		{/*		created: new Date(),*/}
+		{/*		dependencies: [],*/}
+		{/*		type: "task",*/}
+		{/*		lineIndex: 0*/}
+		{/*	}])*/}
+
+		{/*	console.log(view.tasks.length)*/}
+
+
+		{/*}*/}
+
+		{/*}>test add more tasks*/}
+		{/*</button>*/}
+		<Gantt tasks={tasks}
+			   onDateChange={onDateChange}
+			   onProgressChange={onProgressChange}
+		/>
+	</div>
 }
 
-
+const Context = createContext<null | {
+	view: SmartGanttItemView
+}>(null)
 export const SMART_GANTT_ITEM_VIEW_TYPE = "smart-gantt-item-view";
 
 export default class SmartGanttItemView extends FileView implements SmartGanttItemViewState {
+	root: Root | null = null;
 
 	taskMarkDownItems: Node[] = []
 
 	getViewType(): string {
-		console.log("Get view type called")
+		// console.log("Get view type called")
 		return SMART_GANTT_ITEM_VIEW_TYPE;
 	}
 
@@ -66,6 +136,8 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 		super(leaf);
 	}
 
+	[x: string]: unknown;
+
 
 	override getState(): SmartGanttItemViewState {
 		console.log("Get state called")
@@ -73,62 +145,102 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 			tasks: this.tasks,
 			projectId: this.projectId,
 			projectName: this.projectName,
-			file: this.file?.path as unknown as TFile, // yeah, it is trick to silent ts checker
+			file: this.file?.path as unknown as TFile ?? "", // yeah, it is trick to silent ts checker
 			taskMarkDownItems: this.taskMarkDownItems
 
 		}
 	}
 
-	async makeGanttChart(){
-		const container = this.containerEl.children[1]
-		container.createEl("div", {
-			attr: {
-				"id": "gantt-container"
-			}
-		})
-		container.createEl("div", {
-			attr: {
-				"id": "gantt"
-			}
-		})
-		let gantt = new Gantt("#gantt", this.tasks, {
-			infinite_padding: false,
-			view_mode_select: true,
-			date_format: "MM-DD-YYYY",
-			container_height: 500
 
-		} as FrappeGanttOptions)
+	onunload() {
+		// this.saveBackToFile(this.tasks)
+		console.log("on unload triggered")
+		if (this.root) {
+			this.root.unmount()
+		}
+		super.onunload();
 	}
 
 
+	protected onClose(): Promise<void> {
+		// this.saveBackToFile(this.tasks)
+		console.log("on close triggered")
+		if (this.root) {
+			this.root.unmount()
+		}
+		return super.onClose();
+	}
+
+
+	onUnloadFile(file: TFile): Promise<void> {
+		this.saveBackToFile(this.tasks,file)
+		return super.onUnloadFile(file);
+	}
+
+	async makeGanttChart() {
+		console.log("Make gantt chart")
+		if (this.root) {
+			this.root.unmount()
+		}
+		const container = this.containerEl.children[1]
+		this.root = createRoot(container)
+		this.root.render(
+			<StrictMode>
+				<Context.Provider value={{
+					view: this
+				}}>
+					<MainComponent/>
+				</Context.Provider>
+			</StrictMode>
+		)
+
+	}
+
+
+	saveBackToFile(tasks: SmartGanttTask[],file:TFile) {
+
+		this.app.vault.read(file).then(content => {
+			let lines = content.split("\n")
+
+			for (const t of tasks) {
+				if (t.progress !== 100) {
+					lines[t.lineIndex] = `- [ ] ${t.name} [smartGanttId :: ${t.id}] [start::${moment(t.start).format(DATE_FORMAT)}] [due::${moment(t.end).format(DATE_FORMAT)}] [created::${moment(t.created).format(DATE_FORMAT)}] [dependencies::${t.dependencies.join(",")}] [type::${t.type}] [progress::${t.progress}]`
+				} else {
+					lines[t.lineIndex] = `- [x] ${t.name} [smartGanttId :: ${t.id}][start::${moment(t.start).format(DATE_FORMAT)}][due::${moment(t.end).format(DATE_FORMAT)}][created::${moment(t.created).format(DATE_FORMAT)}][dependencies::${t.dependencies.join(",")}][type::${t.type}] [progress::${t.progress}]`
+				}
+			}
+			this.plugin.app.vault.modify(file, lines.join("\n"))
+
+		})
+	}
 
 
 	override async onLoadFile(file: TFile) {
 		await super.onLoadFile(file);
 		this.tasks = []
 		console.log("On loaded file")
-
-
 		const helper = new HelperNg(this.plugin)
-		if (this.file) {
-			const tasks = await helper.getAllLinesContainCheckboxInMarkdown(this.file)
-			// console.log(tasks)
-			for (const task of tasks){
-				const taskWithMetaData = await helper.extractLineWithCheckboxToTaskWithMetaData(task.lineContent)
-				console.log(taskWithMetaData)
-				this.tasks.push({
-					name: taskWithMetaData?.content ?? "No data",
-					progress: Number(taskWithMetaData?.metadata.progress) ?? 0,
-					id: taskWithMetaData?.metadata.smartGanttId ?? v4(),
-					start: taskWithMetaData?.metadata.start ?? moment().format(DATE_FORMAT),
-					end: taskWithMetaData?.metadata.due ?? moment().add(1,"day").format(DATE_FORMAT),
-					created: taskWithMetaData?.metadata.created ?? moment().format(DATE_FORMAT),
-					dependencies: taskWithMetaData?.metadata.dependencies ?? "",
-				})
-			}
-			await this.makeGanttChart()
+		console.log("We are in the file")
+		const tasks = await helper.getAllLinesContainCheckboxInMarkdown(file)
+		// console.log(tasks)
+		for (const task of tasks) {
+			const taskWithMetaData = await helper.extractLineWithCheckboxToTaskWithMetaData(task)
+			// console.log(taskWithMetaData)
+			this.tasks.push({
+				name: taskWithMetaData?.name ?? "No name",
+				progress: Number(taskWithMetaData?.metadata.progress) ?? 0,
+				id: taskWithMetaData?.metadata.smartGanttId ?? v4(),
+				start: moment(taskWithMetaData?.metadata.start).toDate() ?? moment().toDate(),
+				end: moment(taskWithMetaData?.metadata.due).toDate() ?? moment().add(1, "day").toDate(),
+				created: moment(taskWithMetaData?.metadata.created).toDate() ?? moment().toDate(),
+				dependencies: taskWithMetaData?.metadata.dependencies.split(",") ?? [],
+				type: taskWithMetaData?.metadata.type ?? "task",
+				lineIndex: taskWithMetaData?.lineIndex ?? 0
+			} as SmartGanttTask)
 		}
+		await this.makeGanttChart()
 	}
+
 	override setState(state: SmartGanttItemViewState, result: ViewStateResult): Promise<void> {
 		console.log("Set state")
 		this.projectName = state.projectName;
@@ -140,9 +252,9 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 		return super.setState(state, result);
 	}
 
-	projectId: string = "";
-	projectName: string = "";
-	markdownSourceFilePath: string = "";
-	tasks: TaskForFrappeGantt[] = [];
+	projectId = "";
+	projectName = "";
+
+	tasks: SmartGanttTask[] = [];
 
 }
