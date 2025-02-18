@@ -15,11 +15,10 @@ function generateTask (id){
 		content:faker.word.words(10),
 		start: moment(faker.date.recent({days:60})).format("YYYY-MM-DD"),
 		due: moment(faker.date.soon()).format("YYYY-MM-DD"),
-		created: moment(faker.date.recent({days:60})).format("YYYY-MM-DD"),
-		completion: moment(faker.date.recent()).format("YYYY-MM-DD"),
 		dependences: faker.helpers.arrayElements(allTaskId,{min:0,max:3}),
 		progress: faker.number.int({min: 0, max: 100}),
 		type: faker.helpers.arrayElement(["task","milestone","project"]),
+		inventory: faker.helpers.arrayElement(["task","backlog"])
 	}
 }
 let results = []
@@ -30,7 +29,7 @@ allTaskId.forEach((id, index) => {
 
 let markdownTaskString = []
 results.forEach((task,id)=>{
-	markdownTaskString.push(`- [ ] ${task.content} [smartGanttId :: ${task.id}] [start :: ${task.start}] [due :: ${task.due}] [created :: ${task.created}] [progress:: ${task.progress}] [dependencies :: ${task.dependences}] [type :: ${task.type}]`)
+	markdownTaskString.push(`- [ ] ${task.content} [smartGanttId :: ${task.id}] [start :: ${task.start}] [due :: ${task.due}] [progress:: ${task.progress}] [dependencies :: ${task.dependences}] [type :: ${task.type}]`)
 })
 
 writeFileSync("tasks_sample.json",JSON.stringify(results,null,"\t"))

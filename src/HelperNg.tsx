@@ -13,7 +13,7 @@ export type TaskWithMetaData = {
 		[key: string]: string
 
 	},
-	lineIndex: number
+	lineIndex: number|null
 }
 
 export default class HelperNg {

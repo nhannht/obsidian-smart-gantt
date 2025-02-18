@@ -1,4 +1,4 @@
-import {FileView, TFile, ViewStateResult, WorkspaceLeaf} from "obsidian";
+import {FileView, Modal, Notice, Setting, TFile, ViewStateResult, WorkspaceLeaf} from "obsidian";
 import SmartGanttPlugin from "../main";
 import HelperNg from "@/HelperNg";
 import {Node} from "unist"
@@ -8,6 +8,93 @@ import {Gantt, Task} from "gantt-task-react";
 import {createRoot, Root} from "react-dom/client";
 import {createContext, StrictMode, useContext, useState} from "react";
 
+export class TaskCustomizeModal extends Modal {
+	constructor(view: SmartGanttItemView, task: SmartGanttTask, onSubmit: (task: SmartGanttTask) => void) {
+		super(view.plugin.app);
+		this.setTitle("Customize tasks")
+		let cloneTask = {...task}
+
+		let nameSetting = new Setting(this.contentEl)
+			.setName('Task name')
+
+			.addText((text) => {
+				text
+
+					.setPlaceholder("Choose new name")
+					.setValue(task.name)
+					.onChange((value) => {
+						cloneTask.name = value
+					})
+			})
+
+		let startDateSetting = new Setting(this.contentEl)
+			.setName("Start date")
+			.addMomentFormat((com) => {
+				com
+					.setValue(moment(task.start).format("YYYY-MM-DD"))
+					.onChange(value => {
+						if (moment(value).isValid()) {
+							cloneTask.start = moment(value).toDate()
+
+						} else {
+							new Notice("Invalid date", 5000)
+						}
+					})
+			})
+
+		let endDateSetting = new Setting(this.contentEl)
+			.setName("End date")
+			.addMomentFormat((com) => {
+				com
+					.setValue(moment(task.end).format("YYYY-MM-DD"))
+					.onChange(value => {
+						if (moment(value).isValid()) {
+							cloneTask.end = moment(value).toDate()
+						} else {
+							new Notice("Invalid date", 5000)
+						}
+
+					})
+			})
+
+		let progressSetting = new Setting(this.contentEl)
+			.setName("Progress")
+			.addSlider((value) => {
+				value.setValue(task.progress)
+					.onChange(v => {
+						cloneTask.progress = v
+					})
+					.setDynamicTooltip()
+			})
+
+		new Setting(this.contentEl)
+			.addButton((btn) => {
+				btn.setButtonText("Save")
+					.setCta()
+					.onClick(() => {
+						this.close()
+						onSubmit(cloneTask)
+					})
+			})
+			.addButton((btn) => {
+				btn.setButtonText("Cancel")
+					.onClick(() => {
+						this.close()
+					})
+			})
+			.addButton((btn) => {
+				btn.setButtonText("Backlog")
+					.setTooltip("Hide it from this chart but the task still stay in markdown file")
+					.onClick(() => {
+						cloneTask.inventory = "backlog"
+						this.close()
+						onSubmit(cloneTask)
+
+
+					})
+			})
+	}
+}
 
 export const DATE_FORMAT = "YYYY-MM-DD"
 
@@ -16,13 +103,14 @@ export interface SmartGanttTask extends Task {
 	name: string,
 	start: Date,
 	end: Date,
-	created: Date,
-	completion?: Date,
+	// created: Date,
+	// completion?: Date,
 	dependencies: string[],
 	progress: number,
 	duration?: string,
-	important?: boolean,
-	lineIndex: number
+	// important?: boolean,
+	lineIndex: number,
+	inventory: string,
 
 }
 
@@ -56,8 +144,31 @@ export function MainComponent() {
 	const [tasks, setTasks] = useState(view.tasks)
 
 	const updateTaskInComponentAndView = (tasks: SmartGanttTask[]) => {
-		setTasks(tasks)
-		view.tasks = tasks
+		setTasks(() => {
+			if (view.file) {
+				view.saveBackToFile(tasks, view.file)
+				view.tasks = tasks
+			}
+			return tasks
+		})
+	}
+
+	const createNewTask = () => {
+		console.log("Yeah we create new task")
+		let task: SmartGanttTask = {
+			inventory: "",
+			type: "task",
+			id: v4(),
+			start: moment().toDate(),
+			end: moment().add(1, "day").toDate(),
+			name: "New task",
+			progress: 0,
+			dependencies: [],
+			lineIndex: -1
+		}
+		new TaskCustomizeModal(view, task, (task) => {
+			updateTaskInComponentAndView([...tasks, task])
+		}).open()
 	}
 
 	const onDateChange = (task: Task) => {
@@ -87,31 +198,33 @@ export function MainComponent() {
 		updateTaskInComponentAndView(newTasks)
 	}
 
+	return <div className={"twp"}>
+		<div>
+			<button onClick={createNewTask}>
+				New task
+			</button>
+		</div>
 
-	return <div>
-		{/*<button onClick={() => {*/}
-		{/*	updateTaskInComponentAndView([...tasks, {*/}
-		{/*		id: v4(),*/}
-		{/*		name: "Absolute hillarious",*/}
-		{/*		progress: 0,*/}
-		{/*		start: new Date(),*/}
-		{/*		end: new Date(),*/}
-		{/*		created: new Date(),*/}
-		{/*		dependencies: [],*/}
-		{/*		type: "task",*/}
-		{/*		lineIndex: 0*/}
-		{/*	}])*/}
-
-		{/*	console.log(view.tasks.length)*/}
-
-
-		{/*}*/}
-
-		{/*}>test add more tasks*/}
-		{/*</button>*/}
 		<Gantt tasks={tasks}
 			   onDateChange={onDateChange}
 			   onProgressChange={onProgressChange}
+			   ganttHeight={view.containerEl.clientHeight * 0.8}
+			   onDoubleClick={(task) => {
+				   const taskToEdit = tasks.find(t => t.id === task.id)
+				   if (taskToEdit) {
+					   new TaskCustomizeModal(view, taskToEdit, (task) => {
+							   updateTaskInComponentAndView(tasks.map(t => {
+								   if (t.id === task.id) {
+									   return task
+								   }
+								   return t
+							   }))
+						   }
+					   ).open()
+				   }
+
+			   }
+			   }
 		/>
 	</div>
 }
@@ -173,7 +286,7 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 
 
 	onUnloadFile(file: TFile): Promise<void> {
-		this.saveBackToFile(this.tasks,file)
+		// this.saveBackToFile(this.tasks, file)
 		return super.onUnloadFile(file);
 	}
 
@@ -196,18 +309,58 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 
 	}
 
+	// we don't actua delete the task, just put a mark into it
+	// markTaskAsDeleteInFile(task: SmartGanttTask, file: TFile) {
+	// 	this.app.vault.read(file).then(content => {
+	// 		let lines = content.split("\n")
+	// 		task.inventory = "backlog"
+	// 		lines[task.lineIndex] = `- [ ] ${task.name} [smartGanttId :: ${task.id}] [start::${moment(task.start).format(DATE_FORMAT)}] [due::${moment(task.end).format(DATE_FORMAT)}] [created::${moment(task.created).format(DATE_FORMAT)}] [dependencies::${task.dependencies.join(",")}] [type::${task.type}] [progress::${task.progress}] [inventory::${task.inventory}]`
+	//
+	// 		this.plugin.app.vault.modify(file, lines.join("\n"))
+	// 	})
+	// }
 
-	saveBackToFile(tasks: SmartGanttTask[],file:TFile) {
+	convertSmartGanttTaskToMarkdownString(task: SmartGanttTask) {
+		let output = ""
+		task.progress === 100 ? output += `- [x] ` : output += `- [ ] `
+		output += ` ${task.name} `
+		for (let key of Object.keys(task)) {
+
+			if (key === "id") {
+				output += ` [smartGanttId :: ${task["id"]}] `
+
+			} else if (key === "start") {
+				const start = moment(task["start"]).format(DATE_FORMAT)
+				output += ` [start :: ${start}] `
+
+			} else if (key === "end") {
+				const due = moment(task["end"]).format(DATE_FORMAT)
+				output += ` [due :: ${due}] `
+			} else if (key === "dependencies") {
+				output += ` [dependencies :: ${task["dependencies"].join(",")}] `
+			} else {
+				// @ts-ignore
+				output += ` [${key}::${task[key]}] `
+			}
+		}
+		return output
+
+	}
+
+	saveBackToFile(tasks: SmartGanttTask[], file: TFile) {
 
 		this.app.vault.read(file).then(content => {
 			let lines = content.split("\n")
 
 			for (const t of tasks) {
-				if (t.progress !== 100) {
-					lines[t.lineIndex] = `- [ ] ${t.name} [smartGanttId :: ${t.id}] [start::${moment(t.start).format(DATE_FORMAT)}] [due::${moment(t.end).format(DATE_FORMAT)}] [created::${moment(t.created).format(DATE_FORMAT)}] [dependencies::${t.dependencies.join(",")}] [type::${t.type}] [progress::${t.progress}]`
+				if (t.lineIndex === -1) {
+					t.lineIndex = lines.length
+					lines.push(this.convertSmartGanttTaskToMarkdownString(t))
 				} else {
-					lines[t.lineIndex] = `- [x] ${t.name} [smartGanttId :: ${t.id}][start::${moment(t.start).format(DATE_FORMAT)}][due::${moment(t.end).format(DATE_FORMAT)}][created::${moment(t.created).format(DATE_FORMAT)}][dependencies::${t.dependencies.join(",")}][type::${t.type}] [progress::${t.progress}]`
+
+					lines[t.lineIndex] = this.convertSmartGanttTaskToMarkdownString(t)
 				}
+
 			}
 			this.plugin.app.vault.modify(file, lines.join("\n"))
 
@@ -226,17 +379,20 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 		for (const task of tasks) {
 			const taskWithMetaData = await helper.extractLineWithCheckboxToTaskWithMetaData(task)
 			// console.log(taskWithMetaData)
-			this.tasks.push({
-				name: taskWithMetaData?.name ?? "No name",
-				progress: Number(taskWithMetaData?.metadata.progress) ?? 0,
-				id: taskWithMetaData?.metadata.smartGanttId ?? v4(),
-				start: moment(taskWithMetaData?.metadata.start).toDate() ?? moment().toDate(),
-				end: moment(taskWithMetaData?.metadata.due).toDate() ?? moment().add(1, "day").toDate(),
-				created: moment(taskWithMetaData?.metadata.created).toDate() ?? moment().toDate(),
-				dependencies: taskWithMetaData?.metadata.dependencies.split(",") ?? [],
-				type: taskWithMetaData?.metadata.type ?? "task",
-				lineIndex: taskWithMetaData?.lineIndex ?? 0
-			} as SmartGanttTask)
+			if (taskWithMetaData && (!taskWithMetaData.metadata.inventory || taskWithMetaData.metadata.inventory !== "backlog")) {
+				this.tasks.push({
+					name: taskWithMetaData?.name ?? "No name",
+					progress: Number(taskWithMetaData?.metadata.progress) ?? 0,
+					id: taskWithMetaData?.metadata.smartGanttId ?? v4(),
+					start: moment(taskWithMetaData?.metadata.start).toDate() ?? moment().toDate(),
+					end: moment(taskWithMetaData?.metadata.due).toDate() ?? moment().add(1, "day").toDate(),
+					// created: moment(taskWithMetaData?.metadata.created).toDate() ?? moment().toDate(),
+					dependencies: taskWithMetaData?.metadata.dependencies.split(",") ?? [],
+					type: taskWithMetaData?.metadata.type ?? "task",
+					lineIndex: taskWithMetaData?.lineIndex ?? -1,
+					inventory: taskWithMetaData?.metadata.inventory ?? "task"
+				} as SmartGanttTask)
+			}
 		}
 		await this.makeGanttChart()
 	}
