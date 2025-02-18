@@ -24,12 +24,12 @@ export default class HelperNg {
 	}
 
 	async getAllLinesContainCheckboxInMarkdown(file: TFile) {
-		console.log("we are in the helper")
-		console.log("before read file")
-		console.log(file)
+		// console.log("we are in the helper")
+		// console.log("before read file")
+		// console.log(file)
 
 		const fileContent = await this.plugin.app.vault.read(file)
-		console.log("after read file conent")
+		// console.log("after read file conent")
 		let results: { lineContent: string; lineIndex: number; }[] = []
 		const lines = fileContent.split("\n")
 		const regexForTask = /^- \[([ |x])] (.+)$/

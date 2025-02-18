@@ -16,7 +16,6 @@ export class TaskCustomizeModal extends Modal {
 
 		let nameSetting = new Setting(this.contentEl)
 			.setName('Task name')
-
 			.addText((text) => {
 				text
 
@@ -154,7 +153,7 @@ export function MainComponent() {
 	}
 
 	const createNewTask = () => {
-		console.log("Yeah we create new task")
+		// console.log("Yeah we create new task")
 		let task: SmartGanttTask = {
 			inventory: "",
 			type: "task",
@@ -245,7 +244,7 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 	}
 
 	constructor(leaf: WorkspaceLeaf, public plugin: SmartGanttPlugin) {
-		console.log("Contructor called")
+		// console.log("Contructor called")
 		super(leaf);
 	}
 
@@ -253,7 +252,7 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 
 
 	override getState(): SmartGanttItemViewState {
-		console.log("Get state called")
+		// console.log("Get state called")
 		return {
 			tasks: this.tasks,
 			projectId: this.projectId,
@@ -267,7 +266,7 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 
 	onunload() {
 		// this.saveBackToFile(this.tasks)
-		console.log("on unload triggered")
+		// console.log("on unload triggered")
 		if (this.root) {
 			this.root.unmount()
 		}
@@ -277,7 +276,7 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 
 	protected onClose(): Promise<void> {
 		// this.saveBackToFile(this.tasks)
-		console.log("on close triggered")
+		// console.log("on close triggered")
 		if (this.root) {
 			this.root.unmount()
 		}
@@ -291,7 +290,7 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 	}
 
 	async makeGanttChart() {
-		console.log("Make gantt chart")
+		// console.log("Make gantt chart")
 		if (this.root) {
 			this.root.unmount()
 		}
@@ -371,34 +370,50 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 	override async onLoadFile(file: TFile) {
 		await super.onLoadFile(file);
 		this.tasks = []
-		console.log("On loaded file")
+		// console.log("On loaded file")
 		const helper = new HelperNg(this.plugin)
-		console.log("We are in the file")
+		// console.log("We are in the file")
 		const tasks = await helper.getAllLinesContainCheckboxInMarkdown(file)
-		// console.log(tasks)
-		for (const task of tasks) {
-			const taskWithMetaData = await helper.extractLineWithCheckboxToTaskWithMetaData(task)
-			// console.log(taskWithMetaData)
-			if (taskWithMetaData && (!taskWithMetaData.metadata.inventory || taskWithMetaData.metadata.inventory !== "backlog")) {
-				this.tasks.push({
-					name: taskWithMetaData?.name ?? "No name",
-					progress: Number(taskWithMetaData?.metadata.progress) ?? 0,
-					id: taskWithMetaData?.metadata.smartGanttId ?? v4(),
-					start: moment(taskWithMetaData?.metadata.start).toDate() ?? moment().toDate(),
-					end: moment(taskWithMetaData?.metadata.due).toDate() ?? moment().add(1, "day").toDate(),
-					// created: moment(taskWithMetaData?.metadata.created).toDate() ?? moment().toDate(),
-					dependencies: taskWithMetaData?.metadata.dependencies.split(",") ?? [],
-					type: taskWithMetaData?.metadata.type ?? "task",
-					lineIndex: taskWithMetaData?.lineIndex ?? -1,
-					inventory: taskWithMetaData?.metadata.inventory ?? "task"
-				} as SmartGanttTask)
+		if (tasks.length === 0){
+			this.tasks.push({
+				name: "In the beginning there is only darkness",
+				id: v4(),
+				start: moment().toDate(),
+				end: moment().add(3,"day").toDate(),
+				dependencies: [],
+				progress: 0,
+			lineIndex: -1,
+				type: "task",
+				inventory: "task",
+			})
+
+		} else {
+			for (const task of tasks) {
+				const taskWithMetaData = await helper.extractLineWithCheckboxToTaskWithMetaData(task)
+				// console.log(taskWithMetaData)
+				if (taskWithMetaData && (!taskWithMetaData.metadata.inventory || taskWithMetaData.metadata.inventory !== "backlog")) {
+					this.tasks.push({
+						name: taskWithMetaData?.name ?? "No name",
+						progress: Number(taskWithMetaData?.metadata.progress) ?? 0,
+						id: taskWithMetaData?.metadata.smartGanttId ?? v4(),
+						start: moment(taskWithMetaData?.metadata.start).toDate() ?? moment().toDate(),
+						end: moment(taskWithMetaData?.metadata.due).toDate() ?? moment().add(1, "day").toDate(),
+						// created: moment(taskWithMetaData?.metadata.created).toDate() ?? moment().toDate(),
+						dependencies: taskWithMetaData?.metadata.dependencies.split(",") ?? [],
+						type: taskWithMetaData?.metadata.type ?? "task",
+						lineIndex: taskWithMetaData?.lineIndex ?? -1,
+						inventory: taskWithMetaData?.metadata.inventory ?? "task"
+					} as SmartGanttTask)
+				}
 			}
+
 		}
+		// console.log(tasks)
 		await this.makeGanttChart()
 	}
 
 	override setState(state: SmartGanttItemViewState, result: ViewStateResult): Promise<void> {
-		console.log("Set state")
+		// console.log("Set state")
 		this.projectName = state.projectName;
 		this.projectId = state.projectId
 		this.tasks = state.tasks
