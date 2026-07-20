@@ -55,25 +55,11 @@ body {
 	color: var(--sg-label);
 }
 
-/* Obsidian styles `button:not(.clickable-icon)` at (0,1,1), which out-ranks
- * plugin component classes and the :where()-scoped preflight. Neutralize the
- * host styling for buttons inside plugin containers. Tailwind utilities are
- * compiled with !important (config `important: true`) at higher specificity,
- * so shadcn/radix components restyle themselves on top of this reset. The
- * plugin's own sg- controls are excluded and win via specificity instead. */
-.twp :where(button:not([class*="sg-"])) {
-	background-color: transparent !important;
-	background-image: none !important;
-	box-shadow: none !important;
-	border: 0 !important;
-	padding: 0 !important;
-	height: auto !important;
-	font-family: inherit !important;
-	font-size: inherit !important;
-	font-weight: inherit !important;
-	line-height: inherit !important;
-	color: inherit !important;
-}
+/* No button element inside .twp is left bare for Obsidian to skin: the
+ * plugin's own controls render as div[role=button] (see Pressable.tsx), and
+ * radix-rendered buttons carry Obsidian's own `clickable-icon` opt-out class,
+ * so the host's `button:not(.clickable-icon)` skin never matches anything
+ * here. No overrides, no specificity war. */
 
 /* GlassSurface sizes its content wrapper at 100% of the container; with
  * width="auto" both collapse to zero. Shrink-wrap the floating toolbar. */

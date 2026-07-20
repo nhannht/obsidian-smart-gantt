@@ -9,6 +9,7 @@ import SettingViewComponent from "@/component/SettingViewComponent";
 import {ResizableHandle, ResizablePanel, ResizablePanelGroup} from "@/component/ResizablePanel";
 import TaskList from "@/component/TaskList";
 import GlassSurface from "@/component/GlassSurface";
+import Pressable from "@/component/Pressable";
 import {GanttChart, ZoomControl, GanttTask, GanttZoom} from "@/gantt";
 import {resultsToGanttTasks, zoomFromSetting} from "@/gantt/adapters";
 import {CalendarRange, RotateCw, Settings2} from "lucide-react";
@@ -131,7 +132,7 @@ const SidebarReactComponentNg = (props: {
 			>
 				<div className={"flex items-center gap-2 px-3"}>
 					<ZoomControl zoom={zoom} onChange={setZoom}/>
-					<button
+					<Pressable
 						className={"sg-toolbar-icon"}
 						aria-label={"Refresh"}
 						onClick={async () => {
@@ -141,14 +142,14 @@ const SidebarReactComponentNg = (props: {
 						}}
 					>
 						<RotateCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}/>
-					</button>
-					<button
+					</Pressable>
+					<Pressable
 						className={"sg-toolbar-icon"}
 						aria-label={"Settings"}
 						onClick={() => setIsSettingQ(true)}
 					>
 						<Settings2 className={"h-4 w-4"}/>
-					</button>
+					</Pressable>
 				</div>
 			</GlassSurface>
 		</div>

@@ -9,6 +9,7 @@ import SettingViewComponent from "../component/SettingViewComponent";
 import {GanttChart, ZoomControl, GanttTask, GanttZoom} from "@/gantt";
 import {resultsToGanttTasks, zoomFromSetting} from "@/gantt/adapters";
 import {Settings2} from "lucide-react";
+import Pressable from "@/component/Pressable";
 
 export const SmartGanttBlockReactComponentNg = (props: {
 	ctx: MarkdownPostProcessorContext,
@@ -84,13 +85,13 @@ export const SmartGanttBlockReactComponentNg = (props: {
 	return <main>
 		<div className={"mb-2 flex items-center justify-between gap-2"}>
 			<ZoomControl zoom={zoom} onChange={setZoom}/>
-			<button
+			<Pressable
 				className={"sg-toolbar-icon"}
 				aria-label={"Settings"}
 				onClick={() => setIsSettingQ(true)}
 			>
 				<Settings2 className={"h-4 w-4"}/>
-			</button>
+			</Pressable>
 		</div>
 		{tasks.length === 0
 			? <div className={"py-6 text-center text-sm text-muted-foreground"}>

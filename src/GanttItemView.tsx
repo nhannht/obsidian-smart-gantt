@@ -8,6 +8,7 @@ import {createRoot, Root} from "react-dom/client";
 import {createContext, StrictMode, useContext, useState} from "react";
 import {GanttChart, ZoomControl, GanttTask, GanttZoom, GanttChangePayload} from "@/gantt";
 import GlassSurface from "@/component/GlassSurface";
+import Pressable from "@/component/Pressable";
 import {Plus} from "lucide-react";
 
 export class TaskCustomizeModal extends Modal {
@@ -204,10 +205,10 @@ export function MainComponent() {
 			>
 				<div className={"flex items-center gap-2 px-3"}>
 					<ZoomControl zoom={zoom} onChange={setZoom}/>
-					<button className={"sg-new-task"} onClick={createNewTask}>
+					<Pressable className={"sg-new-task"} onClick={createNewTask}>
 						<Plus className={"h-3.5 w-3.5"}/>
 						New task
-					</button>
+					</Pressable>
 				</div>
 			</GlassSurface>
 		</div>

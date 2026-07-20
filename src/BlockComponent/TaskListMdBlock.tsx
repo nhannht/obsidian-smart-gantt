@@ -8,6 +8,7 @@ import {Chrono} from "chrono-node";
 import SettingViewComponent from "../component/SettingViewComponent";
 import TaskList from "../component/TaskList";
 import {Settings2} from "lucide-react";
+import Pressable from "@/component/Pressable";
 
 export const TaskListMdBlock = (props: {
 	ctx: MarkdownPostProcessorContext,
@@ -77,13 +78,13 @@ export const TaskListMdBlock = (props: {
 
 	return <main>
 		<div className={"mb-2 flex justify-end"}>
-			<button
+			<Pressable
 				className={"sg-toolbar-icon"}
 				aria-label={"Settings"}
 				onClick={() => setIsSettingQ(true)}
 			>
 				<Settings2 className={"h-4 w-4"}/>
-			</button>
+			</Pressable>
 		</div>
 		{timelineResults.length === 0
 			? <div className={"py-6 text-center text-sm text-muted-foreground"}>

@@ -1,4 +1,5 @@
 import {GanttZoom} from "./types";
+import Pressable from "@/component/Pressable";
 
 const LEVELS: { key: GanttZoom; label: string }[] = [
 	{key: "day", label: "Day"},
@@ -18,7 +19,7 @@ const ZoomControl = (props: {
 			style={{transform: `translateX(${index * 100}%)`}}
 		/>
 		{LEVELS.map(l =>
-			<button
+			<Pressable
 				key={l.key}
 				role={"tab"}
 				aria-selected={props.zoom === l.key}
@@ -29,7 +30,7 @@ const ZoomControl = (props: {
 				onClick={() => props.onChange(l.key)}
 			>
 				{l.label}
-			</button>
+			</Pressable>
 		)}
 	</div>;
 };
