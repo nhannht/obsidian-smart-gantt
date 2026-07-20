@@ -88,8 +88,8 @@ export class Helper {
 												   context: MarkdownPostProcessorContext) => {
 
 		const sourcePath = context.sourcePath
-		//@ts-ignore
-		const elInfo = context.getSectionInfo(context.el)
+		const contextEl = (context as MarkdownPostProcessorContext & { el: HTMLElement }).el
+		const elInfo = context.getSectionInfo(contextEl)
 		// console.log(elInfo)
 		if (elInfo) {
 			// console.log(elInfo.text)
