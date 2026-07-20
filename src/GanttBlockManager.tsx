@@ -18,17 +18,15 @@ export default class GanttBlockManager {
 		// }))
 
 		this.thisPlugin.registerMarkdownCodeBlockProcessor("gantt", async (source, el, ctx) => {
-			const settings: SmartGanttSettings = source.trim() !== "" ? JSON.parse(source) : {
+			const settings: SmartGanttSettings = source.trim() !== "" ? JSON.parse(source) as SmartGanttSettings : {
 				doneShowQ: true,
 				todoShowQ: true,
 				pathListFilter: ["CurrentFile"],
-				viewMode:"day",
-				leftBarChartDisplayQ:true
+				viewMode: "day",
+				leftBarChartDisplayQ: true,
 			}
 
-			let root = el.createEl("div", {
-				cls: "twp"
-			})
+			let root = el.createDiv({cls: "twp"})
 			let reactRoot = createRoot(root)
 			reactRoot.render(
 				<StrictMode>
@@ -48,17 +46,15 @@ export default class GanttBlockManager {
 			//@ts-ignore
 			// console.log(_ctx.getSectionInfo(_ctx.el))
 			// console.log(source)
-			const settings: SmartGanttSettings = source.trim() !== "" ? JSON.parse(source) : {
+			const settings: SmartGanttSettings = source.trim() !== "" ? JSON.parse(source) as SmartGanttSettings : {
 				doneShowQ: true,
 				todoShowQ: true,
-				pathListFilter: ["CurrentFile"]
+				pathListFilter: ["CurrentFile"],
+				viewMode: "day",
+				leftBarChartDisplayQ: true,
 			}
-			// console.log(settings)
-			// console.log(allSentences)
 
-			let root = el.createEl("div", {
-				cls: "twp"
-			})
+			let root = el.createDiv({cls: "twp"})
 			let reactRoot = createRoot(root)
 			reactRoot.render(
 				<StrictMode>

@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-smart-gantt",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "Intelligently generate Gantt chart from your tasks",
 	"main": "main.js",
 	"scripts": {
@@ -29,6 +29,7 @@
 		"@typescript-eslint/parser": "5.29.0",
 		"concurrently": "^8.2.2",
 		"esbuild": "^0.25.0",
+		"moment": "^2.30.1",
 		"obsidian": "latest",
 		"tailwindcss-scoped-preflight": "^3.4.10",
 		"tslib": "2.4.0",

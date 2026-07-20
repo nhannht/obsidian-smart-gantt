@@ -3,7 +3,6 @@ import SmartGanttPlugin from "../main";
 import HelperNg from "@/HelperNg";
 import {Node} from "unist"
 import {v4} from "uuid";
-import {moment} from "obsidian";
 import {createRoot, Root} from "react-dom/client";
 import {createContext, StrictMode, useContext, useState} from "react";
 import {GanttChart, ZoomControl, GanttTask, GanttZoom, GanttChangePayload} from "@/gantt";
@@ -31,31 +30,31 @@ export class TaskCustomizeModal extends Modal {
 
 		new Setting(this.contentEl)
 			.setName("Start date")
-			.addMomentFormat((com) => {
+			.addText((com) => {
 				com
-					.setValue(moment(task.start).format("YYYY-MM-DD"))
+					.setValue(formatDate(task.start))
 					.onChange(value => {
-						if (moment(value).isValid()) {
-							cloneTask.start = moment(value).toDate()
-
+						const parsed = parseDateInput(value)
+						if (parsed) {
+							cloneTask.start = parsed
 						} else {
-							new Notice("Invalid date", 5000)
+							new Notice("Invalid date, expected YYYY-MM-DD", 5000)
 						}
 					})
 			})
 
 		new Setting(this.contentEl)
 			.setName("End date")
-			.addMomentFormat((com) => {
+			.addText((com) => {
 				com
-					.setValue(moment(task.end).format("YYYY-MM-DD"))
+					.setValue(formatDate(task.end))
 					.onChange(value => {
-						if (moment(value).isValid()) {
-							cloneTask.end = moment(value).toDate()
+						const parsed = parseDateInput(value)
+						if (parsed) {
+							cloneTask.end = parsed
 						} else {
-							new Notice("Invalid date", 5000)
+							new Notice("Invalid date, expected YYYY-MM-DD", 5000)
 						}
-
 					})
 			})
 
@@ -98,6 +97,20 @@ export class TaskCustomizeModal extends Modal {
 }
 
 export const DATE_FORMAT = "YYYY-MM-DD"
+
+const formatDate = (d: Date) => {
+	const p = (n: number) => String(n).padStart(2, "0")
+	return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
+}
+
+const parseDateInput = (value: string): Date | null => {
+	const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim())
+	if (!m) return null
+	return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
+}
+
+const addDays = (d: Date, days: number) =>
+	new Date(d.getFullYear(), d.getMonth(), d.getDate() + days)
 
 export interface SmartGanttTask {
 	id: string,
@@ -157,8 +170,8 @@ export function MainComponent() {
 			inventory: "",
 			type: "task",
 			id: v4(),
-			start: moment().toDate(),
-			end: moment().add(1, "day").toDate(),
+			start: new Date(),
+			end: addDays(new Date(), 1),
 			name: "New task",
 			progress: 0,
 			dependencies: [],
@@ -303,17 +316,6 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 
 	}
 
-	// we don't actua delete the task, just put a mark into it
-	// markTaskAsDeleteInFile(task: SmartGanttTask, file: TFile) {
-	// 	this.app.vault.read(file).then(content => {
-	// 		let lines = content.split("\n")
-	// 		task.inventory = "backlog"
-	// 		lines[task.lineIndex] = `- [ ] ${task.name} [smartGanttId :: ${task.id}] [start::${moment(task.start).format(DATE_FORMAT)}] [due::${moment(task.end).format(DATE_FORMAT)}] [created::${moment(task.created).format(DATE_FORMAT)}] [dependencies::${task.dependencies.join(",")}] [type::${task.type}] [progress::${task.progress}] [inventory::${task.inventory}]`
-	//
-	// 		this.plugin.app.vault.modify(file, lines.join("\n"))
-	// 	})
-	// }
-
 	convertSmartGanttTaskToMarkdownString(task: SmartGanttTask) {
 		let output = ""
 		task.progress === 100 ? output += `- [x] ` : output += `- [ ] `
@@ -324,12 +326,10 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 				output += ` [smartGanttId :: ${task["id"]}] `
 
 			} else if (key === "start") {
-				const start = moment(task["start"]).format(DATE_FORMAT)
-				output += ` [start :: ${start}] `
+				output += ` [start :: ${formatDate(task["start"])}] `
 
 			} else if (key === "end") {
-				const due = moment(task["end"]).format(DATE_FORMAT)
-				output += ` [due :: ${due}] `
+				output += ` [due :: ${formatDate(task["end"])}] `
 			} else if (key === "dependencies") {
 				output += ` [dependencies :: ${task["dependencies"].join(",")}] `
 			} else {
@@ -368,8 +368,8 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 			this.tasks.push({
 				name: "In the beginning there is only darkness",
 				id: v4(),
-				start: moment().toDate(),
-				end: moment().add(3,"day").toDate(),
+				start: new Date(),
+				end: addDays(new Date(), 3),
 				dependencies: [],
 				progress: 0,
 			lineIndex: -1,
@@ -387,8 +387,8 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 						name: taskWithMetaData.name || "No name",
 						progress: Number.isFinite(progress) ? progress : 0,
 						id: meta.smartGanttId ?? v4(),
-						start: moment(meta.start).toDate(),
-						end: meta.due ? moment(meta.due).toDate() : moment().add(1, "day").toDate(),
+						start: (meta.start ? parseDateInput(meta.start) : null) ?? new Date(),
+						end: (meta.due ? parseDateInput(meta.due) : null) ?? addDays(new Date(), 1),
 						dependencies: meta.dependencies?.split(",") ?? [],
 						type: meta.type ?? "task",
 						lineIndex: taskWithMetaData.lineIndex ?? -1,

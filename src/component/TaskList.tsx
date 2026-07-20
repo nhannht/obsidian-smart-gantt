@@ -1,4 +1,5 @@
 import {TimelineExtractorResultNg} from "@/TimelineExtractor";
+import {nodeText} from "@/gantt/adapters";
 import SmartGanttPlugin from "../../main";
 import {useCallback, useEffect, useState} from "react";
 import {ListItem} from "mdast";
@@ -33,8 +34,7 @@ const TodoList = (props: {
 					<Label
 						htmlFor={t.id}
 					>
-						{/*@ts-ignore*/}
-						{t.node.children[0].children[0].value}
+						{nodeText(t.node)}
 						<p className={"text-xs text-muted-foreground hover:text-foreground hover:cursor-pointer"}
 						   onClick={() => {
 							   void props.jumpToResultPositionFn(t)
@@ -72,8 +72,7 @@ const DoneList = (props: {
 					checked={Boolean((props.dones.find(e => e.id === d.id)?.node as ListItem).checked)}
 				/>
 					<Label htmlFor={d.id}>
-						{/*@ts-ignore*/}
-						{d.node.children[0].children[0].value}
+						{nodeText(d.node)}
 						<p className={"text-xs text-muted-foreground hover:text-foreground hover:cursor-pointer"}
 						   onClick={() => {
 							   void props.jumpToResultPositionFn(d)

@@ -7,3 +7,5 @@ Captured 2026-07-20 from the 0.2.0 build running in a live Obsidian instance
   natural-language task note beside it, dark theme
 - [x] `block-light.png` - gantt code block in reading view, light theme,
   overdue bar visible
+- [x] `store-listing.png` - live community store listing (captured 2026-07-20,
+  user-requested): 9k downloads, Add to Obsidian, Health Excellent scorecard
