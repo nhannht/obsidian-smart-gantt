@@ -18,7 +18,7 @@ const TodoList = (props: {
 
 	return <ScrollArea className={"h-72 w-full rounded-md border p-2"}>
 		<div
-			className="mb-4 text-sm font-medium leading-none bg-gray-900 sticky top-0 text-white p-2 text-center">Unchecked
+			className="mb-3 rounded-md bg-secondary p-2 text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground sticky top-0">Unchecked
 		</div>
 		{props.todos.map((t, id) => (
 			<div key={id} className={"space-x-2 "}>
@@ -36,7 +36,7 @@ const TodoList = (props: {
 					>
 						{/*@ts-ignore*/}
 						{t.node.children[0].children[0].value}
-						<p className={"text-gray-600 underline text-sm hover:cursor-pointer"}
+						<p className={"text-xs text-muted-foreground hover:text-foreground hover:cursor-pointer"}
 						   onClick={() => {
 							   props.jumpToResultPositionFn(t)
 						   }}
@@ -60,7 +60,7 @@ const DoneList = (props: {
 }) => {
 	return <ScrollArea className={"h-72 w-full rounded-md border p-2"}>
 		<div
-			className="mb-4 text-sm font-medium leading-none bg-gray-900 sticky top-0 text-white p-2 text-center">Checked
+			className="mb-3 rounded-md bg-secondary p-2 text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground sticky top-0">Checked
 		</div>
 		{props.dones.map((d, id) => (
 			<div key={id} className={"space-x-2 "}>
@@ -76,7 +76,7 @@ const DoneList = (props: {
 					<Label htmlFor={d.id}>
 						{/*@ts-ignore*/}
 						{d.node.children[0].children[0].value}
-						<p className={"text-gray-600 underline text-sm hover:cursor-pointer"}
+						<p className={"text-xs text-muted-foreground hover:text-foreground hover:cursor-pointer"}
 						   onClick={() => {
 							   props.jumpToResultPositionFn(d)
 						   }}
@@ -117,25 +117,17 @@ const TaskList = (props: {
 	}, [props.results])
 
 	const modifyCheckboxFn = useCallback(async (r: TimelineExtractorResultNg, checkedQ: boolean) => {
-			let fileContent = await props.thisPlugin.app.vault.read(r.file)
-			let lines = fileContent.split(/(.*?\n)/g)
-			lines.forEach(((l, i) => {
-				if (l.trim() === "") lines.splice(i, 1)
-			}))
-			// console.log(lines)
-			let lI = Number(r.node.position?.start.line) - 1
-			// console.log(lines[lI])
-			let newLine = ""
-			if (checkedQ) {
-				newLine = lines[lI].replace("[ ]", "[x]")
-			} else {
-				newLine = lines[lI].replace("[x]", "[ ]")
-			}
-			// console.log(newLine)
-			// console.log(lI)
-			lines.splice(lI, 1, newLine)
-			const newFileContent = lines.join("")
-			await props.thisPlugin.app.vault.modify(r.file, newFileContent)
+			const lineIndex = Number(r.node.position?.start.line) - 1
+			if (Number.isNaN(lineIndex) || lineIndex < 0) return
+			await props.thisPlugin.app.vault.process(r.file, (content) => {
+				const lines = content.split("\n")
+				const line = lines[lineIndex]
+				if (line === undefined) return content
+				lines[lineIndex] = checkedQ
+					? line.replace("[ ]", "[x]")
+					: line.replace("[x]", "[ ]")
+				return lines.join("\n")
+			})
 		}, []
 	)
 

@@ -1,15 +1,14 @@
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {MarkdownPostProcessorContext} from "obsidian";
 import SmartGanttPlugin from "../../main";
 import {SmartGanttSettings} from "@/SettingManager";
 import MarkdownProcesser from "../MarkdownProcesser";
 import TimelineExtractor, {TimelineExtractorResultNg} from "../TimelineExtractor";
-import {Chrono, ParsedComponents} from "chrono-node";
-import {Task} from 'gantt-task-react';
+import {Chrono} from "chrono-node";
 import SettingViewComponent from "../component/SettingViewComponent";
-import SmartGanttChart from "../component/SmartGanttChart";
-import {ListItem} from "mdast";
-import {NavBar} from "@/BlockComponent/NavBar";
+import {GanttChart, ZoomControl, GanttTask, GanttZoom} from "@/gantt";
+import {resultsToGanttTasks, zoomFromSetting} from "@/gantt/adapters";
+import {Settings2} from "lucide-react";
 
 export const SmartGanttBlockReactComponentNg = (props: {
 	ctx: MarkdownPostProcessorContext,
@@ -20,117 +19,90 @@ export const SmartGanttBlockReactComponentNg = (props: {
 	const [internalSettings, setInternalSettings] =
 		useState<SmartGanttSettings>(structuredClone(props.settings))
 	const [isSettingQ, setIsSettingQ] = useState(false)
-	// const [resultWithChronoCount, setResultWithChronoCount] = useState(0)
 	const [timelineResults, setTimelineResults] = useState<TimelineExtractorResultNg[]>([])
-	const [tasks, setTasks] = useState<Task[]>([])
-
+	const [zoom, setZoom] = useState<GanttZoom>(zoomFromSetting(internalSettings.viewMode))
 
 	const reupdateData = useCallback(async () => {
 		const allMarkdownFiles = props.thisPlugin.app.vault.getMarkdownFiles();
 		const markdownProcesser = new MarkdownProcesser(allMarkdownFiles, props.thisPlugin)
 		await markdownProcesser.parseAllFilesNg(internalSettings)
-		const allNodes = markdownProcesser.nodes
-		// console.log(allNodes)
 		const timelineExtractor = new TimelineExtractor(new Chrono())
-		const timelineExtractorResults = await timelineExtractor.GetTimelineDataFromNodes(allNodes)
-		// console.log(timelineExtractorResults)
-		setTimelineResults(timelineExtractorResults)
-		// console.log(tasks)
+		setTimelineResults(await timelineExtractor.GetTimelineDataFromNodes(markdownProcesser.nodes))
 	}, [internalSettings])
 
-	const createDateFromKnownValues = useCallback((p: ParsedComponents) => {
-			//@ts-ignore
-			const knownValues = p.knownValues
-			return new Date(knownValues.year, knownValues.month, knownValues.day)
-		}, []
-	)
-
 	useEffect(() => {
-		reupdateData().then(_r => null)
+		reupdateData()
 	}, [internalSettings]);
 
+	// Live refresh on vault changes, debounced.
+	const debounceTimer = useRef<number | null>(null)
 	useEffect(() => {
-		let tempTasks: Task[] = []
-		timelineResults.forEach((timelineResult, _tIndex) => {
-			if (timelineResult.parsedResult) {
-				// console.log(timelineResult.parsedResult.start)
-				const startComponent = timelineResult.parsedResult.start
-				const endComponent = timelineResult.parsedResult.end
-				let task: Task = {
-					start: createDateFromKnownValues(startComponent),
-					end: endComponent ? createDateFromKnownValues(endComponent) : createDateFromKnownValues(startComponent),
-					//@ts-ignore
-					name: timelineResult.node.children[0].children[0].value,
-					id: `${timelineResult.id}`,
-					type: 'task',
-					progress: 50,
-					isDisabled: true,
-					styles: (timelineResult.node as ListItem).checked ? {
-						progressColor: '#df1fc0',
-						progressSelectedColor: '#20f323'
-					} : {
-						progressColor: '#ffffff',
-						progressSelectedColor: '#000000'
-					},
-				}
-				// console.log(task)
-				// console.log(task)
-				tempTasks.push(task)
-			}
-		})
-		setTasks(tempTasks)
-	}, [timelineResults])
+		const app = props.thisPlugin.app
+		const schedule = () => {
+			if (debounceTimer.current !== null) window.clearTimeout(debounceTimer.current)
+			debounceTimer.current = window.setTimeout(() => {
+				debounceTimer.current = null
+				reupdateData()
+			}, 500)
+		}
+		const ref = app.metadataCache.on("changed", schedule)
+		return () => {
+			app.metadataCache.offref(ref)
+			if (debounceTimer.current !== null) window.clearTimeout(debounceTimer.current)
+		}
+	}, [reupdateData])
 
-	let mainComponent: JSX.Element
+	const tasks: GanttTask[] = useMemo(
+		() => resultsToGanttTasks(timelineResults),
+		[timelineResults],
+	)
 
+	const onTaskChange = useCallback(async (task: GanttTask, change: { start: Date; end: Date }) => {
+		await props.thisPlugin.helper.updateResultDates(
+			task.meta as TimelineExtractorResultNg, change.start, change.end)
+	}, [props.thisPlugin])
+
+	const onOpenSource = useCallback((task: GanttTask) => {
+		props.thisPlugin.helper.jumpToPositionOfResult(task.meta as TimelineExtractorResultNg)
+	}, [props.thisPlugin])
 
 	if (isSettingQ) {
-		mainComponent = <main>
+		return <main>
 			<SettingViewComponent
 				isSettingsQ={isSettingQ}
-				isSettingsQHandle={(is) => {
-					setIsSettingQ(is)
-				}}
+				isSettingsQHandle={setIsSettingQ}
 				inputS={internalSettings}
-				saveSettings={(s) => {
-					setInternalSettings(s)
-
-				}}
+				saveSettings={setInternalSettings}
 				updateSettingInCodeBlockHandle={(s) => {
 					props.thisPlugin.helper.updateBlockSettingWithInternalSetting(s, props.ctx)
 				}}
 				thisPlugin={props.thisPlugin}
 			/>
 		</main>
-	} else {
-		if (tasks.length > 0) {
-			mainComponent = <main>
-				<div className={"w-full flex justify-center"}>
-					<NavBar
-						setIsSettingQFn={setIsSettingQ}/>
-				</div>
-				<SmartGanttChart
-					tasks={tasks}
-					thisPlugin={props.thisPlugin}
-					settings={internalSettings}
-					results={timelineResults}
-				/>
-				{/*<TaskList results={timelineResults}*/}
-				{/*		  thisPlugin={props.thisPlugin}*/}
-				{/*		  changeResultStatusFn={modifyResultsStatus}*/}
-				{/*/>*/}
-			</main>
-		} else {
-			mainComponent = <main>
-				<div className={"w-full flex justify-center"}>
-					<NavBar
-						setIsSettingQFn={setIsSettingQ}/>
-				</div>
-			</main>
-		}
 	}
 
-	return <>
-		{mainComponent}
-	</>
+	return <main>
+		<div className={"mb-2 flex items-center justify-between gap-2"}>
+			<ZoomControl zoom={zoom} onChange={setZoom}/>
+			<button
+				className={"sg-toolbar-icon"}
+				aria-label={"Settings"}
+				onClick={() => setIsSettingQ(true)}
+			>
+				<Settings2 className={"h-4 w-4"}/>
+			</button>
+		</div>
+		{tasks.length === 0
+			? <div className={"py-6 text-center text-sm text-muted-foreground"}>
+				No dated tasks match this block&apos;s filter.
+			</div>
+			: <GanttChart
+				tasks={tasks}
+				zoom={zoom}
+				onTaskChange={onTaskChange}
+				onOpenSource={onOpenSource}
+				showNames={internalSettings.leftBarChartDisplayQ}
+				height={320}
+			/>}
+	</main>
 };

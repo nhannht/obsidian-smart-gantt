@@ -7,7 +7,6 @@ import {RadioGroup, RadioGroupItem} from "./RadioGroup";
 import SmartGanttPlugin from "../../main";
 import {ScrollArea} from "./ScrollableList";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "./Select";
-import {ViewMode} from "gantt-task-react";
 import {Button} from "./Button";
 
 
@@ -65,7 +64,7 @@ const SettingViewComponent = (props: {
 	>
 		<ScrollArea className={"h-72 w-48 rounded-md m-2"}>
 			<div className={" space-y-2 px-4"}>
-				<div className={"mb-4 text-sm font-medium leading-none sticky top-0 bg-gray-200 p-2"}>List of
+				<div className={"mb-4 text-sm font-medium leading-none sticky top-0 bg-secondary text-secondary-foreground rounded-md p-2"}>List of
 					directories
 				</div>
 
@@ -162,34 +161,6 @@ const SettingViewComponent = (props: {
 		{props.isSettingsQ ? cancelButton : null}
 	</div>
 
-	const viewModeSelect = () => {
-		return <Select
-			value={s.viewMode}
-			onValueChange={e => {
-				 if (e === "Month"){
-					setS({...s,viewMode:ViewMode.Month})
-				} else if (e === "Day"){
-					setS({...s,viewMode:ViewMode.Day})
-				} else if (e === "Week"){
-					setS({...s,viewMode:ViewMode.Week})
-				} else if (e === "Year"){
-					setS({...s,viewMode:ViewMode.Year})
-				}
-			}}
-		>
-			<SelectTrigger className={"w-[180px]"}>
-				<SelectValue placeholder={"Select view mode of chart"}/>
-			</SelectTrigger>
-			<SelectContent>
-				<SelectItem value={"Day"}>Day</SelectItem>
-				<SelectItem value={"Week"}>Week</SelectItem>
-				<SelectItem value={"Month"}>Month</SelectItem>
-				<SelectItem value={"Year"}>Year</SelectItem>
-			</SelectContent>
-
-		</Select>
-	}
-
 	const showTaskListInChartCheckbox = ()=>{
 		return <div className={"flex space-x-2 items-center"}>
 			<Checkbox
@@ -219,7 +190,6 @@ const SettingViewComponent = (props: {
 			{customPathFilterRadio}
 		</RadioGroup>
 			{filterBaseOnStatusCheckbox}
-			{viewModeSelect()}
 			{showTaskListInChartCheckbox()}
 
 		</div>
