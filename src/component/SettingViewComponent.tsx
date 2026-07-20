@@ -6,7 +6,6 @@ import {Label} from "./Label";
 import {RadioGroup, RadioGroupItem} from "./RadioGroup";
 import SmartGanttPlugin from "../../main";
 import {ScrollArea} from "./ScrollableList";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "./Select";
 import {Button} from "./Button";
 
 
@@ -55,12 +54,10 @@ const SettingViewComponent = (props: {
 		</RadioGroupItem>
 		<Label htmlFor={"customPath"}>Custom path</Label>
 	</div>;
+	const customPathQ = s.pathListFilter.indexOf("AllFiles") === -1 &&
+		s.pathListFilter.indexOf("CurrentFile") === -1
 	const customPathListCheckboxs = <div
 		className={"flex justify-center"}
-		hidden={
-			s.pathListFilter.indexOf("AllFiles") !== -1 ||
-			s.pathListFilter.indexOf("CurrentFile") !== -1
-		}
 	>
 		<ScrollArea className={"h-72 w-48 rounded-md m-2"}>
 			<div className={" space-y-2 px-4"}>
@@ -78,7 +75,7 @@ const SettingViewComponent = (props: {
 							onCheckedChange={(e) => {
 								let paths = {...s}.pathListFilter
 								// console.log(paths)
-								if (Boolean(e)) {
+								if (e) {
 									paths.push(path)
 									setS({...s, pathListFilter: paths})
 								} else {
@@ -128,7 +125,7 @@ const SettingViewComponent = (props: {
 	let settingButton = <Button/>
 	if (props.isSettingsQ) {
 		settingButton = <Button
-			onClick={async () => {
+			onClick={() => {
 				props.isSettingsQHandle(false)
 				props.saveSettings(s)
 				if (props.updateSettingInCodeBlockHandle){
@@ -195,7 +192,7 @@ const SettingViewComponent = (props: {
 		</div>
 
 
-		{customPathListCheckboxs}
+		{customPathQ ? customPathListCheckboxs : null}
 
 	</>
 	return <>

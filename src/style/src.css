@@ -1,10 +1,11 @@
 @import "../component/GlassSurface.css";
-@import "../component/SpotlightCard.css";
-@import "../component/BorderGlow.css";
 @import "./tokens.css";
 @import "../gantt/gantt.css";
+/* stylelint-disable-next-line at-rule-no-unknown -- tailwind build-time directive, compiled away by the tailwind CLI */
 @tailwind base;
+/* stylelint-disable-next-line at-rule-no-unknown -- tailwind build-time directive, compiled away by the tailwind CLI */
 @tailwind components;
+/* stylelint-disable-next-line at-rule-no-unknown -- tailwind build-time directive, compiled away by the tailwind CLI */
 @tailwind utilities;
 
 
@@ -18,6 +19,10 @@
   }
 }
 
-.twp [hidden]{
-	display: none !important;
+/* After the tailwind layers so plain source order beats the scoped preflight:
+ * plugin containers follow Obsidian's interface font, not the preflight's
+ * ui-sans-serif stack. */
+.twp {
+	font-family: var(--font-interface, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif);
+	font-size: inherit;
 }

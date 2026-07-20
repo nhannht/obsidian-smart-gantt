@@ -48,10 +48,6 @@ body {
 }
 
 .twp {
-	/* !important: the scoped Tailwind preflight and Obsidian's app styles
-	 * both target this element with equal or higher precedence. */
-	font-family: var(--font-interface, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif) !important;
-	font-size: inherit !important;
 	color: var(--sg-label);
 }
 
@@ -62,12 +58,16 @@ body {
  * here. No overrides, no specificity war. */
 
 /* GlassSurface sizes its content wrapper at 100% of the container; with
- * width="auto" both collapse to zero. Shrink-wrap the floating toolbar. */
+ * width="auto" both collapse to zero. Shrink-wrap the floating toolbar.
+ * !important is required here: the vendored component sets width through
+ * inline styles, which nothing short of !important can override. */
 .sg-float .glass-surface {
+	/* stylelint-disable-next-line declaration-no-important -- overrides the vendored component's inline style */
 	width: fit-content !important;
 }
 
 .sg-float .glass-surface__content {
+	/* stylelint-disable-next-line declaration-no-important -- overrides the vendored component's inline style */
 	width: max-content !important;
 }
 
@@ -90,24 +90,16 @@ body.theme-dark {
 	border: 1px solid var(--sg-glass-border);
 }
 
-/* Theme fixups for vendored react-bits components - overrides live HERE,
- * never inside the vendored files. */
-.theme-dark .card-spotlight {
-	background-color: var(--background-secondary);
-	border-color: var(--background-modifier-border);
-}
-.theme-light .card-spotlight,
-body:not(.theme-dark) .card-spotlight {
-	background-color: var(--background-primary);
-	border-color: var(--background-modifier-border);
-}
-
-/* Reduced motion: kill transitions, animations, and spring settles */
+/* Reduced motion: kill transitions, animations, and spring settles.
+ * !important is the accessibility kill-switch - it must beat every
+ * component-level transition regardless of specificity. */
 @media (prefers-reduced-motion: reduce) {
 	.twp *,
 	.twp *::before,
 	.twp *::after {
+		/* stylelint-disable-next-line declaration-no-important -- accessibility kill-switch must always win */
 		transition: none !important;
+		/* stylelint-disable-next-line declaration-no-important -- accessibility kill-switch must always win */
 		animation: none !important;
 	}
 }
