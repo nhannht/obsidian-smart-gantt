@@ -1,0 +1,94 @@
+/*
+ * Smart Gantt design tokens.
+ * Scoped under .twp (the plugin's root containers). Colors derive from
+ * Obsidian theme variables so every community theme harmonizes; structure,
+ * radii, and motion follow the Apple ladder adapted to editor-pane density.
+ */
+
+body {
+	/* Label ladder (3 steps, never ad-hoc grays) */
+	--sg-label: var(--text-normal);
+	--sg-label-2: var(--text-muted);
+	--sg-label-3: var(--text-faint);
+
+	/* Accent and status */
+	--sg-accent: var(--interactive-accent);
+	--sg-accent-hover: var(--interactive-accent-hover);
+	--sg-on-accent: var(--text-on-accent);
+	--sg-done: var(--color-green);
+	--sg-overdue: var(--color-red);
+
+	/* Surfaces: paper rests, glass floats */
+	--sg-surface: var(--background-primary);
+	--sg-surface-2: var(--background-secondary);
+	--sg-hairline: var(--background-modifier-border);
+	--sg-hover: var(--background-modifier-hover);
+
+	/* Radii, scaled for pane density */
+	--sg-radius-bar: 8px;
+	--sg-radius-card: 12px;
+	--sg-radius-pill: 14px;
+
+	/* Elevation for the one floating layer */
+	--sg-shadow-float: 0 8px 24px rgba(0, 0, 0, 0.18), 0 1px 3px rgba(0, 0, 0, 0.12);
+	--sg-shadow-drag: 0 12px 32px rgba(0, 0, 0, 0.28), 0 2px 6px rgba(0, 0, 0, 0.16);
+
+	/* Motion: restrained, spring-settled */
+	--sg-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+	--sg-ease-spring: cubic-bezier(0.34, 1.3, 0.4, 1);
+	--sg-dur-fast: 140ms;
+	--sg-dur: 220ms;
+
+	/* Frosted glass backing (fallback + tint under real refraction) */
+	--sg-glass-bg: rgba(255, 255, 255, 0.55);
+	--sg-glass-border: rgba(0, 0, 0, 0.08);
+
+	/* shadcn radius family resolves to the card radius */
+	--radius: 12px;
+}
+
+.twp {
+	font-family: var(--font-interface, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif);
+	color: var(--sg-label);
+}
+
+body.theme-dark {
+	--sg-glass-bg: rgba(22, 22, 28, 0.55);
+	--sg-glass-border: rgba(255, 255, 255, 0.09);
+	--sg-shadow-float: 0 8px 24px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.3);
+	--sg-shadow-drag: 0 12px 32px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+/* Frosted fallback material for floating elements (mobile WKWebView safe).
+ * GlassSurface handles its own refraction on desktop; this class is for
+ * lightweight floats (tooltips, transient drag glass) that skip the SVG
+ * filter entirely. */
+.twp .sg-frost,
+.sg-frost {
+	background: var(--sg-glass-bg);
+	-webkit-backdrop-filter: blur(16px) saturate(1.5);
+	backdrop-filter: blur(16px) saturate(1.5);
+	border: 1px solid var(--sg-glass-border);
+}
+
+/* Theme fixups for vendored react-bits components - overrides live HERE,
+ * never inside the vendored files. */
+.theme-dark .card-spotlight {
+	background-color: var(--background-secondary);
+	border-color: var(--background-modifier-border);
+}
+.theme-light .card-spotlight,
+body:not(.theme-dark) .card-spotlight {
+	background-color: var(--background-primary);
+	border-color: var(--background-modifier-border);
+}
+
+/* Reduced motion: kill transitions, animations, and spring settles */
+@media (prefers-reduced-motion: reduce) {
+	.twp *,
+	.twp *::before,
+	.twp *::after {
+		transition: none !important;
+		animation: none !important;
+	}
+}

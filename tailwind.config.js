@@ -29,38 +29,38 @@ module.exports = {
 		},
 		extend: {
 			colors: {
-				border: "hsl(var(--border))",
-				input: "hsl(var(--input))",
-				ring: "hsl(var(--ring))",
-				background: "hsl(var(--background))",
-				foreground: "hsl(var(--foreground))",
+				border: "var(--sg-hairline)",
+				input: "var(--sg-hairline)",
+				ring: "var(--sg-accent)",
+				background: "var(--sg-surface)",
+				foreground: "var(--sg-label)",
 				primary: {
-					DEFAULT: "hsl(var(--primary))",
-					foreground: "hsl(var(--primary-foreground))",
+					DEFAULT: "var(--sg-accent)",
+					foreground: "var(--sg-on-accent)",
 				},
 				secondary: {
-					DEFAULT: "hsl(var(--secondary))",
-					foreground: "hsl(var(--secondary-foreground))",
+					DEFAULT: "var(--sg-surface-2)",
+					foreground: "var(--sg-label)",
 				},
 				destructive: {
-					DEFAULT: "hsl(var(--destructive))",
-					foreground: "hsl(var(--destructive-foreground))",
+					DEFAULT: "var(--sg-overdue)",
+					foreground: "var(--sg-on-accent)",
 				},
 				muted: {
-					DEFAULT: "hsl(var(--muted))",
-					foreground: "hsl(var(--muted-foreground))",
+					DEFAULT: "var(--sg-surface-2)",
+					foreground: "var(--sg-label-2)",
 				},
 				accent: {
-					DEFAULT: "hsl(var(--accent))",
-					foreground: "hsl(var(--accent-foreground))",
+					DEFAULT: "var(--sg-hover)",
+					foreground: "var(--sg-label)",
 				},
 				popover: {
-					DEFAULT: "hsl(var(--popover))",
-					foreground: "hsl(var(--popover-foreground))",
+					DEFAULT: "var(--sg-surface)",
+					foreground: "var(--sg-label)",
 				},
 				card: {
-					DEFAULT: "hsl(var(--card))",
-					foreground: "hsl(var(--card-foreground))",
+					DEFAULT: "var(--sg-surface-2)",
+					foreground: "var(--sg-label)",
 				},
 			},
 			borderRadius: {
