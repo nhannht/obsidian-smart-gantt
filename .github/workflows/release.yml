@@ -16,24 +16,13 @@ jobs:
           fetch-depth: 0
 
 
-      - name: set up npm
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-#      - name: "📔 Generate a changelog"
-#        uses: orhun/git-cliff-action@v3
-#        with:
-#          config: cliff.toml
-#          args: --verbose --latest
-#        env:
-#          OUTPUT: CHANGELOG_temp.md
+      - name: Set up bun
+        uses: oven-sh/setup-bun@v2
 
       - name: Build plugin
         run: |
-          yarn
-          
-          yarn run build
+          bun install
+          bun run build
 
       - name: "Get the tag"
         id: get_tag
