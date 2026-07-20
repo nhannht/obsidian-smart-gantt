@@ -1,4 +1,13 @@
-name: deploy site
+# Build check only. The site is self-hosted on sg-hs (nginx + certbot) at
+# https://smartgantt.nhannht.io.vn, and sg-hs SSH is reachable over Tailscale
+# only, so GitHub runners cannot deploy. Deploy manually from a Tailscale
+# machine:
+#   cd site && bun install && bun run build \
+#     && rsync -az --delete dist/ sg-hs:/var/www/smartgantt.nhannht.io.vn/
+# The old obsidian-smart-gantt.pages.dev project now serves a permanent 301
+# to the new domain.
+
+name: site build check
 
 on:
     push:
@@ -6,7 +15,7 @@ on:
             - docs
 
 jobs:
-    deploy:
+    build:
         runs-on: ubuntu-latest
         steps:
             -   name: check out
@@ -22,13 +31,3 @@ jobs:
             -   name: build
                 working-directory: site
                 run: bun run build
-
-            -   name: turn pages.dev into a redirect to the new domain
-                working-directory: site
-                env:
-                    CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                    CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                run: |
-                    mkdir redirect-shell
-                    echo "/* https://smartgantt.nhannht.io.vn/:splat 301" > redirect-shell/_redirects
-                    bunx wrangler pages deploy redirect-shell --branch=master
