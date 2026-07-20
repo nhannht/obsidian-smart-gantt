@@ -18,7 +18,8 @@
 <ul>
 
 - Keep track of all your tasks across your vault.
-- Generate a Gantt chart based on them
+- Understands dates written in plain language ("due next monday", "tomorrow"), Tasks-style emoji dates, and Dataview `[due:: ]` fields - no special syntax required.
+- Generate a Gantt chart based on them: drag a bar to reschedule and the date is rewritten in your note, resize edges, zoom Day/Week/Month/Quarter.
 - Quick jump to your task location. 
 
 </ul>
@@ -33,7 +34,7 @@
 
 - Open your sidebar and magic will happen
 
-![](./assets/README-1712821565619.png)
+![Smart Gantt sidebar in dark theme](./showcase/sidebar-dark.png)
 
 ###### Gantt code block.
 
@@ -49,7 +50,7 @@
  ```
 ````
 
-![](./assets/README-1712821625314.png)
+![Gantt code block in light theme](./showcase/block-light.png)
 
 ---
 

@@ -1,9 +1,9 @@
-# Showcase checklist
+# Showcase
 
-At least 2 real screenshots of the 0.2.0 UI are required here before the
-plugin is announced or resubmitted as "done":
+Captured 2026-07-20 from the 0.2.0 build running in a live Obsidian instance
+(user-approved CDP capture):
 
-- [ ] Sidebar gantt view: glass toolbar + bars in dark theme
-- [ ] Gantt code block or the .smartgantt item view in light theme
-
-Capture at a comfortable window size, both themes represented if possible.
+- [x] `sidebar-dark.png` - sidebar gantt view: glass toolbar, today line,
+  natural-language task note beside it, dark theme
+- [x] `block-light.png` - gantt code block in reading view, light theme,
+  overdue bar visible

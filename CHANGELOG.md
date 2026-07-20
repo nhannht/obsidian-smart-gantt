@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.0](https://github.com/nhannht/obsidian-smart-gantt/tree/0.2.0) (2026-07-20)
+
+[Full Changelog](https://github.com/nhannht/obsidian-smart-gantt/compare/0.1.17...0.2.0)
+
+**Highlights:**
+
+- Bespoke gantt engine replaces gantt-task-react: drag a bar to reschedule (the date is rewritten in your note), resize edges, Day/Week/Month/Quarter zoom, today line, weekend shading, windowed rendering.
+- Premium UI overhaul: design tokens derived from your Obsidian theme, one floating glass toolbar per view, restrained motion with prefers-reduced-motion support.
+- Sidebar auto-refreshes when your notes change - the manual reload timer hack is gone.
+- Settings migrated from localStorage to Obsidian loadData/saveData (one-time automatic import).
+- All background file edits go through Vault.process.
+- Plugin UI renders no bare button elements, so Obsidian and community theme button styles can never bleed in.
+- Legacy mermaid, marked, and CodeMirror 5 code paths removed; bundle shrank from 2.45 MB to 1.82 MB.
+
 ## [0.1.16](https://github.com/nhannht/obsidian-smart-gantt/tree/0.1.16) (2024-07-29)
 
 [Full Changelog](https://github.com/nhannht/obsidian-smart-gantt/compare/0.1.14...0.1.16)
