@@ -1,6 +1,5 @@
 import SmartGanttPlugin from "../../main";
 import {EditorPosition, MarkdownPostProcessorContext, MarkdownView, WorkspaceLeaf} from "obsidian";
-import {FilterModal} from "@/FilterModal";
 import {TimelineExtractorResultNg} from "@/TimelineExtractor";
 import {Node} from "mdast"
 import {SmartGanttSettings} from "@/SettingManager";
@@ -12,32 +11,22 @@ export class Helper {
 		this.thisPlugin.app.workspace.detachLeavesOfType("smart-gantt")
 		let leaf = this.thisPlugin.app.workspace.getRightLeaf(false);
 
-		leaf?.setViewState({
+		await leaf?.setViewState({
 			type: "smart-gantt",
 			active: true,
 		})
 		if (leaf instanceof WorkspaceLeaf && !this.thisPlugin.app.workspace.rightSplit.collapsed) {
-			this.thisPlugin.app.workspace.revealLeaf(leaf);
+			await this.thisPlugin.app.workspace.revealLeaf(leaf);
 
 		}
-	}
-
-	async renderFilterBox() {
-		new FilterModal(this.thisPlugin.app,
-			this.thisPlugin,
-		).open()
-
-	}
-
-	getComputedStyleOfVault() {
-		return getComputedStyle(document.body)
-
 	}
 
 	getAllParentPath = () => {
 		let allParentPath: Set<string> = new Set()
 		this.thisPlugin.app.vault.getMarkdownFiles().forEach(r => {
-			r.parent?.path ? allParentPath.add(r.parent.path) : null
+			if (r.parent?.path) {
+				allParentPath.add(r.parent.path)
+			}
 		})
 		return Array.from(allParentPath)
 	}
@@ -49,14 +38,15 @@ export class Helper {
 		const node:Node = result.node
 		// console.log(node)
 
-		view.editor.setSelection({
-			line:  Number(node.position?.start.line) - 1,
+		const from: EditorPosition = {
+			line: Number(node.position?.start.line) - 1,
 			ch: Number(node.position?.start.column) - 1,
-		} as EditorPosition,
-			{
-			line:Number(node.position?.end.line) - 1,
-			ch: Number(node.position?.end.column) - 1
-		} as EditorPosition)
+		}
+		const to: EditorPosition = {
+			line: Number(node.position?.end.line) - 1,
+			ch: Number(node.position?.end.column) - 1,
+		}
+		view.editor.setSelection(from, to)
 
 	}
 
@@ -94,7 +84,7 @@ export class Helper {
 		})
 	}
 
-	updateBlockSettingWithInternalSetting = (settingObject: SmartGanttSettings,
+	updateBlockSettingWithInternalSetting = async (settingObject: SmartGanttSettings,
 												   context: MarkdownPostProcessorContext) => {
 
 		const sourcePath = context.sourcePath
@@ -115,7 +105,7 @@ export class Helper {
 			const newSettingsString = linesFromFile.join("")
 			const file = this.thisPlugin.app.vault.getFileByPath(sourcePath)
 			if (file) {
-				this.thisPlugin.app.vault.process(file, () => newSettingsString)
+				await this.thisPlugin.app.vault.process(file, () => newSettingsString)
 			}
 		}
 
