@@ -1,9 +1,9 @@
 {
 	"id": "smart-gantt",
 	"name": "Smart Gantt",
-	"version": "0.1.17",
-	"minAppVersion": "0.1.5",
-	"description": "Intelligently generate Gantt chart from your tasks",
+	"version": "0.1.18",
+	"minAppVersion": "1.4.16",
+	"description": "Generate Gantt charts from your tasks.",
 	"author": "Nhan Nguyen",
 	"authorUrl": "https://github.com/nhannht",
 	"isDesktopOnly": false
