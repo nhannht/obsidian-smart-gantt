@@ -1,5 +1,4 @@
 import SmartGanttPlugin from "../../main";
-import {useLocalStorage} from "react-use";
 import {SmartGanttSettings} from "@/SettingManager";
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import MarkdownProcesser from "../MarkdownProcesser";
@@ -22,6 +21,15 @@ const DEFAULT_SIDEBAR_SETTINGS: SmartGanttSettings = {
 	viewMode: "day",
 };
 
+/* Sidebar view preferences persist through Obsidian's vault-scoped
+ * localStorage wrappers, as the store guidelines require. */
+const SIDEBAR_SETTINGS_KEY = "smart-gantt-sidebar-settings";
+
+const loadSidebarSettings = (plugin: SmartGanttPlugin): SmartGanttSettings => {
+	const raw = plugin.app.loadLocalStorage(SIDEBAR_SETTINGS_KEY) as Partial<SmartGanttSettings> | null;
+	return {...DEFAULT_SIDEBAR_SETTINGS, ...(raw ?? {})};
+};
+
 const EmptyState = () => (
 	<div className={"flex h-full flex-col items-center justify-center gap-3 px-6 text-center"}>
 		<CalendarRange className={"h-10 w-10 text-muted-foreground opacity-60"} aria-hidden={true}/>
@@ -36,23 +44,24 @@ const EmptyState = () => (
 const SidebarReactComponentNg = (props: {
 	thisPlugin: SmartGanttPlugin
 }) => {
-	const [settings, saveSettings] = useLocalStorage<SmartGanttSettings>(
-		`smart-gantt-sidebar-settings-${props.thisPlugin.app.vault.getName()}`,
-		DEFAULT_SIDEBAR_SETTINGS,
-	);
+	const [settings, setSettings] = useState<SmartGanttSettings>(() => loadSidebarSettings(props.thisPlugin));
+	const saveSettings = useCallback((s: SmartGanttSettings) => {
+		props.thisPlugin.app.saveLocalStorage(SIDEBAR_SETTINGS_KEY, s);
+		setSettings(s);
+	}, [props.thisPlugin]);
 	const [timelineResults, setTimelineResults] = useState<TimelineExtractorResultNg[]>([])
 	const [isSettingQ, setIsSettingQ] = useState(false)
 	const [refreshing, setRefreshing] = useState(false)
 
-	const zoom = zoomFromSetting(settings?.viewMode);
+	const zoom = zoomFromSetting(settings.viewMode);
 	const setZoom = (z: GanttZoom) => {
-		saveSettings({...(settings ?? DEFAULT_SIDEBAR_SETTINGS), viewMode: z});
+		saveSettings({...settings, viewMode: z});
 	};
 
 	const reupdateData = useCallback(async () => {
 		const allMarkdownFiles = props.thisPlugin.app.vault.getMarkdownFiles();
 		const markdownProcesser = new MarkdownProcesser(allMarkdownFiles, props.thisPlugin)
-		await markdownProcesser.parseAllFilesNg(settings ?? DEFAULT_SIDEBAR_SETTINGS)
+		await markdownProcesser.parseAllFilesNg(settings)
 		const allNodes = markdownProcesser.nodes
 		const timelineExtractor = new TimelineExtractor(new Chrono())
 		const timelineExtractorResults = await timelineExtractor.GetTimelineDataFromNodes(allNodes)
@@ -60,8 +69,8 @@ const SidebarReactComponentNg = (props: {
 	}, [settings])
 
 	useEffect(() => {
-		reupdateData()
-	}, [settings])
+		void reupdateData()
+	}, [settings, reupdateData])
 
 	// Live refresh: any metadata change in the vault re-extracts, debounced.
 	const debounceTimer = useRef<number | null>(null)
@@ -71,7 +80,7 @@ const SidebarReactComponentNg = (props: {
 			if (debounceTimer.current !== null) window.clearTimeout(debounceTimer.current)
 			debounceTimer.current = window.setTimeout(() => {
 				debounceTimer.current = null
-				reupdateData()
+				void reupdateData()
 			}, 500)
 		}
 		const refs = [
@@ -107,7 +116,7 @@ const SidebarReactComponentNg = (props: {
 	}, [props.thisPlugin])
 
 	const onOpenSource = useCallback((task: GanttTask) => {
-		props.thisPlugin.helper.jumpToPositionOfResult(task.meta as TimelineExtractorResultNg)
+		void props.thisPlugin.helper.jumpToPositionOfResult(task.meta as TimelineExtractorResultNg)
 	}, [props.thisPlugin])
 
 	if (isSettingQ) {
@@ -135,10 +144,9 @@ const SidebarReactComponentNg = (props: {
 					<Pressable
 						className={"sg-toolbar-icon"}
 						aria-label={"Refresh"}
-						onClick={async () => {
+						onClick={() => {
 							setRefreshing(true)
-							await reupdateData()
-							setRefreshing(false)
+							void reupdateData().finally(() => setRefreshing(false))
 						}}
 					>
 						<RotateCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}/>
