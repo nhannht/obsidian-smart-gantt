@@ -35,7 +35,9 @@ export default class SmartGanttSibeBarView extends ItemView {
 
 
 	override async onOpen() {
-		this.root = createRoot(this.containerEl.children[1]);
+		const container = this.containerEl.children[1]
+		container.addClass("twp")
+		this.root = createRoot(container);
 
 
 		this.root.render(

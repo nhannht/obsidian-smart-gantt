@@ -4,8 +4,7 @@
 @tailwind utilities;
 
 
-@layer base {
-  :root {
+:root {
     --background: 0 0% 100%;
     --foreground: 222.2 47.4% 11.2%;
 
@@ -38,7 +37,7 @@
     --radius: 0.5rem;
   }
 
-  .dark {
+  .theme-dark {
     --background: 224 71% 4%;
     --foreground: 213 31% 91%;
 
@@ -70,18 +69,17 @@
 
     --radius: 0.5rem;
   }
-}
 
 @layer base {
-  * {
+  .twp *, .twp ::before, .twp ::after {
     @apply border-border;
   }
-  body {
+  .twp {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-[hidden]{
+.twp [hidden]{
 	display: none !important;
 }

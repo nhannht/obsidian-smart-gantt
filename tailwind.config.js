@@ -18,7 +18,7 @@ module.exports = {
 		})
 
 	],
-	darkMode: ["class"],
+	darkMode: ["selector", ".theme-dark"],
 	theme: {
 		container: {
 			center: true,

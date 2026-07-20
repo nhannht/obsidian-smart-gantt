@@ -28,7 +28,7 @@ export default class GanttBlockManager {
 			}
 
 			let root = el.createEl("div", {
-				cls: "root"
+				cls: "twp"
 			})
 			let reactRoot = createRoot(root)
 			reactRoot.render(
@@ -58,7 +58,7 @@ export default class GanttBlockManager {
 			// console.log(allSentences)
 
 			let root = el.createEl("div", {
-				cls: "root"
+				cls: "twp"
 			})
 			let reactRoot = createRoot(root)
 			reactRoot.render(
@@ -91,7 +91,7 @@ export default class GanttBlockManager {
 	// 		// console.log(allSentences)
 	//
 	// 		let root = el.createEl("div", {
-	// 			cls: "root"
+	// 			cls: "twp"
 	// 		})
 	// 		let reactRoot = createRoot(root)
 	// 		reactRoot.render(
