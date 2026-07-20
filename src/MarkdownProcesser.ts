@@ -69,7 +69,7 @@ export default class MarkdownProcesser {
 
 	async parseAllFilesNg(settings: SmartGanttSettings) {
 		const pathFilterSettings = settings.pathListFilter
-		this._files.map(async (file) => {
+		await Promise.all(this._files.map(async (file) => {
 			// console.log(file)
 			if (pathFilterSettings.indexOf("AllFiles") !== -1) {
 			} else if (pathFilterSettings.indexOf("CurrentFile") !== -1) {
@@ -81,7 +81,7 @@ export default class MarkdownProcesser {
 			) return
 			// console.log(file)
 			await this.parseFilesAndUpdateTokensNg(file, settings)
-		})
+		}))
 	}
 
 
