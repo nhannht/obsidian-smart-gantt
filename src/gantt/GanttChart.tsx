@@ -62,7 +62,7 @@ const GanttChart = (props: GanttChartProps) => {
 			el.scrollLeft = Math.max(0, geometry.todayX - el.clientWidth / 3);
 		}
 		updateWindow();
-	}, [zoom]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [zoom]); // eslint-disable-line react-hooks/exhaustive-deps -- recenter on zoom change only, not on every geometry rebuild
 
 	useEffect(() => {
 		updateWindow();
