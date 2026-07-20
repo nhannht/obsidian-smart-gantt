@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.2](https://github.com/nhannht/obsidian-smart-gantt/tree/0.2.2) (2026-07-20)
+
+[Full Changelog](https://github.com/nhannht/obsidian-smart-gantt/compare/0.2.1...0.2.2)
+
+**Changes:**
+
+- The plugin has a real icon now: the Smart Gantt bars mark (the same logo as the website favicon) replaces the placeholder egg on the ribbon button, the sidebar view tab, and the gantt item view tab. Monochrome, follows your theme color like any built-in icon.
+
 ## [0.2.1](https://github.com/nhannht/obsidian-smart-gantt/tree/0.2.1) (2026-07-20)
 
 [Full Changelog](https://github.com/nhannht/obsidian-smart-gantt/compare/0.2.0...0.2.1)
