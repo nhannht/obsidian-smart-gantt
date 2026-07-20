@@ -55,7 +55,7 @@ export default class HelperNg {
 		if (matches) {
 			const checkbox = matches[1] === 'x';
 			const name = matches[2].trim();
-			const keyValueRegex = /\[([^\[\]]*?)::([^\[\]]*?)]/g;
+			const keyValueRegex = /\[([^[\]]*?)::([^[\]]*?)]/g;
 			const keyValuePairs:{[key:string]:string} = {}
 
 			let match;

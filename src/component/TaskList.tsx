@@ -10,9 +10,9 @@ import {ResizableHandle, ResizablePanel, ResizablePanelGroup} from "@/component/
 
 const TodoList = (props: {
 	todos: TimelineExtractorResultNg[],
-	modifyCheckboxFn: (t: TimelineExtractorResultNg, status: boolean) => void
+	modifyCheckboxFn: (t: TimelineExtractorResultNg, status: boolean) => void | Promise<void>
 	changeResultStatusFn: (rId: string, status: boolean) => void
-	jumpToResultPositionFn: (t: TimelineExtractorResultNg) => void
+	jumpToResultPositionFn: (t: TimelineExtractorResultNg) => void | Promise<void>
 }) => {
 
 
@@ -24,9 +24,8 @@ const TodoList = (props: {
 			<div key={id} className={"space-x-2 "}>
 				<div className={"flex items-center space-x-2"}><Checkbox
 					id={t.id}
-					onCheckedChange={async e => {
-						props.modifyCheckboxFn(t, Boolean(e))
-						//@ts-ignore
+					onCheckedChange={e => {
+						void props.modifyCheckboxFn(t, Boolean(e))
 						props.changeResultStatusFn(t.id, Boolean(e))
 					}}
 					checked={Boolean((props.todos.find(e => e.id === t.id)?.node as ListItem).checked)}
@@ -38,7 +37,7 @@ const TodoList = (props: {
 						{t.node.children[0].children[0].value}
 						<p className={"text-xs text-muted-foreground hover:text-foreground hover:cursor-pointer"}
 						   onClick={() => {
-							   props.jumpToResultPositionFn(t)
+							   void props.jumpToResultPositionFn(t)
 						   }}
 						> {t.file.path} </p>
 					</Label>
@@ -54,9 +53,9 @@ const TodoList = (props: {
 
 const DoneList = (props: {
 	dones: TimelineExtractorResultNg[],
-	modifyCheckboxFn: (t: TimelineExtractorResultNg, status: boolean) => void,
+	modifyCheckboxFn: (t: TimelineExtractorResultNg, status: boolean) => void | Promise<void>,
 	changeResultStatusFn: (rId: string, status: boolean) => void
-	jumpToResultPositionFn: (t: TimelineExtractorResultNg) => void;
+	jumpToResultPositionFn: (t: TimelineExtractorResultNg) => void | Promise<void>;
 }) => {
 	return <ScrollArea className={"h-72 w-full rounded-md border p-2"}>
 		<div
@@ -66,10 +65,9 @@ const DoneList = (props: {
 			<div key={id} className={"space-x-2 "}>
 				<div className={"flex items-center space-x-2"}><Checkbox
 					id={d.id}
-					onCheckedChange={async e => {
-						props.modifyCheckboxFn(d, Boolean(e))
+					onCheckedChange={e => {
+						void props.modifyCheckboxFn(d, Boolean(e))
 						props.changeResultStatusFn(d.id, Boolean(e))
-
 					}}
 					checked={Boolean((props.dones.find(e => e.id === d.id)?.node as ListItem).checked)}
 				/>
@@ -78,7 +76,7 @@ const DoneList = (props: {
 						{d.node.children[0].children[0].value}
 						<p className={"text-xs text-muted-foreground hover:text-foreground hover:cursor-pointer"}
 						   onClick={() => {
-							   props.jumpToResultPositionFn(d)
+							   void props.jumpToResultPositionFn(d)
 						   }}
 						> {d.file.path} </p>
 
@@ -114,7 +112,7 @@ const TaskList = (props: {
 
 	useEffect(() => {
 		classifyResults()
-	}, [props.results])
+	}, [props.results, classifyResults])
 
 	const modifyCheckboxFn = useCallback(async (r: TimelineExtractorResultNg, checkedQ: boolean) => {
 			const lineIndex = Number(r.node.position?.start.line) - 1

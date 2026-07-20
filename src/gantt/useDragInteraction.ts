@@ -17,7 +17,7 @@ export interface DragState {
 export function useDragInteraction(
 	task: GanttTask,
 	geometry: GanttGeometry,
-	onCommit?: (task: GanttTask, change: GanttChangePayload) => void,
+	onCommit?: (task: GanttTask, change: GanttChangePayload) => void | Promise<void>,
 ) {
 	const [drag, setDrag] = useState<DragState | null>(null);
 	const session = useRef<{ mode: DragMode; originX: number; pointerId: number } | null>(null);
@@ -59,7 +59,7 @@ export function useDragInteraction(
 			end = addDays(end, d.deltaDays);
 			if (daysBetween(start, end) < 0) end = start;
 		}
-		onCommit(task, {start, end});
+		void onCommit(task, {start, end});
 	}, [task, onCommit]);
 
 	useEffect(() => {

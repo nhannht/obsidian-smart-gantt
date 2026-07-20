@@ -17,7 +17,7 @@ export class TaskCustomizeModal extends Modal {
 		this.setTitle("Customize tasks")
 		let cloneTask = {...task}
 
-		let nameSetting = new Setting(this.contentEl)
+		new Setting(this.contentEl)
 			.setName('Task name')
 			.addText((text) => {
 				text
@@ -29,7 +29,7 @@ export class TaskCustomizeModal extends Modal {
 					})
 			})
 
-		let startDateSetting = new Setting(this.contentEl)
+		new Setting(this.contentEl)
 			.setName("Start date")
 			.addMomentFormat((com) => {
 				com
@@ -44,7 +44,7 @@ export class TaskCustomizeModal extends Modal {
 					})
 			})
 
-		let endDateSetting = new Setting(this.contentEl)
+		new Setting(this.contentEl)
 			.setName("End date")
 			.addMomentFormat((com) => {
 				com
@@ -59,14 +59,13 @@ export class TaskCustomizeModal extends Modal {
 					})
 			})
 
-		let progressSetting = new Setting(this.contentEl)
+		new Setting(this.contentEl)
 			.setName("Progress")
 			.addSlider((value) => {
 				value.setValue(task.progress)
 					.onChange(v => {
 						cloneTask.progress = v
 					})
-					.setDynamicTooltip()
 			})
 
 		new Setting(this.contentEl)
@@ -125,7 +124,7 @@ export interface SmartGanttItemViewState extends Record<string, unknown> {
 	projectName: string,
 	taskMarkDownItems: Node[]
 
-	tasks: any[],
+	tasks: SmartGanttTask[],
 	file: TFile | null
 }
 
@@ -146,7 +145,7 @@ export function MainComponent() {
 	const updateTaskInComponentAndView = (tasks: SmartGanttTask[]) => {
 		setTasks(() => {
 			if (view.file) {
-				view.saveBackToFile(tasks, view.file)
+				void view.saveBackToFile(tasks, view.file)
 				view.tasks = tasks
 			}
 			return tasks
@@ -249,12 +248,11 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 
 
 	override getState(): SmartGanttItemViewState {
-		// console.log("Get state called")
 		return {
 			tasks: this.tasks,
 			projectId: this.projectId,
 			projectName: this.projectName,
-			file: this.file?.path as unknown as TFile ?? "", // yeah, it is trick to silent ts checker
+			file: this.file,
 			taskMarkDownItems: this.taskMarkDownItems
 
 		}
@@ -343,8 +341,8 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 
 	}
 
-	saveBackToFile(tasks: SmartGanttTask[], file: TFile) {
-		this.app.vault.process(file, (content) => {
+	async saveBackToFile(tasks: SmartGanttTask[], file: TFile) {
+		await this.app.vault.process(file, (content) => {
 			let lines = content.split("\n")
 			for (const t of tasks) {
 				if (t.lineIndex === -1) {
@@ -382,20 +380,20 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 		} else {
 			for (const task of tasks) {
 				const taskWithMetaData = await helper.extractLineWithCheckboxToTaskWithMetaData(task)
-				// console.log(taskWithMetaData)
-				if (taskWithMetaData && (!taskWithMetaData.metadata.inventory || taskWithMetaData.metadata.inventory !== "backlog")) {
+				if (taskWithMetaData && taskWithMetaData.metadata.inventory !== "backlog") {
+					const meta = taskWithMetaData.metadata
+					const progress = Number(meta.progress)
 					this.tasks.push({
-						name: taskWithMetaData?.name ?? "No name",
-						progress: Number(taskWithMetaData?.metadata.progress) ?? 0,
-						id: taskWithMetaData?.metadata.smartGanttId ?? v4(),
-						start: moment(taskWithMetaData?.metadata.start).toDate() ?? moment().toDate(),
-						end: moment(taskWithMetaData?.metadata.due).toDate() ?? moment().add(1, "day").toDate(),
-						// created: moment(taskWithMetaData?.metadata.created).toDate() ?? moment().toDate(),
-						dependencies: taskWithMetaData?.metadata.dependencies.split(",") ?? [],
-						type: taskWithMetaData?.metadata.type ?? "task",
-						lineIndex: taskWithMetaData?.lineIndex ?? -1,
-						inventory: taskWithMetaData?.metadata.inventory ?? "task"
-					} as SmartGanttTask)
+						name: taskWithMetaData.name || "No name",
+						progress: Number.isFinite(progress) ? progress : 0,
+						id: meta.smartGanttId ?? v4(),
+						start: moment(meta.start).toDate(),
+						end: meta.due ? moment(meta.due).toDate() : moment().add(1, "day").toDate(),
+						dependencies: meta.dependencies?.split(",") ?? [],
+						type: meta.type ?? "task",
+						lineIndex: taskWithMetaData.lineIndex ?? -1,
+						inventory: meta.inventory ?? "task",
+					})
 				}
 			}
 

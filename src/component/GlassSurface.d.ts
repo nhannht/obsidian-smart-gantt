@@ -1,4 +1,4 @@
-import {CSSProperties, ReactNode} from "react";
+import {CSSProperties, ReactElement, ReactNode} from "react";
 
 declare const GlassSurface: (props: {
 	children?: ReactNode
@@ -21,6 +21,6 @@ declare const GlassSurface: (props: {
 	mixBlendMode?: string
 	className?: string
 	style?: CSSProperties
-}) => JSX.Element;
+}) => ReactElement;
 
 export default GlassSurface;

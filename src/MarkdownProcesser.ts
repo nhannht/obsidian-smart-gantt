@@ -4,7 +4,8 @@ import {SmartGanttSettings} from "./SettingManager";
 import {Processor, unified} from "unified";
 import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
-import {Node} from "unist"
+import {Node, Parent} from "unist"
+import {ListItem} from "mdast"
 
 export type NodeFromParseTree = {
 	node: Node,
@@ -36,13 +37,13 @@ export default class MarkdownProcesser {
 		this._remarkProcessor = unified().use(remarkGfm).use(remarkParse)
 	}
 
-	private async recursiveGetListItemFromParseTree(node: Node
+	private recursiveGetListItemFromParseTree(node: Node
 		, file: TFile
 		, settings: SmartGanttSettings) {
 
 		if (node.type == "listItem") {
-			//@ts-ignore
-			if (settings.doneShowQ && node.checked === true || settings.todoShowQ && node.checked === false) {
+			const checked = (node as ListItem).checked
+			if (settings.doneShowQ && checked === true || settings.todoShowQ && checked === false) {
 				this.nodes.push({
 					node,
 					file
@@ -50,8 +51,7 @@ export default class MarkdownProcesser {
 			}
 		}
 		if ("children" in node) {
-			//@ts-ignore
-			node.children.forEach((childNode: Node) => {
+			(node as Parent).children.forEach((childNode) => {
 				this.recursiveGetListItemFromParseTree(childNode, file, settings)
 			})
 		}
@@ -61,8 +61,7 @@ export default class MarkdownProcesser {
 		if (!file) return
 		const fileContent = await this.currentPlugin.app.vault.cachedRead(file)
 		const parseTree: Node = this._remarkProcessor.parse(fileContent)
-		// console.log(parseTree)
-		await this.recursiveGetListItemFromParseTree(parseTree, file, settings)
+		this.recursiveGetListItemFromParseTree(parseTree, file, settings)
 
 	}
 
@@ -70,16 +69,12 @@ export default class MarkdownProcesser {
 	async parseAllFilesNg(settings: SmartGanttSettings) {
 		const pathFilterSettings = settings.pathListFilter
 		await Promise.all(this._files.map(async (file) => {
-			// console.log(file)
-			if (pathFilterSettings.indexOf("AllFiles") !== -1) {
-			} else if (pathFilterSettings.indexOf("CurrentFile") !== -1) {
+			if (pathFilterSettings.includes("CurrentFile")) {
 				if (this._currentPlugin.app.workspace.getActiveFile()?.name !== file.name) return
-			} else if (
-				(pathFilterSettings.indexOf("AllFiles") === -1) &&
-				(pathFilterSettings.indexOf("CurrentFile") === -1) &&
-				(pathFilterSettings.indexOf(file.parent?.path!) === -1)
-			) return
-			// console.log(file)
+			} else if (!pathFilterSettings.includes("AllFiles") &&
+				!pathFilterSettings.includes(file.parent?.path ?? "")) {
+				return
+			}
 			await this.parseFilesAndUpdateTokensNg(file, settings)
 		}))
 	}

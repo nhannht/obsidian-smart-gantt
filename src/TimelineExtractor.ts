@@ -2,7 +2,7 @@ import {Chrono, ParsedResult} from "chrono-node";
 
 import {NodeFromParseTree} from "./MarkdownProcesser";
 import {TFile} from "obsidian";
-import {Node} from "unist"
+import {Node, Parent} from "unist"
 
 
 export type TimelineExtractorResultNg = {
@@ -56,8 +56,9 @@ export default class TimelineExtractor {
 	async GetTimelineDataFromNodes(nodes:NodeFromParseTree[]):Promise<TimelineExtractorResultNg[]> {
 		let results:TimelineExtractorResultNg[] = []
 		nodes.forEach(((node,nodeId)=>{
-			//@ts-ignore
-			let rawText = node.node.children[0].children[0].value
+			const paragraph = (node.node as Parent).children?.[0] as Parent | undefined
+			const firstChild = paragraph?.children?.[0] as { value?: unknown } | undefined
+			const rawText = typeof firstChild?.value === "string" ? firstChild.value : ""
 			let transformedText = this.makeTextCompatibleWithTaskPlugin(rawText)
 			const parsedResults = this.customChrono.parse(transformedText)
 			if (parsedResults && parsedResults.length > 0 ){

@@ -30,8 +30,8 @@ export const TaskListMdBlock = (props: {
 	}, [internalSettings])
 
 	useEffect(() => {
-		reupdateData()
-	}, [internalSettings]);
+		void reupdateData()
+	}, [internalSettings, reupdateData]);
 
 	// Live refresh on vault changes, debounced.
 	const debounceTimer = useRef<number | null>(null)
@@ -41,7 +41,7 @@ export const TaskListMdBlock = (props: {
 			if (debounceTimer.current !== null) window.clearTimeout(debounceTimer.current)
 			debounceTimer.current = window.setTimeout(() => {
 				debounceTimer.current = null
-				reupdateData()
+				void reupdateData()
 			}, 500)
 		}
 		const ref = app.metadataCache.on("changed", schedule)
@@ -69,7 +69,7 @@ export const TaskListMdBlock = (props: {
 				inputS={internalSettings}
 				saveSettings={setInternalSettings}
 				updateSettingInCodeBlockHandle={(s) => {
-					props.thisPlugin.helper.updateBlockSettingWithInternalSetting(s, props.ctx)
+					void props.thisPlugin.helper.updateBlockSettingWithInternalSetting(s, props.ctx)
 				}}
 				thisPlugin={props.thisPlugin}
 			/>

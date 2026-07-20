@@ -16,8 +16,8 @@ export function barTone(task: GanttTask, today: Date): BarTone {
 const TaskBar = memo((props: {
 	task: GanttTask
 	geometry: GanttGeometry
-	onCommit?: (task: GanttTask, change: GanttChangePayload) => void
-	onOpenSource?: (task: GanttTask) => void
+	onCommit?: (task: GanttTask, change: GanttChangePayload) => void | Promise<void>
+	onOpenSource?: (task: GanttTask) => void | Promise<void>
 }) => {
 	const {task, geometry, onCommit, onOpenSource} = props;
 	const [hover, setHover] = useState(false);
@@ -63,7 +63,7 @@ const TaskBar = memo((props: {
 		}}
 		onPointerEnter={() => setHover(true)}
 		onPointerLeave={() => setHover(false)}
-		onDoubleClick={() => onOpenSource?.(task)}
+		onDoubleClick={() => void onOpenSource?.(task)}
 		{...barHandlers}
 	>
 		{elapsed !== null ?

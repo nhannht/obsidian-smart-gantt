@@ -3,7 +3,7 @@ import {GanttZoom} from "@/gantt/types";
 import {zoomFromSetting} from "@/gantt/adapters";
 
 export interface SmartGanttSettings {
-	pathListFilter: String[],
+	pathListFilter: string[],
 	todoShowQ: boolean,
 	doneShowQ: boolean,
 	viewMode: GanttZoom,
@@ -25,18 +25,9 @@ export default class SettingManager {
 	}
 
 	async loadSettings() {
-		const data = await this.thisPlugin.loadData()
+		const data = await this.thisPlugin.loadData() as Partial<SmartGanttSettings> | null
 		if (data) {
-			this._settings = Object.assign({}, this._settings, data)
-		} else {
-			// One-time migration from the legacy localStorage store to data.json
-			const legacyKey = `smart-gantt-settings-${this.thisPlugin.app.vault.getName()}`
-			const legacyData = localStorage.getItem(legacyKey)
-			if (legacyData) {
-				this._settings = Object.assign({}, this._settings, JSON.parse(legacyData))
-				await this.saveSettings(this._settings)
-				localStorage.removeItem(legacyKey)
-			}
+			this._settings = {...this._settings, ...data}
 		}
 		// Legacy persisted values used gantt-task-react ViewMode strings.
 		this._settings.viewMode = zoomFromSetting(this._settings.viewMode)

@@ -12,8 +12,8 @@ export interface GanttChartProps {
 	tasks: GanttTask[]
 	zoom: GanttZoom
 	/** Omit to make the chart read-only. */
-	onTaskChange?: (task: GanttTask, change: GanttChangePayload) => void
-	onOpenSource?: (task: GanttTask) => void
+	onTaskChange?: (task: GanttTask, change: GanttChangePayload) => void | Promise<void>
+	onOpenSource?: (task: GanttTask) => void | Promise<void>
 	/** Sticky left column with task names. */
 	showNames?: boolean
 	/** Fixed height; omit to fill the parent. */
@@ -48,7 +48,7 @@ const GanttChart = (props: GanttChartProps) => {
 		}
 		if (rafPending.current) return;
 		rafPending.current = true;
-		requestAnimationFrame(() => {
+		window.requestAnimationFrame(() => {
 			rafPending.current = false;
 			updateWindow();
 		});
@@ -90,7 +90,7 @@ const GanttChart = (props: GanttChartProps) => {
 								`sg-names__item--${barTone(t, today)}`,
 							].join(" ")}
 							style={{height: ROW_HEIGHT}}
-							onClick={() => onOpenSource?.(t)}
+							onClick={() => void onOpenSource?.(t)}
 							title={t.name}
 						>
 							{t.name}

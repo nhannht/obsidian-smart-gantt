@@ -32,8 +32,8 @@ export const SmartGanttBlockReactComponentNg = (props: {
 	}, [internalSettings])
 
 	useEffect(() => {
-		reupdateData()
-	}, [internalSettings]);
+		void reupdateData()
+	}, [internalSettings, reupdateData]);
 
 	// Live refresh on vault changes, debounced.
 	const debounceTimer = useRef<number | null>(null)
@@ -43,7 +43,7 @@ export const SmartGanttBlockReactComponentNg = (props: {
 			if (debounceTimer.current !== null) window.clearTimeout(debounceTimer.current)
 			debounceTimer.current = window.setTimeout(() => {
 				debounceTimer.current = null
-				reupdateData()
+				void reupdateData()
 			}, 500)
 		}
 		const ref = app.metadataCache.on("changed", schedule)
@@ -64,7 +64,7 @@ export const SmartGanttBlockReactComponentNg = (props: {
 	}, [props.thisPlugin])
 
 	const onOpenSource = useCallback((task: GanttTask) => {
-		props.thisPlugin.helper.jumpToPositionOfResult(task.meta as TimelineExtractorResultNg)
+		void props.thisPlugin.helper.jumpToPositionOfResult(task.meta as TimelineExtractorResultNg)
 	}, [props.thisPlugin])
 
 	if (isSettingQ) {
@@ -75,7 +75,7 @@ export const SmartGanttBlockReactComponentNg = (props: {
 				inputS={internalSettings}
 				saveSettings={setInternalSettings}
 				updateSettingInCodeBlockHandle={(s) => {
-					props.thisPlugin.helper.updateBlockSettingWithInternalSetting(s, props.ctx)
+					void props.thisPlugin.helper.updateBlockSettingWithInternalSetting(s, props.ctx)
 				}}
 				thisPlugin={props.thisPlugin}
 			/>

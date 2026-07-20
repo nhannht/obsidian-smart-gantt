@@ -29,7 +29,7 @@ export default class SmartGanttPlugin extends Plugin {
 			id: 'reload',
 			name: 'Reload',
 			callback: () => {
-				this.helper.reloadView()
+				void this.helper.reloadView()
 			}
 		})
 
@@ -46,20 +46,21 @@ export default class SmartGanttPlugin extends Plugin {
 				let leaf = leafs[0];
 				// console.log(leaf.getEphemeralState())
 				if (this.app.workspace.rightSplit.collapsed) {
-					this.app.workspace.revealLeaf(leaf)
+					void this.app.workspace.revealLeaf(leaf)
 				} else {
 					this.app.workspace.rightSplit.collapse()
 				}
 			} else {
 				let leaf = this.app.workspace.getRightLeaf(false);
 
-				leaf?.setViewState({
+				void leaf?.setViewState({
 					type: "smart-gantt",
 					active: true
+				}).then(() => {
+					if (leaf instanceof WorkspaceLeaf) {
+						return this.app.workspace.revealLeaf(leaf)
+					}
 				})
-				if (leaf instanceof WorkspaceLeaf) {
-					this.app.workspace.revealLeaf(leaf);
-				}
 			}
 
 		})
