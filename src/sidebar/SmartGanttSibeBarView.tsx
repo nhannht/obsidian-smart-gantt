@@ -1,7 +1,6 @@
 import {IconName, ItemView, WorkspaceLeaf} from "obsidian";
 import {createRoot, Root} from "react-dom/client";
 import SmartGanttPlugin from "../../main";
-import "../../styles.css"
 import SidebarReactComponentNg from "./SidebarReactComponentNg";
 
 

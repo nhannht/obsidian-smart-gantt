@@ -1,22 +1,9 @@
 import {Chrono, ParsedResult} from "chrono-node";
 
-import {NodeFromParseTree, TokenWithFile} from "./MarkdownProcesser";
-import {Token} from "marked";
+import {NodeFromParseTree} from "./MarkdownProcesser";
 import {TFile} from "obsidian";
 import {Node} from "unist"
 
-
-export type SmartGanttParsedResults = {
-	parsedResults: ParsedResult[]|null,
-	rawText:string
-
-}
-export type TimelineExtractorResult = {
-	token:Token,
-	file:TFile,
-	parsedResultsAndRawText: SmartGanttParsedResults,
-
-}
 
 export type TimelineExtractorResultNg = {
 	id: string,
@@ -97,42 +84,4 @@ export default class TimelineExtractor {
 	}
 
 
-	async GetTimelineDataFromDocumentArrayWithChrono(tokens: TokenWithFile[] | null,
-	): Promise<TimelineExtractorResult[]> {
-		// let timelineData: TimelineEntryChrono[] = []
-		let extractorResultList: TimelineExtractorResult[] = []
-		// let documents: Document[] = []
-		// console.log(tokens)
-		tokens?.forEach((token) => {
-			let parsedResult:ParsedResult[] = []
-			if ("text" in token.token) {
-				const taskPluginCompatibleText = this.makeTextCompatibleWithTaskPlugin(token.token.text)
-				 parsedResult = this.customChrono.parse(taskPluginCompatibleText)
-			}
-			if (parsedResult && parsedResult.length > 0) {
-				this.#countResultWithChrono = this.#countResultWithChrono + 1
-				const smartGanttParsedResults:SmartGanttParsedResults = {
-					parsedResults: parsedResult,
-					//@ts-ignore
-					rawText: token.token.text
-				}
-				 extractorResultList.push({
-					...token,
-					parsedResultsAndRawText: smartGanttParsedResults
-				})
-			} else if (parsedResult.length === 0){
-				const smartGanttParsedResults: SmartGanttParsedResults = {
-					parsedResults:null,
-					//@ts-ignore
-					rawText:token.token.text
-				}
-				 extractorResultList.push({
-					...token,
-					parsedResultsAndRawText: smartGanttParsedResults,
-				})
-			}
-		})
-
-		return  extractorResultList
-	}
 }

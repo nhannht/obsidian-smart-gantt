@@ -1,7 +1,6 @@
 import SmartGanttPlugin from "../../main";
 import {EditorPosition, MarkdownPostProcessorContext, MarkdownView, WorkspaceLeaf} from "obsidian";
 import {FilterModal} from "@/FilterModal";
-import {Task} from "gantt-task-react";
 import {TimelineExtractorResultNg} from "@/TimelineExtractor";
 import {Node} from "mdast"
 import {SmartGanttSettings} from "@/SettingManager";
@@ -93,24 +92,6 @@ export class Helper {
 			lines[lineIndex] = line
 			return lines.join("\n")
 		})
-	}
-
-	jumpToPositionOfNode= async (task:Task,results:TimelineExtractorResultNg[])=>{
-		const result = results.find(r => r.id === task.id) as TimelineExtractorResultNg
-		const leaf = this.thisPlugin.app.workspace.getLeaf(true)
-		await leaf.openFile(result.file)
-		const view = leaf.view as MarkdownView
-		const node:Node = result.node
-		// console.log(node)
-
-		view.editor.setSelection({
-			line:  Number(node.position?.start.line) - 1,
-			ch: Number(node.position?.start.column) - 1,
-		} as EditorPosition,
-			{
-			line:Number(node.position?.end.line) - 1,
-			ch: Number(node.position?.end.column) - 1
-		} as EditorPosition)
 	}
 
 	updateBlockSettingWithInternalSetting = (settingObject: SmartGanttSettings,

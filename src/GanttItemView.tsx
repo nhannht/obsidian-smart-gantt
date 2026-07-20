@@ -3,8 +3,7 @@ import SmartGanttPlugin from "../main";
 import HelperNg from "@/HelperNg";
 import {Node} from "unist"
 import {v4} from "uuid";
-import moment from "moment";
-import {Task} from "gantt-task-react";
+import {moment} from "obsidian";
 import {createRoot, Root} from "react-dom/client";
 import {createContext, StrictMode, useContext, useState} from "react";
 import {GanttChart, ZoomControl, GanttTask, GanttZoom, GanttChangePayload} from "@/gantt";
@@ -100,20 +99,17 @@ export class TaskCustomizeModal extends Modal {
 
 export const DATE_FORMAT = "YYYY-MM-DD"
 
-export interface SmartGanttTask extends Task {
+export interface SmartGanttTask {
 	id: string,
 	name: string,
 	start: Date,
 	end: Date,
-	// created: Date,
-	// completion?: Date,
+	type: string,
 	dependencies: string[],
 	progress: number,
 	duration?: string,
-	// important?: boolean,
 	lineIndex: number,
 	inventory: string,
-
 }
 
 export interface GanttOptions {
