@@ -33,6 +33,11 @@ const context = await esbuild.context({
 		"@lezer/lr",
 		...builtins],
 	format: "cjs",
+	// Vendored components import their own .css; styles are built separately
+	// by the tailwind CLI into styles.css, so css imports are no-ops here.
+	loader: {
+		".css": "empty",
+	},
 	target: "es2018",
 	logLevel: "info",
 	sourcemap: prod ? false : "inline",
