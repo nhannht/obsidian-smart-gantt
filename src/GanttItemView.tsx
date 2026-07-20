@@ -1,4 +1,4 @@
-import {FileView, Modal, Notice, Setting, TFile, ViewStateResult, WorkspaceLeaf} from "obsidian";
+import {FileView, IconName, Modal, Notice, Setting, TFile, ViewStateResult, WorkspaceLeaf} from "obsidian";
 import SmartGanttPlugin from "../main";
 import HelperNg from "@/HelperNg";
 import {Node} from "unist"
@@ -250,6 +250,10 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 	getViewType(): string {
 		// console.log("Get view type called")
 		return SMART_GANTT_ITEM_VIEW_TYPE;
+	}
+
+	override getIcon(): IconName {
+		return 'smart-gantt'
 	}
 
 	constructor(leaf: WorkspaceLeaf, public plugin: SmartGanttPlugin) {

@@ -52,7 +52,7 @@ export default class SmartGanttSibeBarView extends ItemView {
 	}
 
 	override getIcon(): IconName {
-		return 'egg'
+		return 'smart-gantt'
 	}
 
 

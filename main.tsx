@@ -1,4 +1,4 @@
-import {Plugin, WorkspaceLeaf} from 'obsidian';
+import {addIcon, Plugin, WorkspaceLeaf} from 'obsidian';
 import SmartGanttSibeBarView from "@/sidebar/SmartGanttSibeBarView";
 import {Helper} from "@/lib/Helper";
 import SettingManager, {SmartGanttSettings} from "./src/SettingManager";
@@ -21,6 +21,9 @@ export default class SmartGanttPlugin extends Plugin {
 	ganttBlockManager = new GanttBlockManager(this)
 
 	override async onload() {
+		// Brand mark: the three staggered gantt bars from the website favicon,
+		// monochrome so it follows the theme like any built-in icon.
+		addIcon("smart-gantt", `<rect x="21.9" y="26.6" width="42.2" height="12.5" rx="6.25" fill="currentColor"/><rect x="35.9" y="43.75" width="42.2" height="12.5" rx="6.25" fill="currentColor" opacity="0.85"/><rect x="21.9" y="60.9" width="29.7" height="12.5" rx="6.25" fill="currentColor" opacity="0.7"/>`)
 		await this.settingManager.loadSettings()
 		this.registerView(SMART_GANTT_ITEM_VIEW_TYPE,(leaf)=> new SmartGanttItemView(leaf, this))
 		this.registerExtensions(["smartgantt"],SMART_GANTT_ITEM_VIEW_TYPE)
@@ -38,7 +41,7 @@ export default class SmartGanttPlugin extends Plugin {
 			return new SmartGanttSibeBarView(leaf, this);
 		})
 
-		this.addRibbonIcon('egg', 'Smart Gantt', () => {
+		this.addRibbonIcon('smart-gantt', 'Smart Gantt', () => {
 
 			let leafs = this.app.workspace.getLeavesOfType("smart-gantt");
 			if (leafs.length > 0) {
