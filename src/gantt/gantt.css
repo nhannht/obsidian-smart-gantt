@@ -366,6 +366,53 @@
 	text-overflow: ellipsis;
 }
 
+/* ---- Toolbar icon buttons ---- */
+
+.sg-toolbar-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border: none;
+	border-radius: 999px;
+	background: none;
+	box-shadow: none;
+	color: var(--sg-label-2);
+	cursor: pointer;
+	transition: color var(--sg-dur-fast) var(--sg-ease), background-color var(--sg-dur-fast) var(--sg-ease);
+}
+
+.sg-toolbar-icon:hover {
+	color: var(--sg-label);
+	background: var(--sg-hover);
+}
+
+.sg-new-task {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 5px 12px;
+	border: none;
+	border-radius: 999px;
+	background: var(--sg-accent);
+	color: var(--sg-on-accent);
+	font-size: 11.5px;
+	font-weight: 600;
+	cursor: pointer;
+	box-shadow: none;
+	transition: background-color var(--sg-dur-fast) var(--sg-ease), transform var(--sg-dur-fast) var(--sg-ease-spring);
+}
+
+.sg-new-task:hover {
+	background: var(--sg-accent-hover);
+}
+
+.sg-new-task:active {
+	transform: scale(0.96);
+}
+
 /* ---- Segmented zoom control ---- */
 
 .sg-zoom {

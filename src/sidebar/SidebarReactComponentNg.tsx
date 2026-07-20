@@ -1,189 +1,181 @@
 import SmartGanttPlugin from "../../main";
 import {useLocalStorage} from "react-use";
 import {SmartGanttSettings} from "@/SettingManager";
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import MarkdownProcesser from "../MarkdownProcesser";
 import TimelineExtractor, {TimelineExtractorResultNg} from "../TimelineExtractor";
-import {Chrono, ParsedComponents} from "chrono-node";
-import {Task, ViewMode} from "gantt-task-react";
-import {ListItem} from "mdast";
-import SmartGanttChart from "@/component/SmartGanttChart";
+import {Chrono} from "chrono-node";
 import SettingViewComponent from "@/component/SettingViewComponent";
 import {ResizableHandle, ResizablePanel, ResizablePanelGroup} from "@/component/ResizablePanel";
 import TaskList from "@/component/TaskList";
-import {NavBar} from "@/BlockComponent/NavBar";
+import GlassSurface from "@/component/GlassSurface";
+import {GanttChart, ZoomControl, GanttTask, GanttZoom} from "@/gantt";
+import {resultsToGanttTasks, zoomFromSetting} from "@/gantt/adapters";
+import {CalendarRange, RotateCw, Settings2} from "lucide-react";
+
+const DEFAULT_SIDEBAR_SETTINGS: SmartGanttSettings = {
+	doneShowQ: true,
+	todoShowQ: true,
+	pathListFilter: ["CurrentFile"],
+	leftBarChartDisplayQ: false,
+	viewMode: "day",
+};
+
+const EmptyState = () => (
+	<div className={"flex h-full flex-col items-center justify-center gap-3 px-6 text-center"}>
+		<CalendarRange className={"h-10 w-10 text-muted-foreground opacity-60"} aria-hidden={true}/>
+		<div className={"text-sm font-semibold"}>No dated tasks found</div>
+		<div className={"max-w-[220px] text-xs text-muted-foreground"}>
+			Give any task a date in plain language, like &quot;due next monday&quot;,
+			and it appears here as a bar.
+		</div>
+	</div>
+);
 
 const SidebarReactComponentNg = (props: {
 	thisPlugin: SmartGanttPlugin
 }) => {
-
-
-	const [settings,
-		saveSettings
-	] =
-		useLocalStorage<SmartGanttSettings>
-		(`smart-gantt-sidebar-settings-${props.thisPlugin.app.vault.getName()}`,
-			{
-				doneShowQ: true,
-				todoShowQ: true,
-				pathListFilter: ["CurrentFile"],
-				leftBarChartDisplayQ: false,
-				viewMode: ViewMode.Day
-			})
+	const [settings, saveSettings] = useLocalStorage<SmartGanttSettings>(
+		`smart-gantt-sidebar-settings-${props.thisPlugin.app.vault.getName()}`,
+		DEFAULT_SIDEBAR_SETTINGS,
+	);
 	const [timelineResults, setTimelineResults] = useState<TimelineExtractorResultNg[]>([])
-
 	const [isSettingQ, setIsSettingQ] = useState(false)
-	const [tasks, setTasks] = useState<Task[]>([])
+	const [refreshing, setRefreshing] = useState(false)
+
+	const zoom = zoomFromSetting(settings?.viewMode);
+	const setZoom = (z: GanttZoom) => {
+		saveSettings({...(settings ?? DEFAULT_SIDEBAR_SETTINGS), viewMode: z});
+	};
+
 	const reupdateData = useCallback(async () => {
 		const allMarkdownFiles = props.thisPlugin.app.vault.getMarkdownFiles();
 		const markdownProcesser = new MarkdownProcesser(allMarkdownFiles, props.thisPlugin)
-		if (!settings) {
-			console.log("settings is undefined")
-			saveSettings({
-				doneShowQ: true,
-				todoShowQ: true,
-				pathListFilter: ["CurrentFile"],
-				leftBarChartDisplayQ: false,
-				viewMode: ViewMode.Day
-			})
-		}
-		//@ts-ignore
-		await markdownProcesser.parseAllFilesNg(settings)
+		await markdownProcesser.parseAllFilesNg(settings ?? DEFAULT_SIDEBAR_SETTINGS)
 		const allNodes = markdownProcesser.nodes
-		// console.log(allNodes)
 		const timelineExtractor = new TimelineExtractor(new Chrono())
 		const timelineExtractorResults = await timelineExtractor.GetTimelineDataFromNodes(allNodes)
-		// console.log(timelineExtractorResults)
 		setTimelineResults(timelineExtractorResults)
-		// console.log(tasks)
 	}, [settings])
 
+	useEffect(() => {
+		reupdateData()
+	}, [settings])
 
-	const createDateFromKnownValues = useCallback((p: ParsedComponents) => {
-			//@ts-ignore
-			const knownValues = p.knownValues
-			return new Date(knownValues.year, knownValues.month, knownValues.day)
-		}, []
+	// Live refresh: any metadata change in the vault re-extracts, debounced.
+	const debounceTimer = useRef<number | null>(null)
+	useEffect(() => {
+		const app = props.thisPlugin.app
+		const schedule = () => {
+			if (debounceTimer.current !== null) window.clearTimeout(debounceTimer.current)
+			debounceTimer.current = window.setTimeout(() => {
+				debounceTimer.current = null
+				reupdateData()
+			}, 500)
+		}
+		const refs = [
+			app.metadataCache.on("changed", schedule),
+			app.vault.on("delete", schedule),
+			app.vault.on("rename", schedule),
+		]
+		return () => {
+			refs.forEach(r => app.metadataCache.offref(r))
+			if (debounceTimer.current !== null) window.clearTimeout(debounceTimer.current)
+		}
+	}, [reupdateData])
+
+	const tasks: GanttTask[] = useMemo(
+		() => resultsToGanttTasks(timelineResults),
+		[timelineResults],
 	)
 
-	useEffect(() => {
-		reupdateData().then(_r => null)
-	}, [settings])
-
-	useEffect(() => {
-		let tempTasks: Task[] = []
-		timelineResults.forEach((timelineResult, _tIndex) => {
-			if (timelineResult.parsedResult) {
-				// console.log(timelineResult.parsedResult.start)
-				const startComponent = timelineResult.parsedResult.start
-				const endComponent = timelineResult.parsedResult.end
-				let task: Task = {
-					start: createDateFromKnownValues(startComponent),
-					end: endComponent ? createDateFromKnownValues(endComponent) : createDateFromKnownValues(startComponent),
-					//@ts-ignore
-					name: timelineResult.node.children[0].children[0].value,
-					id: `${timelineResult.id}`,
-					type: 'task',
-					progress: 50,
-					isDisabled: true,
-					styles: (timelineResult.node as ListItem).checked ? {
-						progressColor: '#df1fc0',
-						progressSelectedColor: '#20f323'
-					} : {
-						progressColor: '#ffffff',
-						progressSelectedColor: '#000000'
-					},
-				}
-				// console.log(task)
-				tempTasks.push(task)
-			}
-		})
-		setTasks(tempTasks)
-	}, [timelineResults])
 	const modifyResultsStatus = useCallback((resultId: string, status: boolean) => {
 		let resultsClone = [...timelineResults]
-		// console.log(resultsClone)
-		// console.log(timelineResults)
 		let resultFind = resultsClone.find(r => r.id === resultId)
-		// console.log(resultId)
-		// console.log(resultFind)
 		if (resultFind) {
 			//@ts-ignore
 			resultFind.node.checked = status
 			setTimelineResults(resultsClone)
 		}
-
 	}, [timelineResults])
 
+	const onTaskChange = useCallback(async (task: GanttTask, change: { start: Date; end: Date }) => {
+		await props.thisPlugin.helper.updateResultDates(
+			task.meta as TimelineExtractorResultNg, change.start, change.end)
+		// The vault event listener re-extracts and confirms the new dates.
+	}, [props.thisPlugin])
 
-	let mainComponent = <></>
-
+	const onOpenSource = useCallback((task: GanttTask) => {
+		props.thisPlugin.helper.jumpToPositionOfResult(task.meta as TimelineExtractorResultNg)
+	}, [props.thisPlugin])
 
 	if (isSettingQ) {
-		mainComponent = <main>
+		return <main className={"h-full"}>
 			<SettingViewComponent
 				isSettingsQ={isSettingQ}
-				isSettingsQHandle={(is) => {
-					setIsSettingQ(is)
-				}}
+				isSettingsQHandle={setIsSettingQ}
 				inputS={settings}
-				saveSettings={(s) => {
-					saveSettings(s)
-				}}
+				saveSettings={saveSettings}
 				thisPlugin={props.thisPlugin}
 			/>
 		</main>
-	} else {
-		if (tasks.length > 0) {
-			mainComponent = <main>
-				<div className={"w-full flex justify-center p-2"}>
-					<NavBar
-						setIsSettingQFn={setIsSettingQ}
-						thisPlugin={props.thisPlugin}
-						reloadViewButtonQ={true}
-					/>
-				</div>
-				<ResizablePanelGroup
-					direction={"vertical"}
-					className={"h-screen"}
-				>
-					<ResizablePanel defaultSize={50} minSize={30}>
-						<SmartGanttChart
-							tasks={tasks}
-							thisPlugin={props.thisPlugin}
-							settings={settings}
-							results={timelineResults}
-						/>
-					</ResizablePanel>
-					<ResizableHandle withHandle={true}/>
-					<ResizablePanel defaultSize={50}>
-						<TaskList results={timelineResults}
-								  thisPlugin={props.thisPlugin}
-								  changeResultStatusFn={modifyResultsStatus}/>
-					</ResizablePanel>
-				</ResizablePanelGroup>
-				{/*<TaskList results={timelineResults}*/}
-				{/*		  thisPlugin={props.thisPlugin}*/}
-				{/*		  changeResultStatusFn={modifyResultsStatus}*/}
-				{/*/>*/}
-
-			</main>
-		} else {
-			mainComponent = <main>
-				<div
-				className={"flex justify-center w-full p-2"}
-				><NavBar setIsSettingQFn={setIsSettingQ}
-						 thisPlugin={props.thisPlugin}
-						 reloadViewButtonQ={true}/></div>
-			</main>
-		}
 	}
 
-	return <>
-		{mainComponent}
-	</>
+	return <main className={"relative flex h-full flex-col"}>
+		<div className={"pointer-events-none absolute inset-x-0 top-2 z-20 flex justify-center"}>
+			<GlassSurface
+				width={"auto"}
+				height={44}
+				borderRadius={14}
+				className={"pointer-events-auto"}
+			>
+				<div className={"flex items-center gap-2 px-3"}>
+					<ZoomControl zoom={zoom} onChange={setZoom}/>
+					<button
+						className={"sg-toolbar-icon"}
+						aria-label={"Refresh"}
+						onClick={async () => {
+							setRefreshing(true)
+							await reupdateData()
+							setRefreshing(false)
+						}}
+					>
+						<RotateCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}/>
+					</button>
+					<button
+						className={"sg-toolbar-icon"}
+						aria-label={"Settings"}
+						onClick={() => setIsSettingQ(true)}
+					>
+						<Settings2 className={"h-4 w-4"}/>
+					</button>
+				</div>
+			</GlassSurface>
+		</div>
 
-
+		{tasks.length === 0
+			? <EmptyState/>
+			: <ResizablePanelGroup direction={"vertical"} className={"h-full pt-14"}>
+				<ResizablePanel defaultSize={55} minSize={25}>
+					<GanttChart
+						tasks={tasks}
+						zoom={zoom}
+						onTaskChange={onTaskChange}
+						onOpenSource={onOpenSource}
+						showNames={settings?.leftBarChartDisplayQ}
+						height={"100%"}
+					/>
+				</ResizablePanel>
+				<ResizableHandle withHandle={true}/>
+				<ResizablePanel defaultSize={45}>
+					<TaskList
+						results={timelineResults}
+						thisPlugin={props.thisPlugin}
+						changeResultStatusFn={modifyResultsStatus}
+					/>
+				</ResizablePanel>
+			</ResizablePanelGroup>}
+	</main>
 }
 
 export default SidebarReactComponentNg
