@@ -1,0 +1,85 @@
+/* Design tokens. Dark values live in :root (doubles as the no-attribute
+   fallback); light values override under [data-theme="light"]. */
+
+:root {
+	color-scheme: dark;
+
+	/* Apple 3-step label ladder */
+	--label-1: #ffffff;
+	--label-2: rgba(255, 255, 255, 0.55);
+	--label-3: rgba(255, 255, 255, 0.25);
+
+	/* Brand accent (violet, ties into the Obsidian ecosystem) */
+	--accent: #a78bfa;
+	--accent-fill: #7c3aed;
+	--accent-fill-hover: #8b5cf6;
+	--accent-soft: rgba(124, 58, 237, 0.14);
+
+	--page-bg: #0a0a0f;
+	--page-gradient:
+		radial-gradient(1200px 800px at 85% -10%, rgba(124, 58, 237, 0.2), transparent 60%),
+		radial-gradient(900px 700px at -10% 30%, rgba(0, 145, 255, 0.09), transparent 55%),
+		radial-gradient(1100px 900px at 50% 115%, rgba(124, 58, 237, 0.12), transparent 60%);
+
+	--card-backing: #16161c;
+	--card-border: rgba(255, 255, 255, 0.08);
+	--card-border-hover: rgba(167, 139, 250, 0.4);
+
+	--glass-bg: rgba(20, 20, 27, 0.55);
+	--glass-border: rgba(255, 255, 255, 0.1);
+	--sheet-bg: #1a1a22;
+
+	--btn-secondary-bg: rgba(255, 255, 255, 0.08);
+	--btn-secondary-bg-hover: rgba(255, 255, 255, 0.13);
+
+	--code-bg: #101017;
+	--hairline: rgba(255, 255, 255, 0.09);
+
+	--radius-nav: 28px;
+	--radius-card: 26px;
+	--radius-btn: 18px;
+
+	--shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 40px rgba(0, 0, 0, 0.35);
+	--shadow-nav: 0 8px 24px rgba(0, 0, 0, 0.25);
+
+	--grad-headline: linear-gradient(100deg, #a78bfa 0%, #8b5cf6 45%, #38b6ff 100%);
+}
+
+:root[data-theme="light"] {
+	color-scheme: light;
+
+	--label-1: #1d1d1f;
+	--label-2: rgba(29, 29, 31, 0.64);
+	--label-3: rgba(29, 29, 31, 0.35);
+
+	/* Darkened for AA text contrast on light silver */
+	--accent: #6d28d9;
+	--accent-fill: #7c3aed;
+	--accent-fill-hover: #6d28d9;
+	--accent-soft: rgba(124, 58, 237, 0.1);
+
+	--page-bg: #f5f5f7;
+	--page-gradient:
+		radial-gradient(1200px 800px at 85% -10%, rgba(124, 58, 237, 0.1), transparent 60%),
+		radial-gradient(900px 700px at -10% 30%, rgba(0, 102, 204, 0.06), transparent 55%),
+		radial-gradient(1100px 900px at 50% 115%, rgba(124, 58, 237, 0.07), transparent 60%);
+
+	--card-backing: #ffffff;
+	--card-border: rgba(29, 29, 31, 0.08);
+	--card-border-hover: rgba(109, 40, 217, 0.35);
+
+	--glass-bg: rgba(255, 255, 255, 0.6);
+	--glass-border: rgba(29, 29, 31, 0.08);
+	--sheet-bg: #ffffff;
+
+	--btn-secondary-bg: rgba(29, 29, 31, 0.06);
+	--btn-secondary-bg-hover: rgba(29, 29, 31, 0.1);
+
+	--code-bg: #f0f0f3;
+	--hairline: rgba(29, 29, 31, 0.1);
+
+	--shadow-card: 0 1px 2px rgba(0, 0, 0, 0.06), 0 16px 40px rgba(0, 0, 0, 0.1);
+	--shadow-nav: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+	--grad-headline: linear-gradient(100deg, #6d28d9 0%, #7c3aed 45%, #0066cc 100%);
+}

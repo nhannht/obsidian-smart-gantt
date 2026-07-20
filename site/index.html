@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Smart Gantt for Obsidian</title>
+		<meta
+			name="description"
+			content="Smart Gantt turns the tasks scattered across your Obsidian vault into an interactive Gantt chart. Plain-language dates, drag to reschedule, free and open source."
+		/>
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content="Smart Gantt for Obsidian" />
+		<meta
+			property="og:description"
+			content="Every task in your vault. One timeline. Plain-language dates, drag to reschedule, free and open source."
+		/>
+		<meta property="og:url" content="https://obsidian-smart-gantt.pages.dev/" />
+		<meta property="og:image" content="https://obsidian-smart-gantt.pages.dev/shots/sidebar-dark.png" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<script>
+			(function () {
+				try {
+					var t = localStorage.getItem("theme");
+					if (t !== "light" && t !== "dark")
+						t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+					document.documentElement.dataset.theme = t;
+				} catch (e) {}
+			})();
+		</script>
+	</head>
+	<body>
+		<div id="root"></div>
+		<script type="module" src="/src/main.tsx"></script>
+	</body>
+</html>
