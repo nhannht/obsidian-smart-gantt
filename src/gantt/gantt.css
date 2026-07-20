@@ -368,7 +368,7 @@
 
 /* ---- Toolbar icon buttons ---- */
 
-.sg-toolbar-icon {
+.twp button.sg-toolbar-icon {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -384,12 +384,12 @@
 	transition: color var(--sg-dur-fast) var(--sg-ease), background-color var(--sg-dur-fast) var(--sg-ease);
 }
 
-.sg-toolbar-icon:hover {
+.twp button.sg-toolbar-icon:hover {
 	color: var(--sg-label);
 	background: var(--sg-hover);
 }
 
-.sg-new-task {
+.twp button.sg-new-task {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
@@ -405,11 +405,11 @@
 	transition: background-color var(--sg-dur-fast) var(--sg-ease), transform var(--sg-dur-fast) var(--sg-ease-spring);
 }
 
-.sg-new-task:hover {
+.twp button.sg-new-task:hover {
 	background: var(--sg-accent-hover);
 }
 
-.sg-new-task:active {
+.twp button.sg-new-task:active {
 	transform: scale(0.96);
 }
 
@@ -435,7 +435,7 @@
 	transition: transform var(--sg-dur) var(--sg-ease-spring);
 }
 
-.sg-zoom__segment {
+.twp button.sg-zoom__segment {
 	position: relative;
 	flex: 1;
 	padding: 4px 12px;
@@ -449,6 +449,6 @@
 	transition: color var(--sg-dur-fast) var(--sg-ease);
 }
 
-.sg-zoom__segment--active {
+.twp button.sg-zoom__segment--active {
 	color: var(--sg-label);
 }

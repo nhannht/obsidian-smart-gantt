@@ -48,8 +48,41 @@ body {
 }
 
 .twp {
-	font-family: var(--font-interface, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif);
+	/* !important: the scoped Tailwind preflight and Obsidian's app styles
+	 * both target this element with equal or higher precedence. */
+	font-family: var(--font-interface, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif) !important;
+	font-size: inherit !important;
 	color: var(--sg-label);
+}
+
+/* Obsidian styles `button:not(.clickable-icon)` at (0,1,1), which out-ranks
+ * plugin component classes and the :where()-scoped preflight. Neutralize the
+ * host styling for buttons inside plugin containers. Tailwind utilities are
+ * compiled with !important (config `important: true`) at higher specificity,
+ * so shadcn/radix components restyle themselves on top of this reset. The
+ * plugin's own sg- controls are excluded and win via specificity instead. */
+.twp :where(button:not([class*="sg-"])) {
+	background-color: transparent !important;
+	background-image: none !important;
+	box-shadow: none !important;
+	border: 0 !important;
+	padding: 0 !important;
+	height: auto !important;
+	font-family: inherit !important;
+	font-size: inherit !important;
+	font-weight: inherit !important;
+	line-height: inherit !important;
+	color: inherit !important;
+}
+
+/* GlassSurface sizes its content wrapper at 100% of the container; with
+ * width="auto" both collapse to zero. Shrink-wrap the floating toolbar. */
+.sg-float .glass-surface {
+	width: fit-content !important;
+}
+
+.sg-float .glass-surface__content {
+	width: max-content !important;
 }
 
 body.theme-dark {

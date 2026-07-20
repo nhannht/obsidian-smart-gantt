@@ -122,7 +122,7 @@ const SidebarReactComponentNg = (props: {
 	}
 
 	return <main className={"relative flex h-full flex-col"}>
-		<div className={"pointer-events-none absolute inset-x-0 top-2 z-20 flex justify-center"}>
+		<div className={"sg-float pointer-events-none absolute inset-x-0 top-2 z-20 flex justify-center"}>
 			<GlassSurface
 				width={"auto"}
 				height={44}
