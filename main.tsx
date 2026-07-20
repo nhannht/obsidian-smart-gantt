@@ -3,7 +3,6 @@ import SmartGanttSibeBarView from "@/sidebar/SmartGanttSibeBarView";
 import {Helper} from "@/lib/Helper";
 import SettingManager, {SmartGanttSettings} from "./src/SettingManager";
 import GanttBlockManager from "./src/GanttBlockManager";
-import {ViewMode} from "gantt-task-react";
 import './src/lib/codemirror';
 import './src/mode/gantt/gantt'
 import './src/mode/gantt/gantt-list'
@@ -14,7 +13,7 @@ const DEFAULT_SETTINGS: SmartGanttSettings = {
 	todoShowQ: true,
 	doneShowQ: true,
 	leftBarChartDisplayQ: true,
-	viewMode: ViewMode.Day
+	viewMode: "day"
 
 }
 
@@ -91,8 +90,6 @@ export default class SmartGanttPlugin extends Plugin {
 	}
 
 	override async onunload() {
-		// this.app.workspace.detachLeavesOfType("gantt-chart")
-		await this.settingManager.saveSettings(this.settingManager.settings)
 		//@ts-ignore
 		for (const key in CodeMirror.modes) {
 			// @ts-ignore

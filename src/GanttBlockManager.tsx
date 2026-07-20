@@ -3,7 +3,6 @@ import {createRoot} from "react-dom/client";
 import {SmartGanttSettings} from "./SettingManager";
 import {SmartGanttBlockReactComponentNg} from "./BlockComponent/SmartGanttBlockReactComponentNg";
 import {StrictMode} from "react";
-import {ViewMode} from "gantt-task-react";
 import {TaskListMdBlock} from "@/BlockComponent/TaskListMdBlock";
 import {AppContext} from "@/lib/AppContext";
 
@@ -23,7 +22,7 @@ export default class GanttBlockManager {
 				doneShowQ: true,
 				todoShowQ: true,
 				pathListFilter: ["CurrentFile"],
-				viewMode:ViewMode.Day,
+				viewMode:"day",
 				leftBarChartDisplayQ:true
 			}
 

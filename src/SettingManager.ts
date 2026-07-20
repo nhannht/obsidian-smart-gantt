@@ -1,15 +1,13 @@
 import SmartGanttPlugin from "../main";
-import {ViewMode} from "gantt-task-react";
+import {GanttZoom} from "@/gantt/types";
+import {zoomFromSetting} from "@/gantt/adapters";
 
 export interface SmartGanttSettings {
 	pathListFilter: String[],
 	todoShowQ: boolean,
 	doneShowQ: boolean,
-	viewMode: ViewMode,
+	viewMode: GanttZoom,
 	leftBarChartDisplayQ :boolean,
-	// viewDate?: Date,
-
-
 }
 
 export default class SettingManager {
@@ -27,19 +25,26 @@ export default class SettingManager {
 	}
 
 	async loadSettings() {
-		const vaultName = this.thisPlugin.app.vault.getName()
-		if (localStorage.getItem(`smart-gantt-settings-${vaultName}`)) {
-			this._settings = Object.assign(
-				{},
-				this._settings,
-				//@ts-ignore
-				JSON.parse(localStorage.getItem(`smart-gantt-settings-${vaultName}`)))
+		const data = await this.thisPlugin.loadData()
+		if (data) {
+			this._settings = Object.assign({}, this._settings, data)
+		} else {
+			// One-time migration from the legacy localStorage store to data.json
+			const legacyKey = `smart-gantt-settings-${this.thisPlugin.app.vault.getName()}`
+			const legacyData = localStorage.getItem(legacyKey)
+			if (legacyData) {
+				this._settings = Object.assign({}, this._settings, JSON.parse(legacyData))
+				await this.saveSettings(this._settings)
+				localStorage.removeItem(legacyKey)
+			}
 		}
+		// Legacy persisted values used gantt-task-react ViewMode strings.
+		this._settings.viewMode = zoomFromSetting(this._settings.viewMode)
 	}
 
 	async saveSettings(newSettings: SmartGanttSettings) {
-		const vaultName = this.thisPlugin.app.vault.getName()
-		localStorage.setItem(`smart-gantt-settings-${vaultName}`, JSON.stringify(newSettings))
+		this._settings = newSettings
+		await this.thisPlugin.saveData(newSettings)
 	}
 
 	async addPath(path: string) {

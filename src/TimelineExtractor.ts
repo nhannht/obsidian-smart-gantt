@@ -74,14 +74,14 @@ export default class TimelineExtractor {
 			let transformedText = this.makeTextCompatibleWithTaskPlugin(rawText)
 			const parsedResults = this.customChrono.parse(transformedText)
 			if (parsedResults && parsedResults.length > 0 ){
-				parsedResults.forEach((r,rId) =>{
-					results.push({
-						id: `${nodeId}-${rId}`,
-						node:node.node,
-						file:node.file,
-						parsedResult:r
-					})
-
+				// One bar per task: prefer the parse that carries an explicit
+				// end (a range), fall back to the first match.
+				const best = parsedResults.find(r => r.end) ?? parsedResults[0]
+				results.push({
+					id: `${nodeId}`,
+					node:node.node,
+					file:node.file,
+					parsedResult:best
 				})
 			} else {
 				results.push({
