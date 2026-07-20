@@ -3,6 +3,7 @@
 @import "../component/SpotlightCard.css";
 @import "../component/BorderGlow.css";
 @import "./tokens.css";
+@import "../gantt/gantt.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
