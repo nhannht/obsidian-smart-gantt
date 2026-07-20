@@ -12,7 +12,7 @@
 [![Release](https://img.shields.io/github/v/release/nhannht/obsidian-smart-gantt?label=release)](https://github.com/nhannht/obsidian-smart-gantt/releases/latest)
 [![License](https://img.shields.io/github/license/nhannht/obsidian-smart-gantt)](./LICENSE)
 
-**[Website](https://obsidian-smart-gantt.pages.dev)** | **[Community store](https://community.obsidian.md/plugins/smart-gantt)** | **[Changelog](./CHANGELOG.md)**
+**[Website](https://smartgantt.nhannht.io.vn)** | **[Community store](https://community.obsidian.md/plugins/smart-gantt)** | **[Changelog](./CHANGELOG.md)**
 
 </div>
 
