@@ -1,47 +1,31 @@
-name: build doc
-on:
-  push:
-    branches:
-        - docs
+name: deploy site
 
+on:
+    push:
+        branches:
+            - docs
 
 jobs:
-    build-doc:
+    deploy:
         runs-on: ubuntu-latest
-        if: "contains(github.event.head_commit.message,'doc:')"
-        permissions: write-all
         steps:
-            -   name: "check out quartz custom template "
+            -   name: check out
                 uses: actions/checkout@v4
-                with:
-                    repository: "nhannht/quartz"
-                    fetch-depth: 0
-                    ref: nhannht
-                    path: quartz
 
-            -   name: check out this repo
-                uses: actions/checkout@v4
-                with:
-                    fetch-depth: 0
-                    path: obsidian-smart-gantt
+            -   name: set up bun
+                uses: oven-sh/setup-bun@v2
 
+            -   name: install
+                working-directory: site
+                run: bun install --frozen-lockfile
 
-            -   name: set up node
-                uses: actions/setup-node@v4
-                with:
-                    node-version: '20'
+            -   name: build
+                working-directory: site
+                run: bun run build
 
-            -   name: build and deploy doc
+            -   name: deploy to Cloudflare Pages
+                working-directory: site
                 env:
                     CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                     CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                run:  |
-                    cd quartz
-                    npm install
-                    npm install wrangler
-                    cp ../obsidian-smart-gantt/obsidian-smart-gantt-document/* ./content/ -r
-                    cp ../obsidian-smart-gantt/quartz.config.ts ./
-                    cp ../obsidian-smart-gantt/quartz.layout.ts ./
-                    cp ../obsidian-smart-gantt/wrangler.toml ./
-                    npx  quartz build
-                    npx wrangler pages deploy --branch=master
+                run: bunx wrangler pages deploy --branch=master
