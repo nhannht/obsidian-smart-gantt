@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.1](https://github.com/nhannht/obsidian-smart-gantt/tree/0.2.1) (2026-07-20)
+
+[Full Changelog](https://github.com/nhannht/obsidian-smart-gantt/compare/0.2.0...0.2.1)
+
+**Automated review compliance:**
+
+- minAppVersion raised to 1.8.7: sidebar view preferences now persist through App#saveLocalStorage / App#loadLocalStorage, and vault file lookups use getFileByPath.
+- moment removed from plugin code in favor of native Date helpers; task modal dates are plain YYYY-MM-DD text inputs.
+- Every floating promise awaited or explicitly void; unsafe any flows typed; dead FilterModal and commented legacy code deleted.
+- Unused vendored SpotlightCard and BorderGlow removed.
+- Docs site moved to the docs branch; master carries only plugin code.
+- Release workflow attests main.js, styles.css, and manifest.json provenance and ships exactly the assets Obsidian downloads.
+
 ## [0.2.0](https://github.com/nhannht/obsidian-smart-gantt/tree/0.2.0) (2026-07-20)
 
 [Full Changelog](https://github.com/nhannht/obsidian-smart-gantt/compare/0.1.17...0.2.0)
