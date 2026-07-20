@@ -1,75 +1,70 @@
->[!tip]
-> Check https://obsidian-smart-gantt.pages.dev for a full document
-
-
-<h1
-    align="center"
->Obsidian Smart Gantt</h1>
-
----
+<h1 align="center">Smart Gantt</h1>
 
 <div align="center">
-<sub>Intelligently generate Gantt Chart for your task across your vault</sub>
+<sub>Turn the tasks scattered across your vault into an interactive Gantt chart.</sub>
+</div>
+
+<br/>
+
+<div align="center">
+
+[![Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=8b5cf6&label=downloads&query=%24%5B%22smart-gantt%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)](https://community.obsidian.md/plugins/smart-gantt)
+[![Release](https://img.shields.io/github/v/release/nhannht/obsidian-smart-gantt?label=release)](https://github.com/nhannht/obsidian-smart-gantt/releases/latest)
+[![License](https://img.shields.io/github/license/nhannht/obsidian-smart-gantt)](./LICENSE)
+
+**[Website](https://obsidian-smart-gantt.pages.dev)** | **[Community store](https://community.obsidian.md/plugins/smart-gantt)** | **[Changelog](./CHANGELOG.md)**
 
 </div>
 
 ---
 
-<ul>
+## Install
 
-- Keep track of all your tasks across your vault.
-- Understands dates written in plain language ("due next monday", "tomorrow"), Tasks-style emoji dates, and Dataview `[due:: ]` fields - no special syntax required.
-- Generate a Gantt chart based on them: drag a bar to reschedule and the date is rewritten in your note, resize edges, zoom Day/Week/Month/Quarter.
-- Quick jump to your task location. 
+Smart Gantt is live on the Obsidian community plugin store.
 
-</ul>
+- In Obsidian: **Settings -> Community plugins -> Browse**, search for **Smart Gantt**, install and enable.
+- Or one click from your browser: [Add to Obsidian](https://obsidian.md/plugins?id=smart-gantt).
 
----
+[![Smart Gantt on the Obsidian community store](./showcase/store-listing.png)](https://community.obsidian.md/plugins/smart-gantt)
 
-##### Simplest use cases
+## What it does
 
----
+- Tracks every task across your vault - no plugin-specific syntax to learn.
+- Understands dates written in plain language ("due next monday", "tomorrow"), Tasks-style emoji dates, and Dataview `[due:: ]` fields.
+- Renders them as an interactive Gantt chart: drag a bar to reschedule and the date is rewritten in your note, resize edges to change start/end, zoom Day/Week/Month/Quarter.
+- Click any bar to jump straight to the task in its note.
+- Works on desktop and mobile.
 
-###### Using the right sidebar.
+## Use it two ways
 
-- Open your sidebar and magic will happen
+### The sidebar view
+
+Open the Smart Gantt view from the right sidebar and every dated task in your vault shows up on one timeline.
 
 ![Smart Gantt sidebar in dark theme](./showcase/sidebar-dark.png)
 
-###### Gantt code block.
+### A gantt code block
 
-
-
----
-
-<div><sub>Simply create a Gantt code block somewhere in your file </sub> </div>
+Drop a `gantt` code block anywhere in a note to embed a chart scoped to that document:
 
 ````markdown
- ```gantt
+```gantt
 
- ```
+```
 ````
 
 ![Gantt code block in light theme](./showcase/block-light.png)
 
----
+Right click (hold on mobile) the chart to open the settings view. Settings are stored as JSON inside the code block, so you can also edit them by hand.
 
->[!note]
-> Right click/Hold (on mobile) the plot to open the settings view. All the settings will be stored as JSON  in your Gantt block
->
-> You can also edit the settings manually, Smart Gantt using JSON as domain language.
+## Limitations
 
-##### Limitation
+Smart Gantt tracks lines with a checkbox that contain something interpretable as a time or time range. Its natural language parsing is good, not psychic:
 
+- A bare year like "2024" is not enough context - write the date a bit more clearly.
+- Time of day must come after the date: `Sat Aug 17 2024 9 AM` works; `9 AM Aug 17 2024` parses as two separate points in time.
+- Relative phrases ("today", "tomorrow", "last friday") technically work but re-anchor to the current moment every refresh, which is rarely what you want.
 
+## License
 
-> [!tip]
-> 
-> Only track a valid task (line with checkbox) which have part of string that can interpret as time/time range
-> 
-> Smart Gantt is not perfect for natural language processing:
-> - Cannot parse text with only a year like "2024", so please write your sentence a bit clearly
-> 
-> - Time (hours, minutes) of day must stay after date. Example Sat Aug 17 2024 9 AM or Sat Aug 17 2013 18:40:39 GMT+0900 or 2014-11-30T08:15:30-05:30. But 9 AM April/11/2024 will be parsed as 2 different points of time.
-> 
-> - Relative time like - today, tomorrow, yesterday, last friday, 5 hours from now - will work in theory, but it is not useful at all. Because every time you refresh the plot will parse from your current point of time
+[MIT](./LICENSE)
