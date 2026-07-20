@@ -49,31 +49,6 @@ export default class SmartGanttPlugin extends Plugin {
 		this.registerExtensions(["smartgantt"],SMART_GANTT_ITEM_VIEW_TYPE)
 
 
-		this.addRibbonIcon("shell", "Debug, open Gantt view",async ()=>{
-			// let leaf = this.app.workspace.getLeaf(false)
-			// leaf.setViewState({
-			// 	type:SMART_GANTT_ITEM_VIEW_TYPE,
-			// 	active:true,
-			// 	state:{
-			// 		projectId: "default",
-			// 		projectName: "default"
-			// 	}as SmartGanttItemViewState
-			// })
-			//
-			const currentFile = this.app.workspace.getActiveFile()
-			if (currentFile){
-				// console.log(currentFile)
-				// const helper = new HelperNg(this)
-				// const tree = await helper.getParseTree(currentFile)
-				// console.log(tree)
-				const view = this.app.workspace.getActiveViewOfType(SmartGanttItemView)
-				if (view){
-					console.log(view.getState())
-				}
-
-			}
-		})
-
 		this.app.workspace.onLayoutReady(() => {
 			this.refreshLeaves()
 
@@ -81,7 +56,7 @@ export default class SmartGanttPlugin extends Plugin {
 
 		// console.log(this.settingManager.settings)
 		this.addCommand({
-			id: 'smart-gantt-reload',
+			id: 'reload',
 			name: 'Reload',
 			callback: () => {
 				this.helper.reloadView()
@@ -126,10 +101,6 @@ export default class SmartGanttPlugin extends Plugin {
 
 		this.registerEvent(this.app.workspace.on('css-change', this.darkModeAdapt))
 
-
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		// this.addSettingTab(new SampleSettingTab(this.app, this));
-
 	}
 
 	override async onunload() {
@@ -151,30 +122,3 @@ export default class SmartGanttPlugin extends Plugin {
 
 
 }
-
-
-// class SampleSettingTab extends PluginSettingTab {
-// 	plugin: SmartGanttPlugin;
-//
-// 	constructor(app: App, plugin: SmartGanttPlugin) {
-// 		super(app, plugin);
-// 		this.plugin = plugin;
-// 	}
-//
-// 	display(): void {
-// 		const {containerEl} = this;
-//
-// 		containerEl.empty();
-//
-// 		new Setting(containerEl)
-// 			.setName('Setting #1')
-// 			.setDesc('It\'s a secret')
-// 			.addText(text => text
-// 				.setPlaceholder('Enter your secret')
-// 				.setValue(this.plugin.settingManager.settings.mySetting)
-// 				.onChange(async (value) => {
-// 					this.plugin.settingManager.settings.mySetting = value;
-// 					await this.plugin.settingManager.saveSettings(this.plugin.settingManager.settings)
-// 				}));
-// 	}
-// }
