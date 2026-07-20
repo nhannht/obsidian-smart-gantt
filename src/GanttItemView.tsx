@@ -4,9 +4,12 @@ import HelperNg from "@/HelperNg";
 import {Node} from "unist"
 import {v4} from "uuid";
 import moment from "moment";
-import {Gantt, Task} from "gantt-task-react";
+import {Task} from "gantt-task-react";
 import {createRoot, Root} from "react-dom/client";
 import {createContext, StrictMode, useContext, useState} from "react";
+import {GanttChart, ZoomControl, GanttTask, GanttZoom, GanttChangePayload} from "@/gantt";
+import GlassSurface from "@/component/GlassSurface";
+import {Plus} from "lucide-react";
 
 export class TaskCustomizeModal extends Modal {
 	constructor(view: SmartGanttItemView, task: SmartGanttTask, onSubmit: (task: SmartGanttTask) => void) {
@@ -141,6 +144,7 @@ const useCustomContext = () => {
 export function MainComponent() {
 	const {view} = useCustomContext() as { view: SmartGanttItemView }
 	const [tasks, setTasks] = useState(view.tasks)
+	const [zoom, setZoom] = useState<GanttZoom>("day")
 
 	const updateTaskInComponentAndView = (tasks: SmartGanttTask[]) => {
 		setTasks(() => {
@@ -153,7 +157,6 @@ export function MainComponent() {
 	}
 
 	const createNewTask = () => {
-		// console.log("Yeah we create new task")
 		let task: SmartGanttTask = {
 			inventory: "",
 			type: "task",
@@ -170,61 +173,58 @@ export function MainComponent() {
 		}).open()
 	}
 
-	const onDateChange = (task: Task) => {
-		const newTasks: SmartGanttTask[] = tasks.map(t => {
-			if (t.id === task.id) {
-				return {
-					...t,
-					start: task.start,
-					end: task.end
-				}
-			}
-			return t
-		})
-		updateTaskInComponentAndView(newTasks)
+	const ganttTasks: GanttTask[] = tasks
+		.filter(t => t.inventory !== "backlog")
+		.map(t => ({
+			id: t.id,
+			name: t.name,
+			start: t.start,
+			end: t.end,
+			status: t.progress === 100 ? "done" : "open",
+			meta: t,
+		}))
+
+	const onTaskChange = (task: GanttTask, change: GanttChangePayload) => {
+		updateTaskInComponentAndView(tasks.map(t =>
+			t.id === task.id ? {...t, start: change.start, end: change.end} : t
+		))
 	}
 
-	const onProgressChange = (task: Task, children: Task[]) => {
-		const newTasks: SmartGanttTask[] = tasks.map(t => {
-			if (t.id === task.id) {
-				return {
-					...t,
-					progress: task.progress
-				}
-			}
-			return t
-		})
-		updateTaskInComponentAndView(newTasks)
+	const editTask = (task: GanttTask) => {
+		const taskToEdit = tasks.find(t => t.id === task.id)
+		if (!taskToEdit) return
+		new TaskCustomizeModal(view, taskToEdit, (edited) => {
+			updateTaskInComponentAndView(tasks.map(t => t.id === edited.id ? edited : t))
+		}).open()
 	}
 
-	return <div className={"twp"}>
-		<div>
-			<button onClick={createNewTask}>
-				New task
-			</button>
+	return <div className={"twp relative flex h-full flex-col"}>
+		<div className={"pointer-events-none absolute inset-x-0 top-2 z-20 flex justify-center"}>
+			<GlassSurface
+				width={"auto"}
+				height={44}
+				borderRadius={14}
+				className={"pointer-events-auto"}
+			>
+				<div className={"flex items-center gap-2 px-3"}>
+					<ZoomControl zoom={zoom} onChange={setZoom}/>
+					<button className={"sg-new-task"} onClick={createNewTask}>
+						<Plus className={"h-3.5 w-3.5"}/>
+						New task
+					</button>
+				</div>
+			</GlassSurface>
 		</div>
-
-		<Gantt tasks={tasks}
-			   onDateChange={onDateChange}
-			   onProgressChange={onProgressChange}
-			   ganttHeight={view.containerEl.clientHeight * 0.8}
-			   onDoubleClick={(task) => {
-				   const taskToEdit = tasks.find(t => t.id === task.id)
-				   if (taskToEdit) {
-					   new TaskCustomizeModal(view, taskToEdit, (task) => {
-							   updateTaskInComponentAndView(tasks.map(t => {
-								   if (t.id === task.id) {
-									   return task
-								   }
-								   return t
-							   }))
-						   }
-					   ).open()
-				   }
-
-			   }
-			   }
-		/>
+		<div className={"h-full pt-14"}>
+			<GanttChart
+				tasks={ganttTasks}
+				zoom={zoom}
+				onTaskChange={onTaskChange}
+				onOpenSource={editTask}
+				showNames={true}
+				height={"100%"}
+			/>
+		</div>
 	</div>
 }
 
@@ -347,22 +347,17 @@ export default class SmartGanttItemView extends FileView implements SmartGanttIt
 	}
 
 	saveBackToFile(tasks: SmartGanttTask[], file: TFile) {
-
-		this.app.vault.read(file).then(content => {
+		this.app.vault.process(file, (content) => {
 			let lines = content.split("\n")
-
 			for (const t of tasks) {
 				if (t.lineIndex === -1) {
 					t.lineIndex = lines.length
 					lines.push(this.convertSmartGanttTaskToMarkdownString(t))
 				} else {
-
 					lines[t.lineIndex] = this.convertSmartGanttTaskToMarkdownString(t)
 				}
-
 			}
-			this.plugin.app.vault.modify(file, lines.join("\n"))
-
+			return lines.join("\n")
 		})
 	}
 
