@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import {Node, Parent} from "unist"
 import {ListItem} from "mdast"
+import {taskStatusFromLine} from "./lib/taskStatus";
 
 export type NodeFromParseTree = {
 	node: Node,
@@ -39,20 +40,35 @@ export default class MarkdownProcesser {
 
 	private recursiveGetListItemFromParseTree(node: Node
 		, file: TFile
-		, settings: SmartGanttSettings) {
+		, settings: SmartGanttSettings
+		, lines: string[]) {
 
 		if (node.type == "listItem") {
-			const checked = (node as ListItem).checked
-			if (settings.doneShowQ && checked === true || settings.todoShowQ && checked === false) {
-				this.nodes.push({
-					node,
-					file
-				})
+			const listItem = node as ListItem
+			const lineIndex = (node.position?.start.line ?? 0) - 1
+			const line = lineIndex >= 0 ? lines[lineIndex] : undefined
+			const fromLine = line !== undefined ? taskStatusFromLine(line) : null
+
+			let status: "done" | "open" | null = fromLine
+			if (status === null) {
+				if (listItem.checked === true) status = "done"
+				else if (listItem.checked === false) status = "open"
+			}
+
+			if (status !== null) {
+				listItem.checked = status === "done"
+				if ((settings.doneShowQ && status === "done") ||
+					(settings.todoShowQ && status === "open")) {
+					this.nodes.push({
+						node,
+						file
+					})
+				}
 			}
 		}
 		if ("children" in node) {
 			(node as Parent).children.forEach((childNode) => {
-				this.recursiveGetListItemFromParseTree(childNode, file, settings)
+				this.recursiveGetListItemFromParseTree(childNode, file, settings, lines)
 			})
 		}
 	}
@@ -60,8 +76,9 @@ export default class MarkdownProcesser {
 	private async parseFilesAndUpdateTokensNg(file: TFile, settings: SmartGanttSettings) {
 		if (!file) return
 		const fileContent = await this.currentPlugin.app.vault.cachedRead(file)
+		const lines = fileContent.split("\n")
 		const parseTree: Node = this._remarkProcessor.parse(fileContent)
-		this.recursiveGetListItemFromParseTree(parseTree, file, settings)
+		this.recursiveGetListItemFromParseTree(parseTree, file, settings, lines)
 
 	}
 

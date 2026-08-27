@@ -4,6 +4,7 @@ import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import {TFile} from "obsidian";
 import wikiLinkPlugin from "remark-wiki-link";
+import {isDoneMarker, taskStatusFromLine} from "./lib/taskStatus";
 
 
 export type TaskWithMetaData = {
@@ -32,9 +33,8 @@ export default class HelperNg {
 		// console.log("after read file conent")
 		let results: { lineContent: string; lineIndex: number; }[] = []
 		const lines = fileContent.split("\n")
-		const regexForTask = /^- \[([ |x])] (.+)$/
 		lines.forEach((line,index)=>{
-			if (line.trim().match(regexForTask)){
+			if (taskStatusFromLine(line.trim()) !== null){
 				results.push({
 					'lineContent': line,
 					'lineIndex': index
@@ -48,12 +48,12 @@ export default class HelperNg {
 	}
 
 	async extractLineWithCheckboxToTaskWithMetaData(task:{lineContent:string,lineIndex:number}) {
-		const regex = /- \[(x| )\] (.*?)(\[.*\])/
+		const regex = /- \[([^\]]+)\] (.*?)(\[.*\])/
 		const matches = task.lineContent.match(regex);
 		// console.log(matches)
 
 		if (matches) {
-			const checkbox = matches[1] === 'x';
+			const checkbox = isDoneMarker(matches[1]);
 			const name = matches[2].trim();
 			const keyValueRegex = /\[([^[\]]*?)::([^[\]]*?)]/g;
 			const keyValuePairs:{[key:string]:string} = {}
