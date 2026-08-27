@@ -1,6 +1,11 @@
 import SmartGanttPlugin from "../../main";
 import {EditorPosition, MarkdownPostProcessorContext, MarkdownView, WorkspaceLeaf} from "obsidian";
 import {TimelineExtractorResultNg} from "@/TimelineExtractor";
+import {
+	applyDataviewDates,
+	applyTasksEmojiDates,
+	formatIsoDate,
+} from "@/lib/taskDates";
 import {Node} from "mdast"
 import {SmartGanttSettings} from "@/SettingManager";
 export class Helper {
@@ -51,34 +56,44 @@ export class Helper {
 	}
 
 	/**
-	 * Persists a dragged/resized bar back into the source line. When the
-	 * chrono-matched text still exists verbatim in the line it is replaced
-	 * in place; otherwise known date syntaxes are stripped and a canonical
-	 * range is appended.
+	 * Persists a dragged/resized bar back into the source line. Tasks and
+	 * Dataview dates are rewritten in their native syntax; chrono-matched
+	 * natural language is replaced in place or canonicalized as a range.
 	 */
 	updateResultDates = async (result: TimelineExtractorResultNg, start: Date, end: Date) => {
-		if (!result.parsedResult) return
+		if (!result.span) return
 		const lineIndex = Number(result.node.position?.start.line) - 1
 		if (Number.isNaN(lineIndex) || lineIndex < 0) return
-		const iso = (d: Date) => {
-			const p = (n: number) => String(n).padStart(2, "0")
-			return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
-		}
-		const range = iso(start) === iso(end) ? iso(start) : `${iso(start)} to ${iso(end)}`
-		const matched = result.parsedResult.text
 		await this.thisPlugin.app.vault.process(result.file, (content) => {
 			const lines = content.split("\n")
 			let line = lines[lineIndex]
 			if (line === undefined) return content
-			if (matched && line.includes(matched)) {
-				line = line.replace(matched, range)
-			} else {
-				line = line
-					.replace(/[\u{1F6EB}\u{23F3}\u{2705}\u{2795}\u{274C}\u{1F4C5}]️?\s*\d{4}-\d{2}-\d{2}/gu, "")
-					.replace(/\[(start|due|scheduled|created|completion|cancelled)::[^\]]*]/g, "")
-					.replace(/\s+$/, "")
-				line = `${line} ${range}`
+
+			switch (result.span?.source) {
+				case "tasks":
+					line = applyTasksEmojiDates(line, start, end)
+					break
+				case "dataview":
+					line = applyDataviewDates(line, start, end)
+					break
+				case "chrono": {
+					const range = formatIsoDate(start) === formatIsoDate(end)
+						? formatIsoDate(start)
+						: `${formatIsoDate(start)} to ${formatIsoDate(end)}`
+					const matched = result.parsedResult?.text
+					if (matched && line.includes(matched)) {
+						line = line.replace(matched, range)
+					} else {
+						line = line
+							.replace(/[\u{1F6EB}\u{23F3}\u{2705}\u{2795}\u{274C}\u{1F4C5}]️?\s*\d{4}-\d{2}-\d{2}/gu, "")
+							.replace(/\[(start|due|scheduled|created|completion|cancelled)::[^\]]*]/g, "")
+							.replace(/\s+$/, "")
+						line = `${line} ${range}`
+					}
+					break
+				}
 			}
+
 			lines[lineIndex] = line
 			return lines.join("\n")
 		})

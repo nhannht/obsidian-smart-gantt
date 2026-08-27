@@ -31,6 +31,7 @@ Smart Gantt is live on the Obsidian community plugin store.
 
 - Tracks every task across your vault - no plugin-specific syntax to learn.
 - Understands dates written in plain language ("due next monday", "tomorrow"), Tasks-style emoji dates, and Dataview `[due:: ]` fields.
+- For Tasks and Dataview dates, the bar **starts** on the start date (🛫 / `[start:: ]`) when present, otherwise on the due date; the bar **ends** on the due date (📅 / `[due:: ]`).
 - Renders them as an interactive Gantt chart: drag a bar to reschedule and the date is rewritten in your note, resize edges to change start/end, zoom Day/Week/Month/Quarter.
 - Click any bar to jump straight to the task in its note.
 - Works on desktop and mobile.
