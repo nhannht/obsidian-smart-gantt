@@ -1,16 +1,26 @@
 import {Chrono, ParsedResult} from "chrono-node";
 
 import {NodeFromParseTree} from "./MarkdownProcesser";
+import {
+	extractTaskDates,
+	GanttDateSpan,
+	listItemText,
+	spanFromTaskDates,
+	stripTaskDateTokens,
+} from "./lib/taskDates";
 import {TFile} from "obsidian";
-import {Node, Parent} from "unist"
+import {Node} from "unist";
 
+
+export type {GanttDateSpan} from "./lib/taskDates";
 
 export type TimelineExtractorResultNg = {
 	id: string,
-	node:Node,
-	file:TFile,
-	parsedResult: ParsedResult|null
-
+	node: Node,
+	file: TFile,
+	span: GanttDateSpan | null,
+	parsedResult: ParsedResult | null,
+	rawText: string,
 }
 
 export default class TimelineExtractor {
@@ -32,53 +42,65 @@ export default class TimelineExtractor {
 	}
 
 
-	private makeTextCompatibleWithTaskPlugin(text: string) {
-		const hourGlass = text.replace(/⏳/g, " due in "),
-			airPlain = hourGlass.replace(/🛫/g, " start from "),
-			heavyPlus = airPlain.replace(/➕/g, " created in "),
-			checkMark = heavyPlus.replace(/✅/g, " done in "),
-			crossMark = checkMark.replace(/❌/g, " cancelled in "),
-
-			createdIn = crossMark.replace(/\[created::\s+(.*)]/g, " created in $1 "),
-			scheduledIn = createdIn.replace(/\[scheduled::\s+(.*)]/g, " scheduled in $1 "),
-			startFrom = scheduledIn.replace(/\[start::\s+(.*)]/g, " start from $1 "),
-			dueTo = startFrom.replace(/\[due::\s+(.*)]/g, " due to $1 "),
-			completionIn = dueTo.replace(/\[completion::\s+(.*)]/g, " completion in $1 "),
-			cancelledIn = completionIn.replace(/\[cancelled::\s(.*)]/g, " cancelled in $1 "),
-
-			calendarMark = cancelledIn.replace("/📅/g", " to ")
-
-		return calendarMark
-
+	private spanFromChrono(text: string): { span: GanttDateSpan; parsedResult: ParsedResult } | null {
+		const cleaned = stripTaskDateTokens(text);
+		if (!cleaned) return null;
+		const parsedResults = this.customChrono.parse(cleaned);
+		if (!parsedResults || parsedResults.length === 0) return null;
+		// One bar per task: prefer the parse that carries an explicit end (a range).
+		const best = parsedResults.find(r => r.end) ?? parsedResults[0];
+		let start = best.start.date();
+		let end = best.end ? best.end.date() : start;
+		const dayAnchor = (d: Date) => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+		if (dayAnchor(end) < dayAnchor(start)) [start, end] = [end, start];
+		return {
+			span: {start, end, source: "chrono"},
+			parsedResult: best,
+		};
 	}
 
 
-	async GetTimelineDataFromNodes(nodes:NodeFromParseTree[]):Promise<TimelineExtractorResultNg[]> {
-		let results:TimelineExtractorResultNg[] = []
-		nodes.forEach(((node,nodeId)=>{
-			const paragraph = (node.node as Parent).children?.[0] as Parent | undefined
-			const firstChild = paragraph?.children?.[0] as { value?: unknown } | undefined
-			const rawText = typeof firstChild?.value === "string" ? firstChild.value : ""
-			let transformedText = this.makeTextCompatibleWithTaskPlugin(rawText)
-			const parsedResults = this.customChrono.parse(transformedText)
-			if (parsedResults && parsedResults.length > 0 ){
-				// One bar per task: prefer the parse that carries an explicit
-				// end (a range), fall back to the first match.
-				const best = parsedResults.find(r => r.end) ?? parsedResults[0]
+	async GetTimelineDataFromNodes(nodes: NodeFromParseTree[]): Promise<TimelineExtractorResultNg[]> {
+		const results: TimelineExtractorResultNg[] = []
+		nodes.forEach(((node, nodeId) => {
+			const rawText = listItemText(node.node);
+			const taskDates = extractTaskDates(rawText);
+			const taskSpan = taskDates ? spanFromTaskDates(taskDates) : null;
+
+			if (taskSpan) {
 				results.push({
 					id: `${nodeId}`,
-					node:node.node,
-					file:node.file,
-					parsedResult:best
-				})
-			} else {
-				results.push({
-					id: `${nodeId}`,
-					node:node.node,
-					file:node.file,
-					parsedResult:null
-				})
+					node: node.node,
+					file: node.file,
+					span: taskSpan,
+					parsedResult: null,
+					rawText,
+				});
+				return;
 			}
+
+			const chronoResult = this.spanFromChrono(rawText);
+			if (chronoResult) {
+				this.#countResultWithChrono += 1;
+				results.push({
+					id: `${nodeId}`,
+					node: node.node,
+					file: node.file,
+					span: chronoResult.span,
+					parsedResult: chronoResult.parsedResult,
+					rawText,
+				});
+				return;
+			}
+
+			results.push({
+				id: `${nodeId}`,
+				node: node.node,
+				file: node.file,
+				span: null,
+				parsedResult: null,
+				rawText,
+			});
 		}))
 		return results
 

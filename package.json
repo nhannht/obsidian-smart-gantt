@@ -8,6 +8,7 @@
 		"esbuild": "node esbuild.config.mjs",
 		"dev": "concurrently \"yarn run css\" \"yarn run esbuild\" ",
 		"build": "tailwindcss -i src/style/src.css -o styles.css --minify && tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"test": "tsc -noEmit -skipLibCheck && tsx --test src/lib/taskDates.test.ts",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
 		"gen:sample-vault": "zx script/gen-sample-md.mjs --vault ~/obsidian-smart-gantt-sample/sample --fileN 100 --elN 10"
 	},
@@ -33,6 +34,7 @@
 		"obsidian": "latest",
 		"tailwindcss-scoped-preflight": "^3.4.10",
 		"tslib": "2.4.0",
+		"tsx": "^4.19.3",
 		"typescript": "4.7.4",
 		"zx": "^8.1.4"
 	},

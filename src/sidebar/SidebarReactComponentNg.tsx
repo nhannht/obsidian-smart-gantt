@@ -35,7 +35,7 @@ const EmptyState = () => (
 		<CalendarRange className={"h-10 w-10 text-muted-foreground opacity-60"} aria-hidden={true}/>
 		<div className={"text-sm font-semibold"}>No dated tasks found</div>
 		<div className={"max-w-[220px] text-xs text-muted-foreground"}>
-			Give any task a date in plain language, like &quot;due next monday&quot;,
+			Add a Tasks start/due date (🛫 / 📅) or write a date in plain language,
 			and it appears here as a bar.
 		</div>
 	</div>
