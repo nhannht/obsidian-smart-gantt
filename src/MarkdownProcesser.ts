@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import {Node, Parent} from "unist"
 import {ListItem} from "mdast"
+import {taskStatusFromListItem} from "./lib/taskStatus";
 
 export type NodeFromParseTree = {
 	node: Node,
@@ -42,12 +43,18 @@ export default class MarkdownProcesser {
 		, settings: SmartGanttSettings) {
 
 		if (node.type == "listItem") {
-			const checked = (node as ListItem).checked
-			if (settings.doneShowQ && checked === true || settings.todoShowQ && checked === false) {
-				this.nodes.push({
-					node,
-					file
-				})
+			const listItem = node as ListItem
+			const status = taskStatusFromListItem(listItem)
+
+			if (status !== null) {
+				listItem.checked = status === "done"
+				if ((settings.doneShowQ && status === "done") ||
+					(settings.todoShowQ && status === "open")) {
+					this.nodes.push({
+						node,
+						file
+					})
+				}
 			}
 		}
 		if ("children" in node) {

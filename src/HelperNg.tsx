@@ -4,6 +4,8 @@ import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import {TFile} from "obsidian";
 import wikiLinkPlugin from "remark-wiki-link";
+import {listItemText} from "./lib/taskDates";
+import {taskStatusFromListItem, walkListItems} from "./lib/taskStatus";
 
 
 export type TaskWithMetaData = {
@@ -24,53 +26,48 @@ export default class HelperNg {
 	}
 
 	async getAllLinesContainCheckboxInMarkdown(file: TFile) {
-		// console.log("we are in the helper")
-		// console.log("before read file")
-		// console.log(file)
-
 		const fileContent = await this.plugin.app.vault.read(file)
-		// console.log("after read file conent")
 		let results: { lineContent: string; lineIndex: number; }[] = []
 		const lines = fileContent.split("\n")
-		const regexForTask = /^- \[([ |x])] (.+)$/
-		lines.forEach((line,index)=>{
-			if (line.trim().match(regexForTask)){
-				results.push({
-					'lineContent': line,
-					'lineIndex': index
-				})
-
-			}
+		const tree = this.remarkProcessor.parse(fileContent)
+		walkListItems(tree, (listItem) => {
+			if (taskStatusFromListItem(listItem) === null) return
+			const lineIndex = (listItem.position?.start.line ?? 0) - 1
+			if (lineIndex < 0 || lines[lineIndex] === undefined) return
+			results.push({
+				lineContent: lines[lineIndex],
+				lineIndex,
+			})
 		})
-
 
 		return results
 	}
 
 	async extractLineWithCheckboxToTaskWithMetaData(task:{lineContent:string,lineIndex:number}) {
-		const regex = /- \[(x| )\] (.*?)(\[.*\])/
-		const matches = task.lineContent.match(regex);
-		// console.log(matches)
+		const tree = this.remarkProcessor.parse(task.lineContent)
+		let result: TaskWithMetaData | undefined
 
-		if (matches) {
-			const checkbox = matches[1] === 'x';
-			const name = matches[2].trim();
+		walkListItems(tree, (listItem) => {
+			if (result !== undefined) return
+			const status = taskStatusFromListItem(listItem)
+			if (status === null) return
+
 			const keyValueRegex = /\[([^[\]]*?)::([^[\]]*?)]/g;
-			const keyValuePairs:{[key:string]:string} = {}
-
+			const keyValuePairs: {[key:string]:string} = {}
 			let match;
-			while ((match = keyValueRegex.exec(matches[3])) !== null) {
+			while ((match = keyValueRegex.exec(task.lineContent)) !== null) {
 				keyValuePairs[match[1].trim()] = match[2].trim()
-
 			}
 
-			return {
-				checkbox,
-				name,
+			result = {
+				checkbox: status === "done",
+				name: listItemText(listItem).trim(),
 				metadata: keyValuePairs,
-				lineIndex: task.lineIndex
-			} as TaskWithMetaData
-		}
+				lineIndex: task.lineIndex,
+			}
+		})
+
+		return result
 	}
 
 
