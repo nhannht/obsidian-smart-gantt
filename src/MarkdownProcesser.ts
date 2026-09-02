@@ -6,7 +6,7 @@ import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import {Node, Parent} from "unist"
 import {ListItem} from "mdast"
-import {taskStatusFromLine} from "./lib/taskStatus";
+import {taskStatusFromListItem} from "./lib/taskStatus";
 
 export type NodeFromParseTree = {
 	node: Node,
@@ -40,20 +40,11 @@ export default class MarkdownProcesser {
 
 	private recursiveGetListItemFromParseTree(node: Node
 		, file: TFile
-		, settings: SmartGanttSettings
-		, lines: string[]) {
+		, settings: SmartGanttSettings) {
 
 		if (node.type == "listItem") {
 			const listItem = node as ListItem
-			const lineIndex = (node.position?.start.line ?? 0) - 1
-			const line = lineIndex >= 0 ? lines[lineIndex] : undefined
-			const fromLine = line !== undefined ? taskStatusFromLine(line) : null
-
-			let status: "done" | "open" | null = fromLine
-			if (status === null) {
-				if (listItem.checked === true) status = "done"
-				else if (listItem.checked === false) status = "open"
-			}
+			const status = taskStatusFromListItem(listItem)
 
 			if (status !== null) {
 				listItem.checked = status === "done"
@@ -68,7 +59,7 @@ export default class MarkdownProcesser {
 		}
 		if ("children" in node) {
 			(node as Parent).children.forEach((childNode) => {
-				this.recursiveGetListItemFromParseTree(childNode, file, settings, lines)
+				this.recursiveGetListItemFromParseTree(childNode, file, settings)
 			})
 		}
 	}
@@ -76,9 +67,8 @@ export default class MarkdownProcesser {
 	private async parseFilesAndUpdateTokensNg(file: TFile, settings: SmartGanttSettings) {
 		if (!file) return
 		const fileContent = await this.currentPlugin.app.vault.cachedRead(file)
-		const lines = fileContent.split("\n")
 		const parseTree: Node = this._remarkProcessor.parse(fileContent)
-		this.recursiveGetListItemFromParseTree(parseTree, file, settings, lines)
+		this.recursiveGetListItemFromParseTree(parseTree, file, settings)
 
 	}
 
